@@ -1,4 +1,5 @@
 import { coordinate, land, type Homestead, type Job, type Stock, type Point } from "./world";
+import { Hearth } from "./night";
 export const recipe = { logs: 4, stone: 2 };
 export type BuildingMaterial = keyof typeof recipe;
 export const buildingMaterials = ["logs", "stone"] as const;
@@ -8,6 +9,7 @@ const stages = [
   { label: "Fit roof and hearth", minutes: 16, logs: 4, stone: 2 },
 ] as const;
 export class Cabin {
+  hearth = new Hearth();
   delivered = { logs: 0, stone: 0 };
   stage = 0;
   get complete() {

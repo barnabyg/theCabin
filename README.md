@@ -20,6 +20,14 @@ To prepare firewood, stand on gathered logs or carry them. Choose **Split 1 log*
 
 Reserve a cabin and fell the tree at D4. Choose **Repeat haul** to ferry logs to the blueprint. **Pause haul** holds the settler and load in place, and **Resume haul** continues the route. Deliver four logs and two stone in all. At the footprint, lay the floor, raise the walls and fit the roof and hearth. Each stage remains visible while you fetch the next load.
 
+## Survive the first night
+
+1. Reserve the open site at K4. Fell the tree at D4 and repeat-haul its four logs to K4. Pick up two stone at E5, walk to K4 and deliver them.
+2. At K4 choose **Lay floor**, **Raise walls**, then **Fit roof and hearth**. Fell the tree at C4 and carry two of its logs back to K4. **Split 2 logs** produces four firewood on the cabin floor.
+3. **Add firewood** once, **Light hearth**, then **Wait for nightfall** while inside the cabin. With one piece burning, the low-fuel warning appears. Add the other three pieces over the four watches. Each lit watch burns one piece. Keeping warm through the fourth watch reaches **Dawn at the cabin**.
+4. Choose **Start again at daybreak**. For the wooded route, fell D4, clear its stump, gather the stone at E5, then reserve D4. Deliver the stone and pick up and deliver the logs at the footprint. Build and tend the hearth as above. The same timber travels seven loaded steps to the open site and zero to the wooded site.
+5. For the retreat ending, finish either cabin and wait for nightfall inside with an empty hearth. Two cold watches exhaust your warmth. **Start again** restores the original clearing, tools, purse and daylight.
+
 ## Verify
 
 After `npm ci` and `npx playwright install chromium`, run `npm run verify`. Biome checks formatting, lint and static diagnostics, TypeScript checks types, and Playwright drives the same controls available to the player. Verification also audits the locked dependencies, scans the project for secrets, checks package contents, and builds the static game in `dist/`. CI installs the Chromium system dependencies on Linux.

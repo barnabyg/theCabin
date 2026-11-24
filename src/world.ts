@@ -1,3 +1,4 @@
+import { Night } from "./night";
 import { Cabin, obstructions } from "./cabin";
 
 import { splitJobs } from "./firewood";
@@ -45,6 +46,22 @@ export class Homestead {
   cabins: Cabin[] = [];
   preview: Point = { ...openSite };
   planning = false;
+  night: Night | undefined;
+  get shelter() {
+    return this.cabins.find((cabin) => cabin.complete && cabin.contains(this.position));
+  }
+  beginNight() {
+    this.daylight = 0;
+    this.planning = false;
+    this.selected = { ...this.position };
+    this.night = new Night(this.shelter);
+    this.message = "Night has fallen on the clearing.";
+  }
+  cabinStacks(cabin: Cabin) {
+    return this.plots
+      .filter((_, i) => cabin.contains({ x: i % COLS, y: Math.floor(i / COLS) }))
+      .map((plot) => plot.stock);
+  }
   reserve() {
     if (obstructions(this, this.preview).length) return;
     this.cabins.push(new Cabin({ ...this.preview }));
@@ -159,6 +176,7 @@ export class Homestead {
       });
     const plan = this.cabins.find((cabin) => cabin.contains(this.position));
     if (plan) jobs.push(...plan.jobs(this.load));
+    if (plan?.complete) jobs.push(...plan.hearth.tending(this.load, this.cabinStacks(plan), 1));
     jobs.push(...splitJobs(this.load, tile.stock));
     return jobs;
   }

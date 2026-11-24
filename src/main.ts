@@ -1,3 +1,5 @@
+import { button, element, paragraph } from "./ui";
+import { renderNight } from "./night-panel";
 import { Haul } from "./haul";
 import { buildingMaterials, recipe, obstructions } from "./cabin";
 import { startLandscape } from "./landscape";
@@ -16,24 +18,6 @@ import {
 } from "./world";
 const game = new Homestead();
 const paint = startLandscape(game);
-function element(id: string) {
-  const el = document.getElementById(id);
-  if (!el) throw Error(`Missing element ${id}`);
-  return el;
-}
-function paragraph(parent: HTMLElement, content: string) {
-  const p = document.createElement("p");
-  p.textContent = content;
-  parent.append(p);
-}
-function button(parent: HTMLElement, label: string, click: () => void, disabled = false) {
-  const b = document.createElement("button");
-  b.textContent = label;
-  b.disabled = disabled;
-  b.onclick = click;
-  parent.append(b);
-  return b;
-}
 let haul: Haul | undefined;
 let ticker: number | undefined;
 function stopTimer() {
@@ -81,6 +65,7 @@ for (let y = 0; y < 7; y++)
   for (let x = 0; x < COLS; x++) {
     const p = { x, y },
       cell = button(element("tiles"), "", () => {
+        if (game.night) return;
         if (game.planning) game.preview = p;
         else game.selected = p;
         render();
@@ -147,7 +132,17 @@ function renderMenu() {
     render();
   });
 }
+function haltHaul() {
+  stopTimer();
+  haul = undefined;
+}
 function render() {
+  if (!game.daylight && !game.night) {
+    haltHaul();
+    game.beginNight();
+  }
+  element("build").hidden = !!game.night;
+  element("field-notes").hidden = !!game.night;
   renderMenu();
   renderHaul();
   const p = game.selected,
@@ -158,6 +153,11 @@ function render() {
   const plan = game.cabins.find((c) => c.contains(p));
   if (plan) {
     paragraph(info, `${plan.progress} · ${coordinate(plan.origin)}`);
+    if (plan.complete)
+      paragraph(
+        info,
+        `Hearth · ${plan.hearth.fuel} firewood · ${plan.hearth.lit ? "Lit" : "Unlit"}`,
+      );
     paragraph(info, `Held · ${stockLabel(game.load)}`);
     paragraph(info, `Delivered · ${plan.delivered.logs} logs, ${plan.delivered.stone} stone`);
     paragraph(
@@ -205,6 +205,7 @@ function render() {
   element("load").textContent = `${stockLabel(game.load)} (${quantity(game.load)}/${CAPACITY})`;
   element("clock").textContent =
     `${Math.floor(game.daylight / 60)}h ${String(game.daylight % 60).padStart(2, "0")}m`;
+  renderNight(game, render, haltHaul, !!haul && !haul.paused && !haul.finished);
   element("message").textContent = game.message;
   for (const [i, cell] of cells.entries())
     cell.setAttribute("aria-pressed", String(i === p.y * COLS + p.x));
@@ -221,7 +222,7 @@ const directions: Record<string, Point> = {
   d: { x: 1, y: 0 },
 };
 window.addEventListener("keydown", (event) => {
-  if (game.planning || (haul && !haul.paused && !haul.finished)) return;
+  if (game.night || game.planning || (haul && !haul.paused && !haul.finished)) return;
   if (event.ctrlKey || event.altKey || event.metaKey) return;
   const delta = directions[event.key.toLowerCase()];
   if (!delta) return;
