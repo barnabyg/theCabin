@@ -2,7 +2,7 @@ import { Market, marketKey, marketRules, road, trapline } from "./market";
 import { button, element, heading, paragraph } from "./ui";
 import { coordinate, distance } from "./world";
 
-function restart() {
+function restart(penniless = false) {
   try {
     localStorage.removeItem(marketKey);
   } catch (error) {
@@ -11,7 +11,10 @@ function restart() {
       return;
     }
   }
-  location.reload();
+  const url = new URL(location.href);
+  if (penniless) url.searchParams.set("purse", "empty");
+  else url.searchParams.delete("purse");
+  location.assign(url);
 }
 
 export function openMarket() {
@@ -33,7 +36,7 @@ export function openMarket() {
   element("objective").textContent =
     `Sow turnip seed before sundown and keep at least ${marketRules.reserve} portions in the pantry.`;
   element("seed-label").hidden = element("seeds").hidden = false;
-  if (!saved) return Market.start();
+  if (!saved) return Market.start(new URLSearchParams(location.search).get("purse") === "empty");
   try {
     return Market.resume(saved);
   } catch {
@@ -41,6 +44,31 @@ export function openMarket() {
     paragraph(box, "This market save could not be opened.");
     button(box, "Discard save and start a fresh market day", restart);
     throw Error("Unreadable Market day save");
+  }
+}
+
+function showOrder(town: HTMLElement, market: Market, render: () => void) {
+  const { firewood, payment } = marketRules.order;
+  heading(town, "Firewood order");
+  if (market.order === "paid") {
+    paragraph(town, `Order paid · ${firewood} firewood delivered for ${payment} coins.`);
+  } else if (market.order === "offered") {
+    button(town, `Take order · ${firewood} firewood for ${payment} coins · no fee`, () => {
+      market.order = "accepted";
+      market.game.message = "Bring split firewood to the merchant.";
+      render();
+    });
+  } else {
+    button(
+      town,
+      `Deliver ${firewood} firewood · receive ${payment} coins`,
+      () => {
+        market.deliverFirewood();
+        market.game.message = "The merchant paid for the firewood.";
+        render();
+      },
+      market.game.load.firewood < firewood,
+    );
   }
 }
 
@@ -98,6 +126,7 @@ export function renderMarket(market: Market, render: () => void) {
         },
         !game.load[material],
       );
+    showOrder(town, market, render);
     walk(town, "Walk home");
   } else {
     paragraph(
@@ -121,7 +150,11 @@ export function renderMarket(market: Market, render: () => void) {
       element("message").textContent = "The browser could not save this market day.";
     }
   });
-  button(box, "Start a fresh market day", () => {
-    if (ended || window.confirm("Discard this market day and its save?")) restart();
-  });
+  for (const [label, penniless] of [
+    ["Start a fresh market day", false],
+    ["Start with an empty purse", true],
+  ] as const)
+    button(box, label, () => {
+      if (ended || window.confirm("Discard this market day and its save?")) restart(penniless);
+    });
 }

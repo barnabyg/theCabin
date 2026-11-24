@@ -52,6 +52,8 @@ From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Ope
 
 **Win with a fur.** Follow the stream bank to I7 and collect a fur from the trapline. Save and reopen with the fur in your pack. Sell it in town for three coins, buy seed, walk home and sow at G6. Wait until sundown to win with all four pantry portions untouched.
 
+**Win from an empty purse.** Choose **Start with an empty purse**. Walk to town, take the two-firewood order for three coins, and walk home. Fell the tree at D4, split one log and pick up both pieces of firewood. Carry them to town, deliver the order, buy one turnip seed and return. Sow at G6 and wait until sundown. The order pays once and the pantry still holds four portions.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

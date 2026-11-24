@@ -10,6 +10,7 @@ export const marketRules = {
   salePrices: { food: 2, fur: 3 },
   seedPrice: 3,
   roadMinutes: 30,
+  order: { firewood: 2, payment: 3 },
 };
 export const trapline = { x: 8, y: 6 };
 export const road = { x: 15, y: 5 };
@@ -20,12 +21,13 @@ export class Market {
   seedStock = 2;
   purchased = { food: 0, fur: 0 };
   inTown = false;
+  order: "offered" | "accepted" | "paid" = "offered";
   constructor(
     readonly game: Homestead,
     readonly spring: Spring,
   ) {}
 
-  static start() {
+  static start(penniless: boolean) {
     const game = new Homestead();
     const spring = new Spring();
     spring.seeds = { turnip: 0, squash: 0 };
@@ -37,7 +39,9 @@ export class Market {
     game.plot(pantry).site = { kind: "Pantry", complete: true, delivered: 2, stored: 4 };
     game.plot(game.position).site = { kind: "Garden" };
     game.plot({ x: 7, y: 5 }).site = { kind: "Well", complete: true, delivered: 4 };
-    return new Market(game, spring);
+    const market = new Market(game, spring);
+    if (penniless) market.coins = 0;
+    return market;
   }
 
   get roadMinutes() {
@@ -99,6 +103,14 @@ export class Market {
     return reasons;
   }
 
+  deliverFirewood() {
+    const { firewood, payment } = marketRules.order;
+    if (this.order !== "accepted" || this.game.load.firewood < firewood) return;
+    this.game.load.firewood -= firewood;
+    this.coins += payment;
+    this.order = "paid";
+  }
+
   buySeed() {
     if (!this.seedStock) return "The merchant has sold the last seed.";
     if (this.coins < marketRules.seedPrice)
@@ -117,6 +129,7 @@ export class Market {
         version: 1,
         coins,
         purchased: this.purchased,
+        order: this.order,
         seedStock,
         inTown,
         homestead: snapshot(this.game, this.spring),
@@ -145,6 +158,10 @@ export class Market {
       if (!Number.isSafeInteger(bought) || bought < 0) throw Error("Invalid merchant stock");
       market.purchased[material] = bought;
     }
+    const order = data.order ?? "offered";
+    if (order !== "offered" && order !== "accepted" && order !== "paid")
+      throw Error("Invalid order");
+    market.order = order;
     market.inTown = data.inTown;
     game.message = "Market day resumed.";
     return market;
