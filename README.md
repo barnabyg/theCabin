@@ -40,6 +40,8 @@ To replace the stream trip, reserve a **Well** on H6. The stone pile at F3 holds
 
 Squash gives six portions after four watered days. For a late-sowing comparison, rest until day four, prepare two beds, and sow turnip in one and squash in the other. Water each bed daily. Turnips can be gathered on day six. The squash still needs two growing days when only one remains.
 
+**Win scenario.** From a fresh spring, build the cabin at K4 using the four logs at D4 and the stone at E5. Build the well at H6 with the four stone at F3, saving and reopening after the first delivery. Prepare the garden at G6, sow turnip, and water it from the well on two successive days. Rest after each watering, then harvest. Reserve the pantry at F6, deliver two logs from C4, and finish it. Pick up the food at G6, walk to F6 and choose **Store harvest**. **Harvest secured** should show two stored portions. In a separate run, keep the food in your pack and rest through day six to see the empty-pantry retreat.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

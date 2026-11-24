@@ -3,6 +3,7 @@ import { gardenNotes, springJobs } from "./garden";
 import { buildingNotes, buildingJobs } from "./outbuilding";
 import { springBuildMenu } from "./spring-build";
 import { openScenario, renderSpring, nextSpringDay } from "./spring-panel";
+import { harvestProgress, springDays } from "./spring";
 import { renderNight } from "./night-panel";
 import { Haul } from "./haul";
 import { footprint, withinFootprint, buildingMaterials, recipe, obstructions } from "./cabin";
@@ -147,6 +148,11 @@ function haltHaul() {
   haul = undefined;
 }
 function render() {
+  if (spring && spring.day <= springDays) {
+    const { cabin, well, stored } = harvestProgress(game);
+    spring.won = cabin && well && stored > 0;
+    if (spring.won) haltHaul();
+  }
   if (!game.daylight && !game.night && !spring?.ended) {
     haltHaul();
     if (spring) nextSpringDay(game, spring);

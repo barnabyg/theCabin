@@ -4,7 +4,7 @@ import { button, paragraph } from "./ui";
 import { coordinate, distance, stockLabel, type Homestead } from "./world";
 
 export function springBuildMenu(menu: HTMLElement, game: Homestead, render: () => void) {
-  for (const kind of ["Cabin", "Garden", "Well"] as const)
+  for (const kind of ["Cabin", "Garden", "Well", "Pantry"] as const)
     button(menu, kind, () => {
       game.planKind = kind;
       game.preview = { ...game.position };
@@ -23,7 +23,8 @@ export function springBuildMenu(menu: HTMLElement, game: Homestead, render: () =
       menu,
       `Reserve ${kind.toLowerCase()}`,
       () => {
-        game.plot(p).site = { kind, delivered: 0, complete: false };
+        const building = kind === "Pantry" ? { kind, stored: 0 } : { kind };
+        game.plot(p).site = { ...building, delivered: 0, complete: false };
         game.selected = { ...p };
         game.planning = false;
         render();

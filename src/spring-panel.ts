@@ -1,4 +1,4 @@
-import { dailyMinutes, Spring, springDays } from "./spring";
+import { dailyMinutes, harvestProgress, Spring, springDays } from "./spring";
 import { growGardens } from "./garden";
 import { saveKey, resumeSpring, saveSpring } from "./spring-save";
 import { button, element, heading, paragraph } from "./ui";
@@ -55,32 +55,43 @@ export function renderSpring(
   haul: Haul | undefined,
   rest: () => void,
 ) {
-  element("calendar").textContent = spring.ended
-    ? "First frost"
-    : `Spring · Day ${spring.day} of ${springDays} · Frost after day ${springDays}`;
+  element("calendar").textContent =
+    spring.day > springDays
+      ? "First frost"
+      : `Spring · Day ${spring.day} of ${springDays} · Frost after day ${springDays}`;
   element("seeds").textContent = `${spring.seeds.turnip} turnip · ${spring.seeds.squash} squash`;
   const box = element("night");
   box.replaceChildren();
   box.hidden = game.planning;
-  if (spring.ended) {
+  const { stored, cabin, well } = harvestProgress(game);
+  if (spring.won) {
+    heading(box, "Harvest secured");
+    paragraph(box, `Your cabin and well are ready. You stored ${stored} portions before frost.`);
+  } else if (spring.ended) {
     heading(box, "Retreat to town");
-    paragraph(box, "Frost arrived with no harvest in the pantry. The settler must return to town.");
+    if (!stored) paragraph(box, "Frost arrived with no harvest in the pantry.");
+    if (!cabin) paragraph(box, "The cabin was unfinished at frost.");
+    if (!well) paragraph(box, "The well was unfinished at frost.");
   } else {
+    paragraph(
+      box,
+      `Cabin · ${cabin ? "Ready" : "Unfinished"} · Well · ${well ? "Ready" : "Unfinished"} · Pantry · ${stored} portions`,
+    );
     button(
       box,
       `Rest until tomorrow · ${game.daylight} min`,
       rest,
       !!haul && !haul.finished && !haul.paused,
     );
-    button(box, "Save spring day", () => {
-      try {
-        saveSpring(game, spring, haul);
-        element("message").textContent = "Spring day saved in this browser.";
-      } catch {
-        element("message").textContent = "The browser could not save this spring day.";
-      }
-    });
   }
+  button(box, "Save spring day", () => {
+    try {
+      saveSpring(game, spring, haul);
+      element("message").textContent = "Spring day saved in this browser.";
+    } catch {
+      element("message").textContent = "The browser could not save this spring day.";
+    }
+  });
   button(box, "Start a fresh spring", () => {
     if (spring.ended || window.confirm("Discard this spring run and its save?")) restart();
   });
