@@ -135,6 +135,38 @@ export class Landscape extends Phaser.Scene {
         y + 8,
       );
     }
+    for (const cabin of this.homestead.cabins) {
+      if (!cabin.stage) continue;
+      const x = cabin.origin.x * TILE + 12,
+        y = cabin.origin.y * TILE + 13,
+        w = 3 * TILE - 24,
+        h = 2 * TILE - 26;
+      g.fillStyle(0x886d4c).fillRect(x, y, w, h);
+      for (let row = 2; row < h; row += 8)
+        g.lineStyle(2, 0xb7986c).lineBetween(x + 2, y + row, x + w - 2, y + row);
+      if (cabin.stage >= 2) {
+        g.lineStyle(9, 0x654d37).strokeRect(x + 3, y + 3, w - 6, h - 6);
+        g.fillStyle(0x8a7050).fillRect(x + w / 2 - 12, y + h - 10, 24, 12);
+      }
+      if (cabin.complete) {
+        polygon(g, 0x654735, [
+          [x - 6, y - 3],
+          [x + w + 6, y - 3],
+          [x + w - 4, y + h / 2],
+          [x + 4, y + h / 2],
+        ]);
+        polygon(g, 0x9a6949, [
+          [x + 4, y + h / 2],
+          [x + w - 4, y + h / 2],
+          [x + w + 6, y + h + 3],
+          [x - 6, y + h + 3],
+        ]);
+        for (let i = 8; i < w; i += 12)
+          g.lineStyle(2, 0x775540).lineBetween(x + i, y + h / 2 + 2, x + i - 4, y + h + 1);
+        g.fillStyle(0x596258).fillRect(x + w - 29, y + 8, 16, 21);
+        g.fillStyle(0xb4ad98).fillRect(x + w - 31, y + 5, 20, 7);
+      }
+    }
     if (this.homestead.planning) {
       const p = this.homestead.preview;
       g.fillStyle(0xfbe6a9, 0.3).fillRect(p.x * TILE, p.y * TILE, TILE * 3, TILE * 2);

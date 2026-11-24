@@ -1,4 +1,5 @@
-import { recipe, obstructions } from "./cabin";
+import { Haul } from "./haul";
+import { buildingMaterials, recipe, obstructions } from "./cabin";
 import { startLandscape } from "./landscape";
 import {
   CAPACITY,
@@ -33,6 +34,48 @@ function button(parent: HTMLElement, label: string, click: () => void, disabled 
   parent.append(b);
   return b;
 }
+let haul: Haul | undefined;
+let ticker: number | undefined;
+function stopTimer() {
+  window.clearInterval(ticker);
+  ticker = undefined;
+}
+function advanceHaul() {
+  if (!haul) return;
+  haul.advance(game);
+  if (haul.finished || haul.paused) stopTimer();
+  render();
+}
+function startHaul() {
+  stopTimer();
+  advanceHaul();
+  if (haul && !haul.finished && !haul.paused) ticker = window.setInterval(advanceHaul, 320);
+}
+function renderHaul() {
+  const box = element("haul");
+  box.replaceChildren();
+  box.hidden = !haul;
+  if (!haul) return;
+  const trip = haul;
+  paragraph(
+    box,
+    `${trip.finished ? "Haul complete" : trip.paused ? "Paused" : "Hauling"} · ${trip.material} · ${coordinate(trip.source)} → ${coordinate(trip.cabin.origin)}`,
+  );
+  if (trip.finished) return;
+  paragraph(box, `Settler at ${coordinate(game.position)} · ${stockLabel(game.load)}`);
+  button(
+    box,
+    trip.paused ? "Resume haul" : "Pause haul",
+    () => {
+      trip.paused = !trip.paused;
+      if (trip.paused) {
+        stopTimer();
+        render();
+      } else startHaul();
+    },
+    game.planning,
+  );
+}
 const cells: HTMLButtonElement[] = [];
 for (let y = 0; y < 7; y++)
   for (let x = 0; x < COLS; x++) {
@@ -56,6 +99,10 @@ function siteName(p: Point) {
   return "Clearing";
 }
 element("build").onclick = () => {
+  if (haul && !haul.finished) {
+    haul.paused = true;
+    stopTimer();
+  }
   game.planning = !game.planning;
   render();
 };
@@ -102,13 +149,22 @@ function renderMenu() {
 }
 function render() {
   renderMenu();
+  renderHaul();
   const p = game.selected,
     plot = game.plot(p);
   element("tile-title").textContent = `${siteName(p)} · ${coordinate(p)}`;
   const info = element("inspect");
   info.replaceChildren();
   const plan = game.cabins.find((c) => c.contains(p));
-  if (plan) paragraph(info, `Blueprint · ${coordinate(plan.origin)}`);
+  if (plan) {
+    paragraph(info, `${plan.progress} · ${coordinate(plan.origin)}`);
+    paragraph(info, `Held · ${stockLabel(game.load)}`);
+    paragraph(info, `Delivered · ${plan.delivered.logs} logs, ${plan.delivered.stone} stone`);
+    paragraph(
+      info,
+      `Outstanding · ${plan.remaining("logs")} logs, ${plan.remaining("stone")} stone`,
+    );
+  }
   paragraph(info, plot.timber ?? "Grassland");
   if (quantity(plot.stock)) paragraph(info, `On the ground · ${stockLabel(plot.stock)}`);
   const steps = distance(game.position, p);
@@ -120,7 +176,7 @@ function render() {
   );
   const actions = element("actions");
   actions.replaceChildren();
-  for (const job of game.planning ? [] : game.jobs())
+  for (const job of game.planning || (haul && !haul.paused && !haul.finished) ? [] : game.jobs())
     button(
       actions,
       `${job.label} · ${job.minutes} min`,
@@ -130,6 +186,22 @@ function render() {
       },
       job.enabled === false || job.minutes > game.daylight,
     );
+  if (!game.planning && (!haul || haul.finished || haul.paused) && !steps && !quantity(game.load)) {
+    for (const cabin of game.cabins)
+      for (const material of buildingMaterials) {
+        if (!cabin.remaining(material) || !plot.stock[material]) continue;
+        const travel = distance(p, cabin.origin);
+        button(
+          actions,
+          `Repeat haul · ${material} to ${coordinate(cabin.origin)} · ${travel * 2 + 2} min first load, ${travel * 3 + 2} min per repeat`,
+          () => {
+            haul = new Haul({ ...p }, cabin, material);
+            startHaul();
+          },
+          game.daylight < travel * 2 + 2,
+        );
+      }
+  }
   element("load").textContent = `${stockLabel(game.load)} (${quantity(game.load)}/${CAPACITY})`;
   element("clock").textContent =
     `${Math.floor(game.daylight / 60)}h ${String(game.daylight % 60).padStart(2, "0")}m`;
@@ -149,7 +221,7 @@ const directions: Record<string, Point> = {
   d: { x: 1, y: 0 },
 };
 window.addEventListener("keydown", (event) => {
-  if (game.planning) return;
+  if (game.planning || (haul && !haul.paused && !haul.finished)) return;
   if (event.ctrlKey || event.altKey || event.metaKey) return;
   const delta = directions[event.key.toLowerCase()];
   if (!delta) return;

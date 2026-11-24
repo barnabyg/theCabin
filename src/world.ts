@@ -157,6 +157,8 @@ export class Homestead {
           this.load = freshStock();
         },
       });
+    const plan = this.cabins.find((cabin) => cabin.contains(this.position));
+    if (plan) jobs.push(...plan.jobs(this.load));
     jobs.push(...splitJobs(this.load, tile.stock));
     return jobs;
   }
