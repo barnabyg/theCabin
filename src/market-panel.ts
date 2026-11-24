@@ -1,4 +1,4 @@
-import { Market, marketKey, marketRules, road } from "./market";
+import { Market, marketKey, marketRules, road, trapline } from "./market";
 import { button, element, heading, paragraph } from "./ui";
 import { coordinate, distance } from "./world";
 
@@ -83,22 +83,26 @@ export function renderMarket(market: Market, render: () => void) {
       game.message = market.buySeed();
       render();
     });
-    paragraph(town, `Food portions purchased · ${market.foodBought}`);
-    button(
+    paragraph(
       town,
-      `Sell 1 food · ${marketRules.foodPrice} coins`,
-      () => {
-        market.sellFood();
-        game.message = "Sold one portion of food.";
-        render();
-      },
-      !game.load.food,
+      `Food portions purchased · ${market.purchased.food} · Furs purchased · ${market.purchased.fur}`,
     );
+    for (const material of ["food", "fur"] as const)
+      button(
+        town,
+        `Sell 1 ${material} · ${marketRules.salePrices[material]} coins`,
+        () => {
+          market.sell(material);
+          game.message = `Sold 1 ${material}.`;
+          render();
+        },
+        !game.load[material],
+      );
     walk(town, "Walk home");
   } else {
     paragraph(
       box,
-      `Town road at ${coordinate(road)} · ${marketRules.roadMinutes} min each way, double with a load. Pantry at F6, garden at G6.`,
+      `Town road at ${coordinate(road)} · ${marketRules.roadMinutes} min each way, double with a load. Pantry at F6, garden at G6, trapline at ${coordinate(trapline)}.`,
     );
     if (!distance(game.selected, road) && !distance(game.position, road))
       walk(element("actions"), "Walk to town");

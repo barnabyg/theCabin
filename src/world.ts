@@ -10,7 +10,7 @@ export const COLS = 16,
   TILE = 56,
   CAPACITY = 2;
 export const minutes = { emptyStep: 1, loadedStep: 2, transfer: 1 };
-const materials = ["logs", "stone", "firewood", "water", "food"] as const;
+const materials = ["logs", "stone", "firewood", "water", "food", "fur"] as const;
 export type Material = (typeof materials)[number];
 export type Stock = Record<Material, number>;
 export interface Point {
@@ -24,7 +24,14 @@ export interface Plot {
 }
 export const wooded = { x: 3, y: 3 },
   openSite = { x: 10, y: 3 };
-export const freshStock = (): Stock => ({ logs: 0, stone: 0, firewood: 0, water: 0, food: 0 });
+export const freshStock = (): Stock => ({
+  logs: 0,
+  stone: 0,
+  firewood: 0,
+  water: 0,
+  food: 0,
+  fur: 0,
+});
 export const quantity = (s: Stock) => materials.reduce((total, material) => total + s[material], 0);
 export const stockLabel = (s: Stock) =>
   Object.entries(s)

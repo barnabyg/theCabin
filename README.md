@@ -50,6 +50,8 @@ From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Ope
 
 **Win with surplus food.** Start a fresh market day, walk to the pantry at F6 and withdraw one of its four portions. Carry it to P6 and walk to town. Sell the portion for two coins, buy one turnip seed for three, and walk home. Sow at G6 and wait until sundown. **Sowing secured** appears with all three marked portions still in the pantry. Taking and selling two portions produces a reserve shortage instead. Waiting without sowing explains the missed deadline.
 
+**Win with a fur.** Follow the stream bank to I7 and collect a fur from the trapline. Save and reopen with the fur in your pack. Sell it in town for three coins, buy seed, walk home and sow at G6. Wait until sundown to win with all four pantry portions untouched.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

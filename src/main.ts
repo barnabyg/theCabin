@@ -212,7 +212,7 @@ function render() {
   actions.replaceChildren();
   const jobs = game.jobs();
   if (!steps && growingSeason) jobs.push(...springJobs(game, growingSeason));
-  if (!steps && market) jobs.push(...market.pantryJobs());
+  if (!steps && market) jobs.push(...market.jobs());
   if (!steps && plot.site && plot.site.kind !== "Garden")
     jobs.push(...buildingJobs(plot.site, game.load));
   for (const job of game.planning || (haul && !haul.paused && !haul.finished) ? [] : jobs)

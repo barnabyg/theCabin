@@ -1,23 +1,24 @@
 import { Cabin, recipe } from "./cabin";
 import { Spring } from "./spring";
 import { restoreSpring, snapshot } from "./spring-save";
-import { CAPACITY, Homestead, openSite, quantity, type Job } from "./world";
+import { CAPACITY, Homestead, distance, openSite, quantity, type Job } from "./world";
 
 export const marketKey = "the-cabin.market-day";
 export const marketRules = {
   daylight: 240,
   reserve: 3,
-  foodPrice: 2,
+  salePrices: { food: 2, fur: 3 },
   seedPrice: 3,
   roadMinutes: 30,
 };
+export const trapline = { x: 8, y: 6 };
 export const road = { x: 15, y: 5 };
 export const pantry = { x: 5, y: 5 };
 
 export class Market {
   coins = 1;
   seedStock = 2;
-  foodBought = 0;
+  purchased = { food: 0, fur: 0 };
   inTown = false;
   constructor(
     readonly game: Homestead,
@@ -50,8 +51,19 @@ export class Market {
     this.game.message = this.inTown ? "Arrived at the river town." : "Back on the homestead road.";
   }
 
-  pantryJobs(): Job[] {
+  jobs(): Job[] {
     const { game } = this;
+    if (!distance(game.position, trapline))
+      return [
+        {
+          label: "Collect 1 fur from the trapline",
+          minutes: 15,
+          enabled: quantity(game.load) < CAPACITY,
+          run: () => {
+            game.load.fur++;
+          },
+        },
+      ];
     const site = game.plot(game.position).site;
     if (site?.kind !== "Pantry" || !site.complete) return [];
     return [
@@ -67,11 +79,11 @@ export class Market {
     ];
   }
 
-  sellFood() {
-    if (this.game.load.food < 1) return;
-    this.game.load.food--;
-    this.foodBought++;
-    this.coins += marketRules.foodPrice;
+  sell(material: keyof typeof marketRules.salePrices) {
+    if (this.game.load[material] < 1) return;
+    this.game.load[material]--;
+    this.purchased[material]++;
+    this.coins += marketRules.salePrices[material];
   }
 
   get outcome() {
@@ -104,7 +116,7 @@ export class Market {
       JSON.stringify({
         version: 1,
         coins,
-        foodBought: this.foodBought,
+        purchased: this.purchased,
         seedStock,
         inTown,
         homestead: snapshot(this.game, this.spring),
@@ -128,9 +140,11 @@ export class Market {
     const market = new Market(game, spring);
     market.coins = data.coins;
     market.seedStock = data.seedStock;
-    market.foodBought = data.foodBought ?? 0;
-    if (!Number.isSafeInteger(market.foodBought) || market.foodBought < 0)
-      throw Error("Invalid merchant stock");
+    for (const material of ["food", "fur"] as const) {
+      const bought = data.purchased?.[material] ?? (material === "food" ? data.foodBought : 0) ?? 0;
+      if (!Number.isSafeInteger(bought) || bought < 0) throw Error("Invalid merchant stock");
+      market.purchased[material] = bought;
+    }
     market.inTown = data.inTown;
     game.message = "Market day resumed.";
     return market;
