@@ -26,6 +26,7 @@ import { openMarket, renderMarket } from "./market-panel";
 const session = openScenario();
 const market = openMarket();
 const spring = session?.spring;
+const growingSeason = market?.spring ?? spring;
 const game = market?.game ?? session?.game ?? new Homestead();
 const paint = startLandscape(game);
 let haul: Haul | undefined = session?.haul;
@@ -177,9 +178,9 @@ function render() {
   const info = element("inspect");
   info.replaceChildren();
   if (spring && streamBank(p)) paragraph(info, "Stream bank · Draw water here.");
-  if (spring && plot.site?.kind === "Garden") {
+  if (growingSeason && plot.site?.kind === "Garden") {
     paragraph(info, "Garden");
-    for (const note of gardenNotes(plot.site, spring)) paragraph(info, note);
+    for (const note of gardenNotes(plot.site, growingSeason)) paragraph(info, note);
   }
   const plan = game.cabins.find((c) => c.contains(p));
   if (plot.site && plot.site.kind !== "Garden")
@@ -210,7 +211,8 @@ function render() {
   const actions = element("actions");
   actions.replaceChildren();
   const jobs = game.jobs();
-  if (!steps && spring) jobs.push(...springJobs(game, spring));
+  if (!steps && growingSeason) jobs.push(...springJobs(game, growingSeason));
+  if (!steps && market) jobs.push(...market.pantryJobs());
   if (!steps && plot.site && plot.site.kind !== "Garden")
     jobs.push(...buildingJobs(plot.site, game.load));
   for (const job of game.planning || (haul && !haul.paused && !haul.finished) ? [] : jobs)

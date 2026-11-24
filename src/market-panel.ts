@@ -68,17 +68,32 @@ export function renderMarket(market: Market, render: () => void) {
       game.daylight < market.roadMinutes,
     );
   if (ended) {
-    heading(box, "Sowing deadline reached");
+    const reasons = market.outcome;
+    heading(box, reasons.length ? "Retreat to town" : "Sowing secured");
+    for (const reason of reasons) paragraph(box, reason);
+    if (!reasons.length) paragraph(box, "Your turnips are sown and the pantry reserve is intact.");
+    if (market.inTown) heading(town, "River town at sundown");
   } else if (market.inTown) {
     heading(town, "River town merchant");
     paragraph(
       town,
-      `${market.seedStock} turnip seeds in stock · ${marketRules.seedPrice} coins each`,
+      `${market.seedStock} turnip seed${market.seedStock === 1 ? "" : "s"} in stock · ${marketRules.seedPrice} coins each`,
     );
     button(town, `Buy 1 turnip seed · ${marketRules.seedPrice} coins`, () => {
       game.message = market.buySeed();
       render();
     });
+    paragraph(town, `Food portions purchased · ${market.foodBought}`);
+    button(
+      town,
+      `Sell 1 food · ${marketRules.foodPrice} coins`,
+      () => {
+        market.sellFood();
+        game.message = "Sold one portion of food.";
+        render();
+      },
+      !game.load.food,
+    );
     walk(town, "Walk home");
   } else {
     paragraph(
@@ -88,6 +103,12 @@ export function renderMarket(market: Market, render: () => void) {
     if (!distance(game.selected, road) && !distance(game.position, road))
       walk(element("actions"), "Walk to town");
   }
+  if (!ended)
+    button(box, `Wait until sundown · ${game.daylight} min`, () => {
+      game.daylight = 0;
+      game.message = "Sundown on the sowing day.";
+      render();
+    });
   button(box, "Save market day", () => {
     try {
       market.save();

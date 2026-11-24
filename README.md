@@ -48,6 +48,8 @@ A repeat haul pauses when you leave the spring tab. Return and choose **Resume h
 
 From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Open http://127.0.0.1:5173 and choose **Market day**. Walk to P6, follow the road to town and try buying turnip seed. Your one coin is short of the three-coin price. Save in town, close and reopen the browser in the same profile, then choose **Resume Market day**. The merchant still has both seeds. Walk home to P6. Each road trip uses 30 minutes empty or 60 with a load.
 
+**Win with surplus food.** Start a fresh market day, walk to the pantry at F6 and withdraw one of its four portions. Carry it to P6 and walk to town. Sell the portion for two coins, buy one turnip seed for three, and walk home. Sow at G6 and wait until sundown. **Sowing secured** appears with all three marked portions still in the pantry. Taking and selling two portions produces a reserve shortage instead. Waiting without sowing explains the missed deadline.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:
