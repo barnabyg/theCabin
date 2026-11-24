@@ -1,6 +1,20 @@
 import { chromium, expect, test } from "@playwright/test";
 import { action, reserveOpen, walkTo } from "./controls";
 
+test("restart after frost when browser storage is disabled", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "localStorage", {
+      get() {
+        throw new DOMException("Storage disabled", "SecurityError");
+      },
+    });
+  });
+  await page.goto("/?scenario=harvest");
+  for (let i = 0; i < 6; i++) await action(page, /^Rest until tomorrow/);
+  await action(page, /^Start a fresh spring/);
+  await expect(page.locator("#calendar")).toContainText("Day 1");
+});
+
 test("resume the spring cabin on the same day with the load and delivery intact", async ({
   baseURL,
 }, testInfo) => {

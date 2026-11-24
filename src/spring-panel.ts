@@ -43,10 +43,13 @@ export function openScenario() {
 function restart() {
   try {
     localStorage.removeItem(saveKey);
-    location.reload();
-  } catch {
-    element("message").textContent = "The browser could not remove the save.";
+  } catch (error) {
+    if (!(error instanceof DOMException && error.name === "SecurityError")) {
+      element("message").textContent = "The browser could not remove the save.";
+      return;
+    }
   }
+  location.reload();
 }
 
 export function renderSpring(
