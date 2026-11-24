@@ -1,0 +1,7 @@
+{
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": { "includes": ["**", "!!**/package-lock.json"] },
+  "html": { "formatter": { "enabled": true } },
+  "formatter": { "indentStyle": "space", "lineWidth": 100 },
+  "linter": { "rules": { "preset": "recommended" } }
+}

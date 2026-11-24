@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#202f27">
+    <title>The Cabin · One cold night</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="main.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="brand"><span class="mark" aria-hidden="true">⌂</span>The Cabin</div>
+      <div class="location">ILLINOIS COUNTRY <span> / </span> CIRCA 1750</div>
+    </header>
+    <main>
+      <div class="intro">
+        <div>
+          <div class="overline">FIRST NIGHT</div>
+          <h1>One cold night</h1>
+          <p>Raise a cabin and keep its hearth lit until dawn.</p>
+        </div>
+        <div class="clock">
+          <div class="overline" id="clock-label">DAYLIGHT REMAINING</div>
+          <strong id="clock"></strong>
+        </div>
+      </div>
+      <div class="layout">
+        <section class="map-panel" aria-label="Homestead map">
+          <div class="panel-head">
+            <h2>Your homestead</h2>
+            <span class="compass">↑ N</span>
+          </div>
+          <div class="board">
+            <div id="terrain"></div>
+            <fieldset id="tiles" aria-label="Select a plot tile"></fieldset>
+          </div>
+          <div class="map-key">
+            <span><i class="key settler"></i>Settler</span
+            ><span><i class="key site"></i>Cabin site</span
+            ><span><i class="key selected"></i>Selected tile</span>
+          </div>
+          <div class="controls">
+            <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrow keys to walk
+            <span>·</span> Click a tile to inspect
+          </div>
+        </section>
+        <aside>
+          <section class="card">
+            <div class="overline">FIELD NOTES</div>
+            <h2 id="tile-title">Selected tile</h2>
+            <div id="inspect"></div>
+            <div id="actions"></div>
+          </section>
+          <section class="card inventory">
+            <h2>Settler’s pack</h2>
+            <dl>
+              <dt>Load</dt>
+              <dd id="load"></dd>
+              <dt>Tools</dt>
+              <dd>Axe, spade, cooking pot</dd>
+              <dt>Purse</dt>
+              <dd>4 coins</dd>
+            </dl>
+          </section>
+        </aside>
+      </div>
+      <div id="message" role="status"></div>
+    </main>
+  </body>
+</html>

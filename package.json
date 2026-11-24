@@ -1,0 +1,37 @@
+{
+  "name": "the-cabin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.13.0"
+  },
+  "scripts": {
+    "play": "npm ci && npm run dev",
+    "dev": "node scripts/game.mjs --serve",
+    "build": "node scripts/game.mjs",
+    "format": "biome format .",
+    "lint": "biome lint --error-on-warnings .",
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test",
+    "security": "npm audit --audit-level=low && secretlint \"**/*\" && npm pack --dry-run",
+    "verify": "npm run format && npm run lint && npm run typecheck && npm test && npm run security && npm run build"
+  },
+  "files": [
+    "src",
+    "index.html",
+    "scripts/game.mjs",
+    "README.md"
+  ],
+  "dependencies": {
+    "phaser": "3.90.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.9",
+    "@playwright/test": "1.65.1",
+    "@types/node": "24.19.2",
+    "esbuild": "0.28.2",
+    "secretlint": "14.1.0",
+    "typescript": "7.0.2"
+  }
+}
