@@ -73,17 +73,17 @@ export class Cabin {
     return withinFootprint(this.origin, p);
   }
 }
-export function obstructions(game: Homestead, origin: Point) {
+export function obstructions(game: Homestead, origin: Point, size = footprint) {
   const blocked: string[] = [];
-  for (let y = origin.y; y < origin.y + footprint.height; y++)
-    for (let x = origin.x; x < origin.x + footprint.width; x++) {
+  for (let y = origin.y; y < origin.y + size.height; y++)
+    for (let x = origin.x; x < origin.x + size.width; x++) {
       const p = { x, y };
       let reason: string | null = null;
       if (!land(p)) reason = "Outside buildable land";
       else if (game.cabins.some((cabin) => cabin.contains(p))) reason = "Reserved blueprint";
       else {
         const plot = game.plot(p);
-        reason = plot.timber ?? (plot.stock.stone ? "Loose stone" : null);
+        reason = plot.site?.kind ?? plot.timber ?? (plot.stock.stone ? "Loose stone" : null);
       }
       if (reason) blocked.push(`${coordinate(p)} · ${reason}`);
     }

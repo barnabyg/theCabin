@@ -1,4 +1,9 @@
 import { button, element, paragraph } from "./ui";
+import { gardenNotes, springJobs } from "./garden";
+import { buildingNotes, buildingJobs } from "./outbuilding";
+import { springBuildMenu } from "./spring-build";
+import { openScenario, renderSpring, nextSpringDay } from "./spring-panel";
+import { harvestProgress, springDays } from "./spring";
 import { renderNight } from "./night-panel";
 import { Haul } from "./haul";
 import { footprint, withinFootprint, buildingMaterials, recipe, obstructions } from "./cabin";
@@ -8,6 +13,7 @@ import {
   COLS,
   coordinate,
   stockLabel,
+  streamBank,
   distance,
   Homestead,
   land,
@@ -16,9 +22,11 @@ import {
   wooded,
   type Point,
 } from "./world";
-const game = new Homestead();
+const session = openScenario();
+const spring = session?.spring;
+const game = session?.game ?? new Homestead();
 const paint = startLandscape(game);
-let haul: Haul | undefined;
+let haul: Haul | undefined = session?.haul;
 let ticker: number | undefined;
 function stopTimer() {
   window.clearInterval(ticker);
@@ -35,6 +43,12 @@ function startHaul() {
   advanceHaul();
   if (haul && !haul.finished && !haul.paused) ticker = window.setInterval(advanceHaul, 320);
 }
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden || !spring || !haul || haul.finished || haul.paused) return;
+  haul.paused = true;
+  stopTimer();
+  render();
+});
 function renderHaul() {
   const box = element("haul");
   box.replaceChildren();
@@ -65,7 +79,7 @@ for (let y = 0; y < 7; y++)
   for (let x = 0; x < COLS; x++) {
     const p = { x, y },
       cell = button(element("tiles"), "", () => {
-        if (game.night) return;
+        if (game.night || spring?.ended) return;
         if (game.planning) game.preview = p;
         else game.selected = p;
         render();
@@ -96,6 +110,7 @@ function renderMenu() {
   menu.hidden = !game.planning;
   menu.replaceChildren();
   if (!game.planning) return;
+  if (spring && springBuildMenu(menu, game, render)) return;
   const h = document.createElement("h2");
   h.textContent = "Cabin & stone hearth";
   menu.append(h);
@@ -140,12 +155,18 @@ function haltHaul() {
   haul = undefined;
 }
 function render() {
-  if (!game.daylight && !game.night) {
-    haltHaul();
-    game.beginNight();
+  if (spring && spring.day <= springDays) {
+    const { cabin, well, stored } = harvestProgress(game);
+    spring.won = cabin && well && stored > 0;
+    if (spring.won) haltHaul();
   }
-  element("build").hidden = !!game.night;
-  element("field-notes").hidden = !!game.night;
+  if (!game.daylight && !game.night && !spring?.ended) {
+    haltHaul();
+    if (spring) nextSpringDay(game, spring);
+    else game.beginNight();
+  }
+  element("build").hidden = !!game.night || !!spring?.ended;
+  element("field-notes").hidden = !!game.night || !!spring?.ended;
   renderMenu();
   renderHaul();
   const p = game.selected,
@@ -153,7 +174,14 @@ function render() {
   element("tile-title").textContent = `${siteName(p)} · ${coordinate(p)}`;
   const info = element("inspect");
   info.replaceChildren();
+  if (spring && streamBank(p)) paragraph(info, "Stream bank · Draw water here.");
+  if (spring && plot.site?.kind === "Garden") {
+    paragraph(info, "Garden");
+    for (const note of gardenNotes(plot.site, spring)) paragraph(info, note);
+  }
   const plan = game.cabins.find((c) => c.contains(p));
+  if (plot.site && plot.site.kind !== "Garden")
+    for (const note of buildingNotes(plot.site, game.load)) paragraph(info, note);
   if (plan) {
     paragraph(info, `${plan.progress} · ${coordinate(plan.origin)}`);
     if (plan.complete)
@@ -179,7 +207,11 @@ function render() {
   );
   const actions = element("actions");
   actions.replaceChildren();
-  for (const job of game.planning || (haul && !haul.paused && !haul.finished) ? [] : game.jobs())
+  const jobs = game.jobs();
+  if (!steps && spring) jobs.push(...springJobs(game, spring));
+  if (!steps && plot.site && plot.site.kind !== "Garden")
+    jobs.push(...buildingJobs(plot.site, game.load));
+  for (const job of game.planning || (haul && !haul.paused && !haul.finished) ? [] : jobs)
     button(
       actions,
       `${job.label} · ${job.minutes} min`,
@@ -208,7 +240,13 @@ function render() {
   element("load").textContent = `${stockLabel(game.load)} (${quantity(game.load)}/${CAPACITY})`;
   element("clock").textContent =
     `${Math.floor(game.daylight / 60)}h ${String(game.daylight % 60).padStart(2, "0")}m`;
-  renderNight(game, render, haltHaul, !!haul && !haul.paused && !haul.finished);
+  if (spring)
+    renderSpring(game, spring, haul, () => {
+      haltHaul();
+      nextSpringDay(game, spring);
+      render();
+    });
+  else renderNight(game, render, haltHaul, !!haul && !haul.paused && !haul.finished);
   element("message").textContent = game.message;
   for (const [i, cell] of cells.entries())
     cell.setAttribute("aria-pressed", String(i === p.y * COLS + p.x));
@@ -225,7 +263,8 @@ const directions: Record<string, Point> = {
   d: { x: 1, y: 0 },
 };
 window.addEventListener("keydown", (event) => {
-  if (game.night || game.planning || (haul && !haul.paused && !haul.finished)) return;
+  if (game.night || spring?.ended || game.planning || (haul && !haul.paused && !haul.finished))
+    return;
   if (event.ctrlKey || event.altKey || event.metaKey) return;
   const delta = directions[event.key.toLowerCase()];
   if (!delta) return;

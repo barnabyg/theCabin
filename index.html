@@ -11,14 +11,17 @@
   <body>
     <header>
       <div class="brand"><span class="mark" aria-hidden="true">⌂</span>The Cabin</div>
+      <nav aria-label="Scenario">
+        <a id="scenario-link" href="?scenario=harvest">First harvest</a>
+      </nav>
       <div class="location">ILLINOIS COUNTRY <span> / </span> CIRCA 1750</div>
     </header>
     <main>
       <div class="intro">
         <div>
-          <div class="overline">FIRST NIGHT</div>
-          <h1>One cold night</h1>
-          <p>Raise a cabin and keep warm until dawn.</p>
+          <div class="overline" id="calendar">FIRST NIGHT</div>
+          <h1 id="scenario-title">One cold night</h1>
+          <p id="objective">Raise a cabin and keep warm until dawn.</p>
         </div>
         <div class="clock">
           <div class="overline" id="clock-label">DAYLIGHT REMAINING</div>
@@ -65,6 +68,8 @@
               <dd>Axe, spade, cooking pot</dd>
               <dt>Purse</dt>
               <dd>4 coins</dd>
+              <dt id="seed-label" hidden>Seeds</dt>
+              <dd id="seeds" hidden></dd>
             </dl>
           </section>
         </aside>

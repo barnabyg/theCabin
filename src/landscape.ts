@@ -172,18 +172,48 @@ export class Landscape extends Phaser.Scene {
     }
     if (this.homestead.planning) {
       const p = this.homestead.preview;
-      g.fillStyle(0xfbe6a9, 0.3).fillRect(p.x * TILE, p.y * TILE, cabinWidth, cabinHeight);
-      g.lineStyle(3, 0xffeba9).strokeRect(
-        p.x * TILE + 2,
-        p.y * TILE + 2,
-        cabinWidth - 4,
-        cabinHeight - 4,
-      );
+      const w = this.homestead.planKind === "Cabin" ? cabinWidth : TILE;
+      const h = this.homestead.planKind === "Cabin" ? cabinHeight : TILE;
+      g.fillStyle(0xfbe6a9, 0.3).fillRect(p.x * TILE, p.y * TILE, w, h);
+      g.lineStyle(3, 0xffeba9).strokeRect(p.x * TILE + 2, p.y * TILE + 2, w - 4, h - 4);
     }
     for (const [i, plot] of this.homestead.plots.entries()) {
       const x = ((i % COLS) + 0.5) * TILE,
         y = (Math.floor(i / COLS) + 0.5) * TILE;
       if (plot.timber === "Tree") pine(g, x, y, i % 2 ? 0x597649 : 0x4d7052);
+      if (plot.site?.kind === "Pantry") {
+        g.lineStyle(2, 0xe8dfb8).strokeRect(x - 20, y - 18, 40, 36);
+        if (plot.site.complete) {
+          g.fillStyle(0x805c3d).fillRect(x - 17, y - 9, 34, 26);
+          polygon(g, 0x604a3c, [
+            [x - 22, y - 8],
+            [x, y - 24],
+            [x + 22, y - 8],
+          ]);
+          g.fillStyle(0x473b2b).fillRect(x - 6, y - 4, 12, 21);
+          if (plot.site.stored) g.fillStyle(0xc29455).fillEllipse(x - 12, y + 13, 9, 8);
+        }
+      }
+      if (plot.site?.kind === "Well") {
+        g.lineStyle(3, 0xeee5c6).strokeEllipse(x, y + 2, 35, 24);
+        if (plot.site.complete) {
+          g.fillStyle(0x7a7d70).fillEllipse(x, y, 34, 23);
+          g.fillStyle(0x394f50).fillEllipse(x, y - 2, 22, 12);
+          g.lineStyle(3, 0x66492e)
+            .lineBetween(x - 14, y - 1, x - 14, y - 16)
+            .lineBetween(x + 14, y - 1, x + 14, y - 16)
+            .lineBetween(x - 16, y - 16, x + 16, y - 16);
+        }
+      }
+      if (plot.site?.kind === "Garden") {
+        g.fillStyle(0x755638).fillRoundedRect(x - 22, y - 19, 44, 38, 4);
+        for (const row of [-10, 0, 10]) {
+          g.lineStyle(2, 0xb78b5d).lineBetween(x - 18, y + row, x + 18, y + row);
+          if (plot.site.crop)
+            for (const col of [-12, 0, 12])
+              g.fillStyle(0x85a950).fillCircle(x + col, y + row, 2 + plot.site.crop.days);
+        }
+      }
       if (plot.timber === "Stump") {
         g.fillStyle(0x6f573a).fillRect(x - 8, y - 4, 16, 12);
         g.fillStyle(0xc79b61).fillEllipse(x, y - 4, 18, 8);
