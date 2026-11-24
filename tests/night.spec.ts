@@ -57,7 +57,9 @@ for (const site of ["K4", "D4"] as const)
     await action(page, /^Fell tree/);
     await action(page, /^Pick up logs/);
     await walkTo(page, site);
+    await expect(page.locator("#night")).toContainText("Short by 4 firewood");
     await action(page, /^Split 2 logs/);
+    await expect(page.locator("#night")).toContainText("Enough fuel for all four watches");
     await action(page, /^Add firewood/);
     await action(page, /^Light hearth/);
     await action(page, /^Wait for nightfall/);
