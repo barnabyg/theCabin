@@ -12,6 +12,7 @@
     <header>
       <div class="brand"><span class="mark" aria-hidden="true">⌂</span>The Cabin</div>
       <nav aria-label="Scenario">
+        <a id="market-link" href="?scenario=market">Market day</a>
         <a id="scenario-link" href="?scenario=harvest">First harvest</a>
       </nav>
       <div class="location">ILLINOIS COUNTRY <span> / </span> CIRCA 1750</div>
@@ -29,7 +30,8 @@
         </div>
       </div>
       <div class="layout">
-        <section class="map-panel" aria-label="Homestead map">
+        <section id="town" class="card" hidden aria-label="Town market"></section>
+        <section id="map-panel" class="map-panel" aria-label="Homestead map">
           <div class="panel-head">
             <h2>Your homestead</h2>
             <button type="button" id="build" class="build-button">Build menu</button
@@ -50,7 +52,10 @@
           </div>
         </section>
         <aside>
-          <section class="card" id="haul" hidden></section>
+          <section class="card" id="haul" hidden>
+            <p id="haul-summary"></p>
+            <div id="haul-controls"><p id="haul-load"></p></div>
+          </section>
           <section class="card" id="plan-menu" hidden></section>
           <section class="card" id="field-notes">
             <div class="overline">FIELD NOTES</div>
@@ -67,7 +72,7 @@
               <dt>Tools</dt>
               <dd>Axe, spade, cooking pot</dd>
               <dt>Purse</dt>
-              <dd>4 coins</dd>
+              <dd id="purse">4 coins</dd>
               <dt id="seed-label" hidden>Seeds</dt>
               <dd id="seeds" hidden></dd>
             </dl>

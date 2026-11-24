@@ -18,7 +18,7 @@ import {
 
 export const saveKey = "the-cabin.first-harvest";
 
-function snapshot(game: Homestead, spring: Spring, haul?: Haul) {
+export function snapshot(game: Homestead, spring: Spring, haul?: Haul) {
   return {
     version: 1,
     spring: { day: spring.day, seeds: spring.seeds },
@@ -87,7 +87,10 @@ function restorePlot(plot: Plot): Plot {
 }
 
 export function resumeSpring(encoded: string) {
-  const data: ReturnType<typeof snapshot> = JSON.parse(encoded);
+  return restoreSpring(JSON.parse(encoded));
+}
+
+export function restoreSpring(data: ReturnType<typeof snapshot>) {
   if (data.version !== 1) throw Error("Unsupported save version");
   if (
     !Array.isArray(data.plots) ||
