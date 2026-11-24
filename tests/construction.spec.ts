@@ -8,11 +8,13 @@ test("interrupt a repeat haul, preserve its load, then finish the cabin in stage
   await walkTo(page, "D4");
   await action(page, /^Fell tree/);
   await action(page, /^Repeat haul · logs to K4/);
+  await expect(page.locator("#load")).toContainText("Empty");
+  await expect(page.locator("#load")).toContainText("2 logs");
   await action(page, /^Pause haul/);
   await expect(page.locator("#haul")).toContainText("Paused");
   await expect(page.locator("#load")).toContainText("2 logs");
   await selectTile(page, "K4");
-  await expect(page.locator("#inspect")).toContainText("Delivered · 0 logs, 0 stone");
+  await expect(page.locator("#inspect")).toContainText("Delivered · 2 logs, 0 stone");
   await action(page, /^Resume haul/);
   await expect(page.locator("#haul")).toContainText("Haul complete", { timeout: 25000 });
   await expect(page.locator("#inspect")).toContainText("Delivered · 4 logs, 0 stone");
