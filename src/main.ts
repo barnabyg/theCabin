@@ -42,6 +42,12 @@ function startHaul() {
   advanceHaul();
   if (haul && !haul.finished && !haul.paused) ticker = window.setInterval(advanceHaul, 320);
 }
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden || !spring || !haul || haul.finished || haul.paused) return;
+  haul.paused = true;
+  stopTimer();
+  render();
+});
 function renderHaul() {
   const box = element("haul");
   box.replaceChildren();
