@@ -9,6 +9,7 @@ import {
 } from "./world";
 import type { Spring } from "./spring";
 
+export const sowingMinutes = 4;
 export const crops = {
   turnip: { name: "Turnip", days: 2, yield: 2 },
   squash: { name: "Squash", days: 4, yield: 6 },
@@ -54,7 +55,7 @@ export function drawWater(load: Stock, label: string): Job {
   };
 }
 
-export function springJobs(game: Homestead, spring: Spring): Job[] {
+export function springJobs(game: Homestead, spring: Spring, sowingOpen = true): Job[] {
   const plot = game.plot(game.position);
   const jobs: Job[] = [];
   if (streamBank(game.position)) jobs.push(drawWater(game.load, "Draw stream water"));
@@ -65,8 +66,8 @@ export function springJobs(game: Homestead, spring: Spring): Job[] {
     for (const v of Object.keys(crops) as Variety[])
       jobs.push({
         label: `Sow ${v}`,
-        minutes: 4,
-        enabled: spring.seeds[v] > 0,
+        minutes: sowingMinutes,
+        enabled: sowingOpen && spring.seeds[v] > 0,
         run: () => {
           spring.seeds[v]--;
           site.crop = { variety: v, days: 0, watered: false };

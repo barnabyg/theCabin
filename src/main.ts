@@ -180,6 +180,8 @@ function render() {
   if (spring && streamBank(p)) paragraph(info, "Stream bank · Draw water here.");
   if (growingSeason && plot.site?.kind === "Garden") {
     paragraph(info, "Garden");
+    if (market && !market.sowingOpen && !plot.site.crop)
+      paragraph(info, "Too late to finish sowing before sundown.");
     for (const note of gardenNotes(plot.site, growingSeason)) paragraph(info, note);
   }
   const plan = game.cabins.find((c) => c.contains(p));
@@ -211,7 +213,7 @@ function render() {
   const actions = element("actions");
   actions.replaceChildren();
   const jobs = game.jobs();
-  if (!steps && growingSeason) jobs.push(...springJobs(game, growingSeason));
+  if (!steps && growingSeason) jobs.push(...springJobs(game, growingSeason, market?.sowingOpen));
   if (!steps && market) jobs.push(...market.jobs());
   if (!steps && plot.site && plot.site.kind !== "Garden")
     jobs.push(...buildingJobs(plot.site, game.load));

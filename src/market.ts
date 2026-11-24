@@ -1,4 +1,5 @@
 import { Cabin, recipe } from "./cabin";
+import { sowingMinutes } from "./garden";
 import { Spring } from "./spring";
 import { restoreSpring, snapshot } from "./spring-save";
 import { CAPACITY, Homestead, distance, openSite, quantity, type Job } from "./world";
@@ -46,6 +47,10 @@ export class Market {
     const market = new Market(game, spring);
     if (penniless) market.coins = 0;
     return market;
+  }
+
+  get sowingOpen() {
+    return this.game.daylight > sowingMinutes;
   }
 
   get roadMinutes() {

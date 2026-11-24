@@ -35,6 +35,31 @@ for (const portions of [1, 2]) {
     await expect(page.locator("#clock")).toHaveText("4h 00m");
   });
 }
+test("four minutes left is too late to finish sowing before sundown", async ({ page }) => {
+  await page.goto("/?scenario=market");
+  await walkTo(page, "F6");
+  await action(page, /^Withdraw 1 portion/);
+  await walkTo(page, "P6");
+  await action(page, /^Walk to town/);
+  await action(page, /^Sell 1 food/);
+  await action(page, /^Buy 1 turnip seed/);
+  await action(page, /^Walk home/);
+  await walkTo(page, "G6");
+  await walkTo(page, "H6");
+  await action(page, /^Draw well water/);
+  await action(page, /^Set down load/);
+  await walkTo(page, "G6");
+  for (let trip = 0; trip < 5; trip++) {
+    await walkTo(page, "O3");
+    await walkTo(page, "G6");
+  }
+  await expect(page.locator("#clock")).toHaveText("0h 04m");
+  await expect(page.getByRole("button", { name: /^Sow turnip/ })).toBeDisabled();
+  await expect(page.locator("#inspect")).toContainText("Too late to finish sowing before sundown");
+  await action(page, /^Wait until sundown/);
+  await expect(page.locator("#night")).toContainText("The garden was still unsown at sundown");
+});
+
 test("reach the deadline in town with the garden unsown", async ({ page }) => {
   await page.goto("/?scenario=market");
   await walkTo(page, "P6");
