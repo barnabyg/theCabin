@@ -1,14 +1,27 @@
-import { Cabin } from "./cabin";
+import { Cabin, footprint, recipe } from "./cabin";
+import { crops } from "./garden";
+import { plans } from "./outbuilding";
 import { Haul } from "./haul";
-import { Spring } from "./spring";
-import { freshStock, Homestead } from "./world";
+import { dailyMinutes, Spring, springDays } from "./spring";
+import {
+  CAPACITY,
+  COLS,
+  ROWS,
+  freshStock,
+  Homestead,
+  land,
+  quantity,
+  type Point,
+  type Plot,
+  type Stock,
+} from "./world";
 
 export const saveKey = "the-cabin.first-harvest";
 
 function snapshot(game: Homestead, spring: Spring, haul?: Haul) {
   return {
     version: 1,
-    spring,
+    spring: { day: spring.day, seeds: spring.seeds },
     position: game.position,
     selected: game.selected,
     daylight: game.daylight,
@@ -35,9 +48,59 @@ export function saveSpring(game: Homestead, spring: Spring, haul?: Haul) {
   localStorage.setItem(saveKey, JSON.stringify(snapshot(game, spring, haul)));
 }
 
+function count(value: number, max = Number.MAX_SAFE_INTEGER) {
+  return Number.isSafeInteger(value) && value >= 0 && value <= max;
+}
+
+function validPosition(p: Point) {
+  return Number.isInteger(p.x) && Number.isInteger(p.y) && land(p);
+}
+
+function restoreStock(record: Stock) {
+  const stock = { ...freshStock(), ...record };
+  if (!record || !Object.values(stock).every((n) => count(n))) throw Error("Invalid stock");
+  return stock;
+}
+
+function restorePlot(plot: Plot): Plot {
+  const { site, timber } = plot;
+  if (timber !== null && timber !== "Tree" && timber !== "Stump") throw Error("Invalid timber");
+  if (site?.kind === "Garden") {
+    const c = site.crop;
+    if (
+      c &&
+      (!Object.hasOwn(crops, c.variety) ||
+        !count(c.days, crops[c.variety].days) ||
+        typeof c.watered !== "boolean")
+    )
+      throw Error("Invalid crop");
+  } else if (site) {
+    if (
+      !Object.hasOwn(plans, site.kind) ||
+      !count(site.delivered, plans[site.kind].amount) ||
+      typeof site.complete !== "boolean" ||
+      (site.kind === "Pantry" && !count(site.stored))
+    )
+      throw Error("Invalid building");
+  }
+  return { ...plot, stock: restoreStock(plot.stock) };
+}
+
 export function resumeSpring(encoded: string) {
   const data: ReturnType<typeof snapshot> = JSON.parse(encoded);
   if (data.version !== 1) throw Error("Unsupported save version");
+  if (
+    !Array.isArray(data.plots) ||
+    data.plots.length !== COLS * ROWS ||
+    !validPosition(data.position) ||
+    !validPosition(data.selected) ||
+    !count(data.daylight, dailyMinutes) ||
+    !count(data.spring.day, springDays + 1) ||
+    data.spring.day < 1 ||
+    !count(data.spring.seeds.turnip) ||
+    !count(data.spring.seeds.squash)
+  )
+    throw Error("Invalid spring day");
   const game = new Homestead();
   const spring = new Spring();
   spring.day = data.spring.day;
@@ -45,9 +108,23 @@ export function resumeSpring(encoded: string) {
   game.position = data.position;
   game.selected = data.selected;
   game.daylight = data.daylight;
-  game.plots = data.plots.map((plot) => ({ ...plot, stock: { ...freshStock(), ...plot.stock } }));
-  game.load = { ...freshStock(), ...data.load };
+  game.plots = data.plots.map(restorePlot);
+  game.load = restoreStock(data.load);
+  if (quantity(game.load) > CAPACITY) throw Error("Invalid carried load");
   game.cabins = data.cabins.map((record) => {
+    if (
+      !validPosition(record.origin) ||
+      !land({
+        x: record.origin.x + footprint.width - 1,
+        y: record.origin.y + footprint.height - 1,
+      }) ||
+      !count(record.delivered.logs, recipe.logs) ||
+      !count(record.delivered.stone, recipe.stone) ||
+      !count(record.stage, 3) ||
+      !count(record.hearth.fuel) ||
+      typeof record.hearth.lit !== "boolean"
+    )
+      throw Error("Invalid cabin");
     const cabin = new Cabin(record.origin);
     cabin.delivered = record.delivered;
     cabin.stage = record.stage;
@@ -56,6 +133,12 @@ export function resumeSpring(encoded: string) {
   });
   let haul: Haul | undefined;
   if (data.haul) {
+    if (
+      !validPosition(data.haul.source) ||
+      !game.cabins[data.haul.cabin] ||
+      !Object.hasOwn(recipe, data.haul.material)
+    )
+      throw Error("Invalid haul");
     haul = new Haul(data.haul.source, game.cabins[data.haul.cabin], data.haul.material);
     haul.paused = true;
   }
