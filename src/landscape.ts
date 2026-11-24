@@ -162,6 +162,12 @@ export class Landscape extends Phaser.Scene {
           g.fillStyle(0xd8ae73).fillCircle(dx, dy, 3);
         }
       }
+      for (let piece = 0; piece < Math.min(plot.stock.firewood, 6); piece++) {
+        const dx = x - 20 + (piece % 3) * 4,
+          dy = y + 12 - Math.floor(piece / 3) * 4;
+        g.lineStyle(4, 0x855b36).lineBetween(dx, dy, dx + 9, dy - 7);
+        g.lineStyle(2, 0xe6bd77).lineBetween(dx, dy - 1, dx + 9, dy - 8);
+      }
       if (plot.stock.stone) {
         for (const [dx, dy, s] of [
           [-9, 3, 10],

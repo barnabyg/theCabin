@@ -1,9 +1,13 @@
 import { Cabin, obstructions } from "./cabin";
+
+import { splitJobs } from "./firewood";
+
 export const COLS = 16,
   ROWS = 9,
   TILE = 56,
   CAPACITY = 2;
-export type Material = "logs" | "stone";
+const materials = ["logs", "stone", "firewood"] as const;
+export type Material = (typeof materials)[number];
 export type Stock = Record<Material, number>;
 export interface Point {
   x: number;
@@ -15,8 +19,8 @@ export interface Plot {
 }
 export const wooded = { x: 3, y: 3 },
   openSite = { x: 10, y: 3 };
-export const freshStock = (): Stock => ({ logs: 0, stone: 0 });
-export const quantity = (s: Stock) => s.logs + s.stone;
+export const freshStock = (): Stock => ({ logs: 0, stone: 0, firewood: 0 });
+export const quantity = (s: Stock) => s.logs + s.stone + s.firewood;
 export const stockLabel = (s: Stock) =>
   Object.entries(s)
     .filter(([, n]) => n > 0)
@@ -131,7 +135,7 @@ export class Homestead {
           tile.stock.logs += 4;
         },
       });
-    for (const material of ["logs", "stone"] as const) {
+    for (const material of materials) {
       if (!tile.stock[material]) continue;
       const amount = Math.min(CAPACITY - quantity(this.load), tile.stock[material]);
       jobs.push({
@@ -149,11 +153,11 @@ export class Homestead {
         label: "Set down load",
         minutes: 1,
         run: () => {
-          tile.stock.logs += this.load.logs;
-          tile.stock.stone += this.load.stone;
+          for (const material of materials) tile.stock[material] += this.load[material];
           this.load = freshStock();
         },
       });
+    jobs.push(...splitJobs(this.load, tile.stock));
     return jobs;
   }
 }

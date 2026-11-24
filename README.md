@@ -16,6 +16,8 @@ Click the tree at D4 in the wooded site and choose **Walk here**, then **Fell tr
 
 Open **Build menu** to compare sites. The open footprint at K4 is clear. The wooded footprint at D4 needs the tree felled, its stump dug out, and the stone at E5 gathered. Return to the clearing to work, then reopen the menu to reserve the same footprint.
 
+To prepare firewood, stand on gathered logs or carry them. Choose **Split 1 log** to spend four minutes making two pieces of firewood. A double batch takes eight minutes. The settler uses carried logs first and stacks the firewood on the ground. Select **Pick up firewood** to carry up to two pieces.
+
 ## Verify
 
 After `npm ci` and `npx playwright install chromium`, run `npm run verify`. Biome checks formatting, lint and static diagnostics, TypeScript checks types, and Playwright drives the same controls available to the player. Verification also audits the locked dependencies, scans the project for secrets, checks package contents, and builds the static game in `dist/`. CI installs the Chromium system dependencies on Linux.
