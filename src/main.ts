@@ -52,30 +52,25 @@ document.addEventListener("visibilitychange", () => {
   stopTimer();
   render();
 });
+const haulToggle = button(element("haul-controls"), "Pause haul", () => {
+  if (!haul || haul.finished) return;
+  haul.paused = !haul.paused;
+  if (haul.paused) {
+    stopTimer();
+    render();
+  } else startHaul();
+});
 function renderHaul() {
-  const box = element("haul");
-  box.replaceChildren();
-  box.hidden = !haul;
+  element("haul").hidden = !haul;
   if (!haul) return;
-  const trip = haul;
-  paragraph(
-    box,
-    `${trip.finished ? "Haul complete" : trip.paused ? "Paused" : "Hauling"} · ${trip.material} · ${coordinate(trip.source)} → ${coordinate(trip.cabin.origin)}`,
-  );
-  if (trip.finished) return;
-  paragraph(box, `Settler at ${coordinate(game.position)} · ${stockLabel(game.load)}`);
-  button(
-    box,
-    trip.paused ? "Resume haul" : "Pause haul",
-    () => {
-      trip.paused = !trip.paused;
-      if (trip.paused) {
-        stopTimer();
-        render();
-      } else startHaul();
-    },
-    game.planning,
-  );
+  const status = haul.finished ? "Haul complete" : haul.paused ? "Paused" : "Hauling";
+  element("haul-summary").textContent =
+    `${status} · ${haul.material} · ${coordinate(haul.source)} → ${coordinate(haul.cabin.origin)}`;
+  const load = element("haul-load");
+  element("haul-controls").hidden = haul.finished;
+  load.textContent = `Settler at ${coordinate(game.position)} · ${stockLabel(game.load)}`;
+  haulToggle.textContent = haul.paused ? "Resume haul" : "Pause haul";
+  haulToggle.disabled = game.planning;
 }
 const cells: HTMLButtonElement[] = [];
 for (let y = 0; y < 7; y++)

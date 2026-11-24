@@ -3,20 +3,37 @@ import { action, reserveOpen, selectTile, walkTo } from "./controls";
 test("interrupt a repeat haul, preserve its load, then finish the cabin in stages", async ({
   page,
 }) => {
+  await page.clock.install({ time: new Date("2026-01-01T12:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-01-01T12:01:00Z"));
   await page.goto("/");
   await reserveOpen(page);
   await walkTo(page, "D4");
   await action(page, /^Fell tree/);
   await action(page, /^Repeat haul · logs to K4/);
-  await expect(page.locator("#load")).toContainText("Empty");
-  await expect(page.locator("#load")).toContainText("2 logs");
+  const pause = page.getByRole("button", { name: "Pause haul" });
+  await pause.focus();
+  const advanceToLoad = (label: string) =>
+    expect
+      .poll(
+        async () => {
+          await page.clock.runFor(400);
+          return page.locator("#load").textContent();
+        },
+        { intervals: [0] },
+      )
+      .toContain(label);
+  await advanceToLoad("Empty");
+  await expect(pause).toBeFocused();
+  await advanceToLoad("2 logs");
   await action(page, /^Pause haul/);
   await expect(page.locator("#haul")).toContainText("Paused");
   await expect(page.locator("#load")).toContainText("2 logs");
   await selectTile(page, "K4");
   await expect(page.locator("#inspect")).toContainText("Delivered · 2 logs, 0 stone");
   await action(page, /^Resume haul/);
+  await page.clock.resume();
   await expect(page.locator("#haul")).toContainText("Haul complete", { timeout: 25000 });
+  await expect(pause).toBeHidden();
   await expect(page.locator("#inspect")).toContainText("Delivered · 4 logs, 0 stone");
   await expect(page.locator("#load")).toContainText("Empty");
   await action(page, /^Lay floor/);
