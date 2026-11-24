@@ -1,7 +1,7 @@
 import { button, element, paragraph } from "./ui";
 import { renderNight } from "./night-panel";
 import { Haul } from "./haul";
-import { buildingMaterials, recipe, obstructions } from "./cabin";
+import { footprint, withinFootprint, buildingMaterials, recipe, obstructions } from "./cabin";
 import { startLandscape } from "./landscape";
 import {
   CAPACITY,
@@ -80,7 +80,7 @@ function siteName(p: Point) {
     [wooded, "Wooded site"],
     [openSite, "Open site"],
   ] as const)
-    if (p.x >= site.x && p.x < site.x + 3 && p.y >= site.y && p.y < site.y + 2) return name;
+    if (withinFootprint(site, p)) return name;
   return "Clearing";
 }
 element("build").onclick = () => {
@@ -115,7 +115,10 @@ function renderMenu() {
       game.preview = { ...site };
       render();
     });
-  paragraph(menu, `Footprint · ${coordinate(game.preview)} · 3 × 2 tiles`);
+  paragraph(
+    menu,
+    `Footprint · ${coordinate(game.preview)} · ${footprint.width} × ${footprint.height} tiles`,
+  );
   const blocked = obstructions(game, game.preview);
   paragraph(menu, blocked.join(" / ") || "Footprint clear");
   button(

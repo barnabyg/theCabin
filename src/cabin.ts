@@ -1,5 +1,14 @@
 import { coordinate, land, type Homestead, type Job, type Stock, type Point } from "./world";
 import { Hearth } from "./night";
+export const footprint = { width: 3, height: 2 };
+export function withinFootprint(origin: Point, p: Point) {
+  return (
+    p.x >= origin.x &&
+    p.x < origin.x + footprint.width &&
+    p.y >= origin.y &&
+    p.y < origin.y + footprint.height
+  );
+}
 export const recipe = { logs: 4, stone: 2 };
 export type BuildingMaterial = keyof typeof recipe;
 export const buildingMaterials = ["logs", "stone"] as const;
@@ -53,18 +62,13 @@ export class Cabin {
   }
   constructor(readonly origin: Point) {}
   contains(p: Point) {
-    return (
-      p.x >= this.origin.x &&
-      p.x < this.origin.x + 3 &&
-      p.y >= this.origin.y &&
-      p.y < this.origin.y + 2
-    );
+    return withinFootprint(this.origin, p);
   }
 }
 export function obstructions(game: Homestead, origin: Point) {
   const blocked: string[] = [];
-  for (let y = origin.y; y < origin.y + 2; y++)
-    for (let x = origin.x; x < origin.x + 3; x++) {
+  for (let y = origin.y; y < origin.y + footprint.height; y++)
+    for (let x = origin.x; x < origin.x + footprint.width; x++) {
       const p = { x, y };
       let reason: string | null = null;
       if (!land(p)) reason = "Outside buildable land";

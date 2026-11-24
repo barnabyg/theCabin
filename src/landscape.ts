@@ -1,7 +1,10 @@
+import { footprint } from "./cabin";
 import Phaser from "phaser";
 import { COLS, ROWS, TILE, openSite, wooded, type Homestead } from "./world";
 const W = COLS * TILE,
   H = ROWS * TILE;
+const cabinWidth = TILE * footprint.width,
+  cabinHeight = TILE * footprint.height;
 type Graphics = Phaser.GameObjects.Graphics;
 function polygon(g: Graphics, color: number, points: number[][]) {
   g.fillStyle(color).fillPoints(
@@ -95,8 +98,8 @@ export class Landscape extends Phaser.Scene {
     for (const p of [wooded, openSite]) {
       const x = p.x * TILE,
         y = p.y * TILE;
-      g.fillStyle(0xf3e7aa, 0.14).fillRect(x, y, TILE * 3, TILE * 2);
-      g.lineStyle(2, 0x736e4f, 0.8).strokeRect(x + 1, y + 1, TILE * 3 - 2, TILE * 2 - 2);
+      g.fillStyle(0xf3e7aa, 0.14).fillRect(x, y, cabinWidth, cabinHeight);
+      g.lineStyle(2, 0x736e4f, 0.8).strokeRect(x + 1, y + 1, cabinWidth - 2, cabinHeight - 2);
       const label = this.add.text(x + 3, y - 17, p === wooded ? "WOODED SITE" : "OPEN SITE", {
         fontFamily: "monospace",
         fontSize: "12px",
@@ -126,12 +129,12 @@ export class Landscape extends Phaser.Scene {
     for (const cabin of this.homestead.cabins) {
       const x = cabin.origin.x * TILE,
         y = cabin.origin.y * TILE;
-      g.fillStyle(0x344e53, 0.52).fillRect(x + 3, y + 3, TILE * 3 - 6, TILE * 2 - 6);
-      g.lineStyle(3, 0xf2e5c0).strokeRect(x + 7, y + 7, TILE * 3 - 14, TILE * 2 - 14);
-      g.lineBetween(x + 8, y + 8, x + TILE * 3 - 8, y + TILE * 2 - 8).lineBetween(
+      g.fillStyle(0x344e53, 0.52).fillRect(x + 3, y + 3, cabinWidth - 6, cabinHeight - 6);
+      g.lineStyle(3, 0xf2e5c0).strokeRect(x + 7, y + 7, cabinWidth - 14, cabinHeight - 14);
+      g.lineBetween(x + 8, y + 8, x + cabinWidth - 8, y + cabinHeight - 8).lineBetween(
         x + 8,
-        y + TILE * 2 - 8,
-        x + TILE * 3 - 8,
+        y + cabinHeight - 8,
+        x + cabinWidth - 8,
         y + 8,
       );
     }
@@ -139,8 +142,8 @@ export class Landscape extends Phaser.Scene {
       if (!cabin.stage) continue;
       const x = cabin.origin.x * TILE + 12,
         y = cabin.origin.y * TILE + 13,
-        w = 3 * TILE - 24,
-        h = 2 * TILE - 26;
+        w = cabinWidth - 24,
+        h = cabinHeight - 26;
       g.fillStyle(0x886d4c).fillRect(x, y, w, h);
       for (let row = 2; row < h; row += 8)
         g.lineStyle(2, 0xb7986c).lineBetween(x + 2, y + row, x + w - 2, y + row);
@@ -169,12 +172,12 @@ export class Landscape extends Phaser.Scene {
     }
     if (this.homestead.planning) {
       const p = this.homestead.preview;
-      g.fillStyle(0xfbe6a9, 0.3).fillRect(p.x * TILE, p.y * TILE, TILE * 3, TILE * 2);
+      g.fillStyle(0xfbe6a9, 0.3).fillRect(p.x * TILE, p.y * TILE, cabinWidth, cabinHeight);
       g.lineStyle(3, 0xffeba9).strokeRect(
         p.x * TILE + 2,
         p.y * TILE + 2,
-        TILE * 3 - 4,
-        TILE * 2 - 4,
+        cabinWidth - 4,
+        cabinHeight - 4,
       );
     }
     for (const [i, plot] of this.homestead.plots.entries()) {
