@@ -28,6 +28,12 @@ Reserve a cabin and fell the tree at D4. Choose **Repeat haul** to ferry logs to
 4. Choose **Start again at daybreak**. For the wooded route, fell D4, clear its stump, gather the stone at E5, then reserve D4. Deliver the stone and pick up and deliver the logs at the footprint. Build and tend the hearth as above. The same timber travels seven loaded steps to the open site and zero to the wooded site.
 5. For the retreat ending, finish either cabin and wait for nightfall inside with an empty hearth. Two cold watches exhaust your warmth. **Start again** restores the original clearing, tools, purse and daylight.
 
+## First harvest
+
+From the repository root run `npm.cmd run play` with Node.js 24.13 or later, then open http://127.0.0.1:5173 and choose **First harvest**. The spring scenario lasts six working days. Resting spends the remaining daylight. Each morning restores six hours for travel and labour.
+
+Reserve the open cabin site at K4, deliver two logs, and choose **Rest until tomorrow**. Pick up the stone at E5 and choose **Save spring day**. Close the browser, reopen the same address in the same browser profile, and choose **Resume First harvest**. You should be at E5 on day two with two stone, and K4 should still show two delivered logs. Finish the cabin or rest through day six to see the frost ending. **Start a fresh spring** discards the saved run.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

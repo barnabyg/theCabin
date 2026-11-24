@@ -1,4 +1,5 @@
 import { button, element, paragraph } from "./ui";
+import { openScenario, renderSpring, nextSpringDay } from "./spring-panel";
 import { renderNight } from "./night-panel";
 import { Haul } from "./haul";
 import { footprint, withinFootprint, buildingMaterials, recipe, obstructions } from "./cabin";
@@ -16,9 +17,11 @@ import {
   wooded,
   type Point,
 } from "./world";
-const game = new Homestead();
+const session = openScenario();
+const spring = session?.spring;
+const game = session?.game ?? new Homestead();
 const paint = startLandscape(game);
-let haul: Haul | undefined;
+let haul: Haul | undefined = session?.haul;
 let ticker: number | undefined;
 function stopTimer() {
   window.clearInterval(ticker);
@@ -65,7 +68,7 @@ for (let y = 0; y < 7; y++)
   for (let x = 0; x < COLS; x++) {
     const p = { x, y },
       cell = button(element("tiles"), "", () => {
-        if (game.night) return;
+        if (game.night || spring?.ended) return;
         if (game.planning) game.preview = p;
         else game.selected = p;
         render();
@@ -140,12 +143,13 @@ function haltHaul() {
   haul = undefined;
 }
 function render() {
-  if (!game.daylight && !game.night) {
+  if (!game.daylight && !game.night && !spring?.ended) {
     haltHaul();
-    game.beginNight();
+    if (spring) nextSpringDay(game, spring);
+    else game.beginNight();
   }
-  element("build").hidden = !!game.night;
-  element("field-notes").hidden = !!game.night;
+  element("build").hidden = !!game.night || !!spring?.ended;
+  element("field-notes").hidden = !!game.night || !!spring?.ended;
   renderMenu();
   renderHaul();
   const p = game.selected,
@@ -208,7 +212,13 @@ function render() {
   element("load").textContent = `${stockLabel(game.load)} (${quantity(game.load)}/${CAPACITY})`;
   element("clock").textContent =
     `${Math.floor(game.daylight / 60)}h ${String(game.daylight % 60).padStart(2, "0")}m`;
-  renderNight(game, render, haltHaul, !!haul && !haul.paused && !haul.finished);
+  if (spring)
+    renderSpring(game, spring, haul, () => {
+      haltHaul();
+      nextSpringDay(game, spring);
+      render();
+    });
+  else renderNight(game, render, haltHaul, !!haul && !haul.paused && !haul.finished);
   element("message").textContent = game.message;
   for (const [i, cell] of cells.entries())
     cell.setAttribute("aria-pressed", String(i === p.y * COLS + p.x));
@@ -225,7 +235,8 @@ const directions: Record<string, Point> = {
   d: { x: 1, y: 0 },
 };
 window.addEventListener("keydown", (event) => {
-  if (game.night || game.planning || (haul && !haul.paused && !haul.finished)) return;
+  if (game.night || spring?.ended || game.planning || (haul && !haul.paused && !haul.finished))
+    return;
   if (event.ctrlKey || event.altKey || event.metaKey) return;
   const delta = directions[event.key.toLowerCase()];
   if (!delta) return;
