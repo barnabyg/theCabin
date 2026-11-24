@@ -312,6 +312,10 @@ button small {
 #night p {
   font-size: 14px;
 }
+header nav {
+  display: flex;
+  gap: 1rem;
+}
 header nav a {
   color: inherit;
   text-underline-offset: 3px;

@@ -22,9 +22,11 @@ import {
   wooded,
   type Point,
 } from "./world";
+import { openMarket, renderMarket } from "./market-panel";
 const session = openScenario();
+const market = openMarket();
 const spring = session?.spring;
-const game = session?.game ?? new Homestead();
+const game = market?.game ?? session?.game ?? new Homestead();
 const paint = startLandscape(game);
 let haul: Haul | undefined = session?.haul;
 let ticker: number | undefined;
@@ -79,7 +81,7 @@ for (let y = 0; y < 7; y++)
   for (let x = 0; x < COLS; x++) {
     const p = { x, y },
       cell = button(element("tiles"), "", () => {
-        if (game.night || spring?.ended) return;
+        if (game.night || spring?.ended || market?.inTown || (market && !game.daylight)) return;
         if (game.planning) game.preview = p;
         else game.selected = p;
         render();
@@ -160,12 +162,12 @@ function render() {
     spring.won = cabin && well && stored > 0;
     if (spring.won) haltHaul();
   }
-  if (!game.daylight && !game.night && !spring?.ended) {
+  if (!game.daylight && !market && !game.night && !spring?.ended) {
     haltHaul();
     if (spring) nextSpringDay(game, spring);
     else game.beginNight();
   }
-  element("build").hidden = !!game.night || !!spring?.ended;
+  element("build").hidden = !!market || !!game.night || !!spring?.ended;
   element("field-notes").hidden = !!game.night || !!spring?.ended;
   renderMenu();
   renderHaul();
@@ -240,7 +242,8 @@ function render() {
   element("load").textContent = `${stockLabel(game.load)} (${quantity(game.load)}/${CAPACITY})`;
   element("clock").textContent =
     `${Math.floor(game.daylight / 60)}h ${String(game.daylight % 60).padStart(2, "0")}m`;
-  if (spring)
+  if (market) renderMarket(market, render);
+  else if (spring)
     renderSpring(game, spring, haul, () => {
       haltHaul();
       nextSpringDay(game, spring);
@@ -263,6 +266,7 @@ const directions: Record<string, Point> = {
   d: { x: 1, y: 0 },
 };
 window.addEventListener("keydown", (event) => {
+  if (market?.inTown || (market && !game.daylight)) return;
   if (game.night || spring?.ended || game.planning || (haul && !haul.paused && !haul.finished))
     return;
   if (event.ctrlKey || event.altKey || event.metaKey) return;
