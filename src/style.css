@@ -125,6 +125,19 @@ h1 {
   font-size: 23px;
   font-weight: 500;
 }
+.build-button {
+  margin-left: auto;
+  margin-right: 16px;
+  border: 1px solid #b6bea5;
+  background: #eceddf;
+  border-radius: 4px;
+  color: #314c3c;
+  font:
+    600 14px "Segoe UI",
+    sans-serif;
+  padding: 6px 12px;
+  cursor: pointer;
+}
 .compass {
   color: #677258;
 }

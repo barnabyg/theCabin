@@ -123,6 +123,28 @@ export class Landscape extends Phaser.Scene {
     if (!this.ground || !this.objects) return;
     const g = this.objects;
     g.clear();
+    for (const cabin of this.homestead.cabins) {
+      const x = cabin.origin.x * TILE,
+        y = cabin.origin.y * TILE;
+      g.fillStyle(0x344e53, 0.52).fillRect(x + 3, y + 3, TILE * 3 - 6, TILE * 2 - 6);
+      g.lineStyle(3, 0xf2e5c0).strokeRect(x + 7, y + 7, TILE * 3 - 14, TILE * 2 - 14);
+      g.lineBetween(x + 8, y + 8, x + TILE * 3 - 8, y + TILE * 2 - 8).lineBetween(
+        x + 8,
+        y + TILE * 2 - 8,
+        x + TILE * 3 - 8,
+        y + 8,
+      );
+    }
+    if (this.homestead.planning) {
+      const p = this.homestead.preview;
+      g.fillStyle(0xfbe6a9, 0.3).fillRect(p.x * TILE, p.y * TILE, TILE * 3, TILE * 2);
+      g.lineStyle(3, 0xffeba9).strokeRect(
+        p.x * TILE + 2,
+        p.y * TILE + 2,
+        TILE * 3 - 4,
+        TILE * 2 - 4,
+      );
+    }
     for (const [i, plot] of this.homestead.plots.entries()) {
       const x = ((i % COLS) + 0.5) * TILE,
         y = (Math.floor(i / COLS) + 0.5) * TILE;

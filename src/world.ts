@@ -1,3 +1,4 @@
+import { Cabin, obstructions } from "./cabin";
 export const COLS = 16,
   ROWS = 9,
   TILE = 56,
@@ -37,6 +38,16 @@ export class Homestead {
     timber: null,
     stock: freshStock(),
   }));
+  cabins: Cabin[] = [];
+  preview: Point = { ...openSite };
+  planning = false;
+  reserve() {
+    if (obstructions(this, this.preview).length) return;
+    this.cabins.push(new Cabin({ ...this.preview }));
+    this.selected = { ...this.preview };
+    this.planning = false;
+    this.message = "Cabin footprint reserved.";
+  }
   load = freshStock();
   daylight = 360;
   message = "Daybreak. Select a tile to inspect the clearing.";
@@ -65,7 +76,7 @@ export class Homestead {
       [15, 6],
     ])
       this.plot({ x, y }).timber = "Tree";
-    this.plot({ x: 4, y: 4 }).stock.stone = 6;
+    this.plot({ x: 4, y: 4 }).stock.stone = 2;
     this.plot({ x: 5, y: 2 }).stock.stone = 4;
   }
   plot(p: Point) {
@@ -103,6 +114,14 @@ export class Homestead {
         },
       ];
     const jobs: Job[] = [];
+    if (tile.timber === "Stump")
+      jobs.push({
+        label: "Clear stump with spade",
+        minutes: 8,
+        run: () => {
+          tile.timber = null;
+        },
+      });
     if (tile.timber === "Tree")
       jobs.push({
         label: "Fell tree · 4 logs",

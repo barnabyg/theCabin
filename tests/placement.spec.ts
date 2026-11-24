@@ -1,0 +1,36 @@
+import { expect, test } from "@playwright/test";
+import { action, reserveOpen, walkTo } from "./controls";
+test("reserve open ground immediately and reject an overlapping plan", async ({ page }) => {
+  await page.goto("/");
+  await reserveOpen(page);
+  await expect(page.getByText("Blueprint · K4", { exact: true })).toBeVisible();
+  await action(page, /^Build menu/);
+  await action(page, /^Open site/);
+  await expect(page.locator("#plan-menu")).toContainText("K4 · Reserved blueprint");
+  await expect(page.getByRole("button", { name: /Reserve footprint/ })).toBeDisabled();
+  await expect(page.locator("#clock")).toHaveText("6h 00m");
+});
+test("keep the wooded footprint while clearing the tree, stump and stone", async ({ page }) => {
+  await page.goto("/");
+  await action(page, /^Build menu/);
+  await action(page, /^Wooded site/);
+  const menu = page.locator("#plan-menu");
+  await expect(menu).toContainText("D4 · Tree");
+  await expect(menu).toContainText("E5 · Loose stone");
+  await expect(page.getByRole("button", { name: /Reserve footprint/ })).toBeDisabled();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator("#clock")).toHaveText("6h 00m");
+  await action(page, /^Return to clearing/);
+  await walkTo(page, "D4");
+  await action(page, /^Fell tree/);
+  await action(page, /^Build menu/);
+  await expect(menu).toContainText("D4 · Stump");
+  await action(page, /^Return to clearing/);
+  await action(page, /^Clear stump/);
+  await walkTo(page, "E5");
+  await action(page, /^Pick up stone/);
+  await action(page, /^Build menu/);
+  await expect(menu).toContainText("Footprint clear");
+  await action(page, /^Reserve footprint/);
+  await expect(page.getByText("Blueprint · D4", { exact: true })).toBeVisible();
+});

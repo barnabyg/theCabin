@@ -29,7 +29,8 @@
         <section class="map-panel" aria-label="Homestead map">
           <div class="panel-head">
             <h2>Your homestead</h2>
-            <span class="compass">↑ N</span>
+            <button type="button" id="build" class="build-button">Build menu</button
+            ><span class="compass">↑ N</span>
           </div>
           <div class="board">
             <div id="terrain"></div>
@@ -46,6 +47,7 @@
           </div>
         </section>
         <aside>
+          <section class="card" id="plan-menu" hidden></section>
           <section class="card">
             <div class="overline">FIELD NOTES</div>
             <h2 id="tile-title">Selected tile</h2>
