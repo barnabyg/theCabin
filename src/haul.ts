@@ -1,6 +1,7 @@
 import type { Cabin, BuildingMaterial } from "./cabin";
 import {
   CAPACITY,
+  minutes,
   coordinate,
   distance,
   quantity,
@@ -17,6 +18,12 @@ export class Haul {
     readonly cabin: Cabin,
     readonly material: BuildingMaterial,
   ) {}
+  get firstTripMinutes() {
+    return 2 * minutes.transfer + distance(this.source, this.cabin.origin) * minutes.loadedStep;
+  }
+  get repeatTripMinutes() {
+    return this.firstTripMinutes + distance(this.source, this.cabin.origin) * minutes.emptyStep;
+  }
   next(game: Homestead): Job | undefined {
     const needed = this.cabin.remaining(this.material);
     if (needed === 0) return;
@@ -46,7 +53,7 @@ export class Haul {
     const amount = Math.min(CAPACITY - quantity(game.load), needed, pile[this.material]);
     return {
       label: `Load ${this.material}`,
-      minutes: 1,
+      minutes: minutes.transfer,
       run: () => {
         game.load[this.material] += amount;
         pile[this.material] -= amount;

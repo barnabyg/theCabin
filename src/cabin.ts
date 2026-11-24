@@ -1,4 +1,12 @@
-import { coordinate, land, type Homestead, type Job, type Stock, type Point } from "./world";
+import {
+  minutes,
+  coordinate,
+  land,
+  type Homestead,
+  type Job,
+  type Stock,
+  type Point,
+} from "./world";
 import { Hearth } from "./night";
 export const footprint = { width: 3, height: 2 };
 export function withinFootprint(origin: Point, p: Point) {
@@ -35,7 +43,7 @@ export class Cabin {
       return;
     return {
       label: "Deliver materials",
-      minutes: 1,
+      minutes: minutes.transfer,
       run: () => {
         for (const material of buildingMaterials) {
           const amount = Math.min(load[material], this.remaining(material));

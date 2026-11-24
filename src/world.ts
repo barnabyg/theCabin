@@ -7,6 +7,7 @@ export const COLS = 16,
   ROWS = 9,
   TILE = 56,
   CAPACITY = 2;
+export const minutes = { emptyStep: 1, loadedStep: 2, transfer: 1 };
 const materials = ["logs", "stone", "firewood"] as const;
 export type Material = (typeof materials)[number];
 export type Stock = Record<Material, number>;
@@ -104,7 +105,7 @@ export class Homestead {
     return this.plots[p.y * COLS + p.x];
   }
   get pace() {
-    return quantity(this.load) > 0 ? 2 : 1;
+    return quantity(this.load) > 0 ? minutes.loadedStep : minutes.emptyStep;
   }
   walk(p: Point) {
     if (!land(p)) return false;
@@ -157,7 +158,7 @@ export class Homestead {
       const amount = Math.min(CAPACITY - quantity(this.load), tile.stock[material]);
       jobs.push({
         label: `Pick up ${material}`,
-        minutes: 1,
+        minutes: minutes.transfer,
         enabled: amount > 0,
         run: () => {
           tile.stock[material] -= amount;
@@ -168,7 +169,7 @@ export class Homestead {
     if (quantity(this.load))
       jobs.push({
         label: "Set down load",
-        minutes: 1,
+        minutes: minutes.transfer,
         run: () => {
           for (const material of materials) tile.stock[material] += this.load[material];
           this.load = freshStock();

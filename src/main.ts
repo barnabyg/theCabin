@@ -193,15 +193,15 @@ function render() {
     for (const cabin of game.cabins)
       for (const material of buildingMaterials) {
         if (!cabin.remaining(material) || !plot.stock[material]) continue;
-        const travel = distance(p, cabin.origin);
+        const route = new Haul({ ...p }, cabin, material);
         button(
           actions,
-          `Repeat haul · ${material} to ${coordinate(cabin.origin)} · ${travel * 2 + 2} min first load, ${travel * 3 + 2} min per repeat`,
+          `Repeat haul · ${material} to ${coordinate(cabin.origin)} · ${route.firstTripMinutes} min first load, ${route.repeatTripMinutes} min per repeat`,
           () => {
-            haul = new Haul({ ...p }, cabin, material);
+            haul = route;
             startHaul();
           },
-          game.daylight < travel * 2 + 2,
+          game.daylight < route.firstTripMinutes,
         );
       }
   }
