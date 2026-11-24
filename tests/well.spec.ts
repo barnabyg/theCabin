@@ -14,6 +14,9 @@ test("finish a well after reopening with two of its four stone delivered", async
     await expect(page.getByRole("button", { name: "Well", exact: true })).toBeVisible();
     await action(page, /^Well$/);
     await selectTile(page, "H6");
+    await expect(page.locator("#plan-menu")).toContainText(
+      "Delivered · 0 stone · Outstanding · 4 stone",
+    );
     await action(page, /^Reserve well/);
     await walkTo(page, "F3");
     await action(page, /^Pick up stone/);

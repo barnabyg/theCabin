@@ -18,6 +18,10 @@ export function springBuildMenu(menu: HTMLElement, game: Homestead, render: () =
     const plan = plans[kind];
     paragraph(menu, `${kind} · ${coordinate(p)} · 1 tile · ${plan.purpose}`);
     paragraph(menu, `Recipe · ${plan.amount} ${plan.material} · Held · ${stockLabel(game.load)}`);
+    paragraph(
+      menu,
+      `Delivered · 0 ${plan.material} · Outstanding · ${plan.amount} ${plan.material}`,
+    );
     paragraph(menu, blocked.join(" / ") || "Footprint clear");
     button(
       menu,
