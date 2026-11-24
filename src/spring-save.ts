@@ -1,7 +1,7 @@
 import { Cabin } from "./cabin";
 import { Haul } from "./haul";
 import { Spring } from "./spring";
-import { Homestead } from "./world";
+import { freshStock, Homestead } from "./world";
 
 export const saveKey = "the-cabin.first-harvest";
 
@@ -45,8 +45,8 @@ export function resumeSpring(encoded: string) {
   game.position = data.position;
   game.selected = data.selected;
   game.daylight = data.daylight;
-  game.plots = data.plots;
-  game.load = data.load;
+  game.plots = data.plots.map((plot) => ({ ...plot, stock: { ...freshStock(), ...plot.stock } }));
+  game.load = { ...freshStock(), ...data.load };
   game.cabins = data.cabins.map((record) => {
     const cabin = new Cabin(record.origin);
     cabin.delivered = record.delivered;

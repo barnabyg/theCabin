@@ -172,18 +172,24 @@ export class Landscape extends Phaser.Scene {
     }
     if (this.homestead.planning) {
       const p = this.homestead.preview;
-      g.fillStyle(0xfbe6a9, 0.3).fillRect(p.x * TILE, p.y * TILE, cabinWidth, cabinHeight);
-      g.lineStyle(3, 0xffeba9).strokeRect(
-        p.x * TILE + 2,
-        p.y * TILE + 2,
-        cabinWidth - 4,
-        cabinHeight - 4,
-      );
+      const w = this.homestead.planKind === "Cabin" ? cabinWidth : TILE;
+      const h = this.homestead.planKind === "Cabin" ? cabinHeight : TILE;
+      g.fillStyle(0xfbe6a9, 0.3).fillRect(p.x * TILE, p.y * TILE, w, h);
+      g.lineStyle(3, 0xffeba9).strokeRect(p.x * TILE + 2, p.y * TILE + 2, w - 4, h - 4);
     }
     for (const [i, plot] of this.homestead.plots.entries()) {
       const x = ((i % COLS) + 0.5) * TILE,
         y = (Math.floor(i / COLS) + 0.5) * TILE;
       if (plot.timber === "Tree") pine(g, x, y, i % 2 ? 0x597649 : 0x4d7052);
+      if (plot.site?.kind === "Garden") {
+        g.fillStyle(0x755638).fillRoundedRect(x - 22, y - 19, 44, 38, 4);
+        for (const row of [-10, 0, 10]) {
+          g.lineStyle(2, 0xb78b5d).lineBetween(x - 18, y + row, x + 18, y + row);
+          if (plot.site.crop)
+            for (const col of [-12, 0, 12])
+              g.fillStyle(0x85a950).fillCircle(x + col, y + row, 2 + plot.site.crop.days);
+        }
+      }
       if (plot.timber === "Stump") {
         g.fillStyle(0x6f573a).fillRect(x - 8, y - 4, 16, 12);
         g.fillStyle(0xc79b61).fillEllipse(x, y - 4, 18, 8);

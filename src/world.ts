@@ -1,4 +1,5 @@
 import { Night } from "./night";
+import type { Garden } from "./garden";
 import { Cabin, obstructions } from "./cabin";
 
 import { splitJobs } from "./firewood";
@@ -8,7 +9,7 @@ export const COLS = 16,
   TILE = 56,
   CAPACITY = 2;
 export const minutes = { emptyStep: 1, loadedStep: 2, transfer: 1 };
-const materials = ["logs", "stone", "firewood"] as const;
+const materials = ["logs", "stone", "firewood", "water", "food"] as const;
 export type Material = (typeof materials)[number];
 export type Stock = Record<Material, number>;
 export interface Point {
@@ -16,13 +17,14 @@ export interface Point {
   y: number;
 }
 export interface Plot {
+  site?: Garden;
   timber: "Tree" | "Stump" | null;
   stock: Stock;
 }
 export const wooded = { x: 3, y: 3 },
   openSite = { x: 10, y: 3 };
-export const freshStock = (): Stock => ({ logs: 0, stone: 0, firewood: 0 });
-export const quantity = (s: Stock) => s.logs + s.stone + s.firewood;
+export const freshStock = (): Stock => ({ logs: 0, stone: 0, firewood: 0, water: 0, food: 0 });
+export const quantity = (s: Stock) => materials.reduce((total, material) => total + s[material], 0);
 export const stockLabel = (s: Stock) =>
   Object.entries(s)
     .filter(([, n]) => n > 0)
@@ -47,6 +49,7 @@ export class Homestead {
   cabins: Cabin[] = [];
   preview: Point = { ...openSite };
   planning = false;
+  planKind: "Cabin" | "Garden" = "Cabin";
   night: Night | undefined;
   get shelter() {
     return this.cabins.find((cabin) => cabin.complete && cabin.contains(this.position));

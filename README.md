@@ -34,6 +34,8 @@ From the repository root run `npm.cmd run play` with Node.js 24.13 or later, the
 
 Reserve the open cabin site at K4, deliver two logs, and choose **Rest until tomorrow**. Pick up the stone at E5 and choose **Save spring day**. Close the browser, reopen the same address in the same browser profile, and choose **Resume First harvest**. You should be at E5 on day two with two stone, and K4 should still show two delivered logs. Finish the cabin or rest through day six to see the frost ending. **Start a fresh spring** discards the saved run.
 
+For a first harvest of turnips, open **Build menu**, select **Garden**, then **Prepare garden** at G6. Sow turnip seed, draw water on the stream bank at G7, walk back to G6, water the crop and rest. Repeat the watering and rest on the second day. Harvest on day three to leave two edible portions on the garden tile.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

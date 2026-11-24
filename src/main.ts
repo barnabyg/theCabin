@@ -1,4 +1,6 @@
 import { button, element, paragraph } from "./ui";
+import { gardenNotes, springJobs } from "./garden";
+import { springBuildMenu } from "./spring-build";
 import { openScenario, renderSpring, nextSpringDay } from "./spring-panel";
 import { renderNight } from "./night-panel";
 import { Haul } from "./haul";
@@ -99,6 +101,7 @@ function renderMenu() {
   menu.hidden = !game.planning;
   menu.replaceChildren();
   if (!game.planning) return;
+  if (spring && springBuildMenu(menu, game, render)) return;
   const h = document.createElement("h2");
   h.textContent = "Cabin & stone hearth";
   menu.append(h);
@@ -157,6 +160,11 @@ function render() {
   element("tile-title").textContent = `${siteName(p)} · ${coordinate(p)}`;
   const info = element("inspect");
   info.replaceChildren();
+  if (spring && p.y === 6) paragraph(info, "Stream bank · Draw water here.");
+  if (spring && plot.site?.kind === "Garden") {
+    paragraph(info, "Garden");
+    for (const note of gardenNotes(plot.site, spring)) paragraph(info, note);
+  }
   const plan = game.cabins.find((c) => c.contains(p));
   if (plan) {
     paragraph(info, `${plan.progress} · ${coordinate(plan.origin)}`);
@@ -183,7 +191,9 @@ function render() {
   );
   const actions = element("actions");
   actions.replaceChildren();
-  for (const job of game.planning || (haul && !haul.paused && !haul.finished) ? [] : game.jobs())
+  const jobs = game.jobs();
+  if (!steps && spring) jobs.push(...springJobs(game, spring));
+  for (const job of game.planning || (haul && !haul.paused && !haul.finished) ? [] : jobs)
     button(
       actions,
       `${job.label} · ${job.minutes} min`,

@@ -1,4 +1,5 @@
 import { dailyMinutes, Spring, springDays } from "./spring";
+import { growGardens } from "./garden";
 import { saveKey, resumeSpring, saveSpring } from "./spring-save";
 import { button, element, heading, paragraph } from "./ui";
 import type { Homestead } from "./world";
@@ -86,6 +87,7 @@ export function renderSpring(
 }
 
 export function nextSpringDay(game: Homestead, spring: Spring) {
+  growGardens(game.plots);
   spring.rest();
   game.daylight = spring.ended ? 0 : dailyMinutes;
   game.planning = false;
