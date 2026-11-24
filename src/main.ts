@@ -13,6 +13,7 @@ import {
   COLS,
   coordinate,
   stockLabel,
+  streamBank,
   distance,
   Homestead,
   land,
@@ -173,7 +174,7 @@ function render() {
   element("tile-title").textContent = `${siteName(p)} · ${coordinate(p)}`;
   const info = element("inspect");
   info.replaceChildren();
-  if (spring && p.y === 6) paragraph(info, "Stream bank · Draw water here.");
+  if (spring && streamBank(p)) paragraph(info, "Stream bank · Draw water here.");
   if (spring && plot.site?.kind === "Garden") {
     paragraph(info, "Garden");
     for (const note of gardenNotes(plot.site, spring)) paragraph(info, note);

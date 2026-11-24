@@ -34,6 +34,7 @@ export const stockLabel = (s: Stock) =>
 export const coordinate = (p: Point) => String.fromCharCode(65 + p.x) + (p.y + 1);
 export const distance = (a: Point, b: Point) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 export const land = (p: Point) => p.x >= 0 && p.x < COLS && p.y >= 0 && p.y < 7;
+export const streamBank = (p: Point) => land(p) && !land({ x: p.x, y: p.y + 1 });
 export interface Job {
   label: string;
   minutes: number;

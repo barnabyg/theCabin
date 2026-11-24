@@ -1,4 +1,12 @@
-import { CAPACITY, quantity, type Homestead, type Job, type Plot, type Stock } from "./world";
+import {
+  CAPACITY,
+  quantity,
+  streamBank,
+  type Homestead,
+  type Job,
+  type Plot,
+  type Stock,
+} from "./world";
 import type { Spring } from "./spring";
 
 export const crops = {
@@ -49,7 +57,7 @@ export function drawWater(load: Stock, label: string): Job {
 export function springJobs(game: Homestead, spring: Spring): Job[] {
   const plot = game.plot(game.position);
   const jobs: Job[] = [];
-  if (game.position.y === 6) jobs.push(drawWater(game.load, "Draw stream water"));
+  if (streamBank(game.position)) jobs.push(drawWater(game.load, "Draw stream water"));
   const site = plot.site;
   if (site?.kind !== "Garden") return jobs;
   const crop = site.crop;
