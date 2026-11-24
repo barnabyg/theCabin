@@ -4,10 +4,14 @@ import { restoreSpring, snapshot } from "./spring-save";
 import { CAPACITY, Homestead, distance, openSite, quantity, type Job } from "./world";
 
 export const marketKey = "the-cabin.market-day";
+export const saleOffers = [
+  { material: "food", price: 2 },
+  { material: "fur", price: 3 },
+] as const;
+type SaleOffer = (typeof saleOffers)[number];
 export const marketRules = {
   daylight: 240,
   reserve: 3,
-  salePrices: { food: 2, fur: 3 },
   seedPrice: 3,
   roadMinutes: 30,
   order: { firewood: 2, payment: 3 },
@@ -83,11 +87,11 @@ export class Market {
     ];
   }
 
-  sell(material: keyof typeof marketRules.salePrices) {
+  sell({ material, price }: SaleOffer) {
     if (this.game.load[material] < 1) return;
     this.game.load[material]--;
     this.purchased[material]++;
-    this.coins += marketRules.salePrices[material];
+    this.coins += price;
   }
 
   get outcome() {
@@ -153,7 +157,7 @@ export class Market {
     const market = new Market(game, spring);
     market.coins = data.coins;
     market.seedStock = data.seedStock;
-    for (const material of ["food", "fur"] as const) {
+    for (const { material } of saleOffers) {
       const bought = data.purchased?.[material] ?? (material === "food" ? data.foodBought : 0) ?? 0;
       if (!Number.isSafeInteger(bought) || bought < 0) throw Error("Invalid merchant stock");
       market.purchased[material] = bought;

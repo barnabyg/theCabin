@@ -1,4 +1,4 @@
-import { Market, marketKey, marketRules, road, trapline } from "./market";
+import { Market, marketKey, marketRules, road, saleOffers, trapline } from "./market";
 import { button, element, heading, paragraph } from "./ui";
 import { coordinate, distance } from "./world";
 
@@ -115,16 +115,16 @@ export function renderMarket(market: Market, render: () => void) {
       town,
       `Food portions purchased · ${market.purchased.food} · Furs purchased · ${market.purchased.fur}`,
     );
-    for (const material of ["food", "fur"] as const)
+    for (const offer of saleOffers)
       button(
         town,
-        `Sell 1 ${material} · ${marketRules.salePrices[material]} coins`,
+        `Sell 1 ${offer.material} · ${offer.price} coins`,
         () => {
-          market.sell(material);
-          game.message = `Sold 1 ${material}.`;
+          market.sell(offer);
+          game.message = `Sold 1 ${offer.material}.`;
           render();
         },
-        !game.load[material],
+        !game.load[offer.material],
       );
     showOrder(town, market, render);
     walk(town, "Walk home");
