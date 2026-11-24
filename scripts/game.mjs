@@ -17,5 +17,6 @@ if (process.argv.includes("--serve")) {
   await bundler.serve({ host: "127.0.0.1", port, servedir: "dist" });
   console.log(`The Cabin is ready at http://127.0.0.1:${port}`);
 } else {
-  await build(options);
+  const result = await build(options);
+  if (result.warnings.length) process.exitCode = 1;
 }
