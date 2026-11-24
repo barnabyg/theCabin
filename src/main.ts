@@ -1,5 +1,6 @@
 import { button, element, paragraph } from "./ui";
 import { gardenNotes, springJobs } from "./garden";
+import { buildingNotes, buildingJobs } from "./outbuilding";
 import { springBuildMenu } from "./spring-build";
 import { openScenario, renderSpring, nextSpringDay } from "./spring-panel";
 import { renderNight } from "./night-panel";
@@ -166,6 +167,8 @@ function render() {
     for (const note of gardenNotes(plot.site, spring)) paragraph(info, note);
   }
   const plan = game.cabins.find((c) => c.contains(p));
+  if (plot.site && plot.site.kind !== "Garden")
+    for (const note of buildingNotes(plot.site, game.load)) paragraph(info, note);
   if (plan) {
     paragraph(info, `${plan.progress} · ${coordinate(plan.origin)}`);
     if (plan.complete)
@@ -193,6 +196,8 @@ function render() {
   actions.replaceChildren();
   const jobs = game.jobs();
   if (!steps && spring) jobs.push(...springJobs(game, spring));
+  if (!steps && plot.site && plot.site.kind !== "Garden")
+    jobs.push(...buildingJobs(plot.site, game.load));
   for (const job of game.planning || (haul && !haul.paused && !haul.finished) ? [] : jobs)
     button(
       actions,

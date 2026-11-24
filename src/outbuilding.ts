@@ -1,0 +1,48 @@
+import { drawWater } from "./garden";
+import { stockLabel, type Job, type Stock } from "./world";
+
+export const plans = {
+  Well: { material: "stone", amount: 4, minutes: 12, purpose: "Draw water near your crops." },
+} as const;
+export type OutbuildingKind = keyof typeof plans;
+export interface Outbuilding {
+  kind: OutbuildingKind;
+  delivered: number;
+  complete: boolean;
+}
+
+export function buildingNotes(site: Outbuilding, load: Stock) {
+  const { material, amount } = plans[site.kind];
+  return [
+    `${site.kind} · ${site.complete ? "Complete" : "Blueprint"}`,
+    `Held · ${stockLabel(load)}`,
+    `Delivered · ${site.delivered} ${material}`,
+    `Outstanding · ${amount - site.delivered} ${material}`,
+  ];
+}
+
+export function buildingJobs(site: Outbuilding, load: Stock): Job[] {
+  if (site.complete) return [drawWater(load, "Draw well water")];
+  const plan = plans[site.kind];
+  const transfer = Math.min(load[plan.material], plan.amount - site.delivered);
+  const name = site.kind.toLowerCase();
+  return [
+    {
+      label: `Deliver to ${name}`,
+      minutes: 1,
+      enabled: transfer > 0,
+      run: () => {
+        load[plan.material] -= transfer;
+        site.delivered += transfer;
+      },
+    },
+    {
+      label: `Finish ${name}`,
+      minutes: plan.minutes,
+      enabled: site.delivered === plan.amount,
+      run: () => {
+        site.complete = true;
+      },
+    },
+  ];
+}

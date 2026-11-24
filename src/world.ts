@@ -1,5 +1,6 @@
 import { Night } from "./night";
 import type { Garden } from "./garden";
+import type { Outbuilding, OutbuildingKind } from "./outbuilding";
 import { Cabin, obstructions } from "./cabin";
 
 import { splitJobs } from "./firewood";
@@ -17,7 +18,7 @@ export interface Point {
   y: number;
 }
 export interface Plot {
-  site?: Garden;
+  site?: Garden | Outbuilding;
   timber: "Tree" | "Stump" | null;
   stock: Stock;
 }
@@ -49,7 +50,7 @@ export class Homestead {
   cabins: Cabin[] = [];
   preview: Point = { ...openSite };
   planning = false;
-  planKind: "Cabin" | "Garden" = "Cabin";
+  planKind: "Cabin" | "Garden" | OutbuildingKind = "Cabin";
   night: Night | undefined;
   get shelter() {
     return this.cabins.find((cabin) => cabin.complete && cabin.contains(this.position));

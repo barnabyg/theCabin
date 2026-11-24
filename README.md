@@ -36,6 +36,8 @@ Reserve the open cabin site at K4, deliver two logs, and choose **Rest until tom
 
 For a first harvest of turnips, open **Build menu**, select **Garden**, then **Prepare garden** at G6. Sow turnip seed, draw water on the stream bank at G7, walk back to G6, water the crop and rest. Repeat the watering and rest on the second day. Harvest on day three to leave two edible portions on the garden tile.
 
+To replace the stream trip, reserve a **Well** on H6. The stone pile at F3 holds four stone. Deliver two, save, and close and reopen the browser. The blueprint should show two delivered and two outstanding. Fetch the remaining pair, deliver them, finish the well, then draw water and carry it one tile to the garden.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

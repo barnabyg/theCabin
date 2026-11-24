@@ -181,6 +181,17 @@ export class Landscape extends Phaser.Scene {
       const x = ((i % COLS) + 0.5) * TILE,
         y = (Math.floor(i / COLS) + 0.5) * TILE;
       if (plot.timber === "Tree") pine(g, x, y, i % 2 ? 0x597649 : 0x4d7052);
+      if (plot.site?.kind === "Well") {
+        g.lineStyle(3, 0xeee5c6).strokeEllipse(x, y + 2, 35, 24);
+        if (plot.site.complete) {
+          g.fillStyle(0x7a7d70).fillEllipse(x, y, 34, 23);
+          g.fillStyle(0x394f50).fillEllipse(x, y - 2, 22, 12);
+          g.lineStyle(3, 0x66492e)
+            .lineBetween(x - 14, y - 1, x - 14, y - 16)
+            .lineBetween(x + 14, y - 1, x + 14, y - 16)
+            .lineBetween(x - 16, y - 16, x + 16, y - 16);
+        }
+      }
       if (plot.site?.kind === "Garden") {
         g.fillStyle(0x755638).fillRoundedRect(x - 22, y - 19, 44, 38, 4);
         for (const row of [-10, 0, 10]) {
