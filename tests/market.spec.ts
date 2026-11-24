@@ -1,6 +1,15 @@
 import { chromium, expect, test } from "@playwright/test";
 import { action, walkTo } from "./controls";
 
+test("discard an unreadable market save into the regular starting purse", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => localStorage.setItem("the-cabin.market-day", "{"));
+  await page.getByRole("link", { name: "Market day" }).click();
+  await action(page, /^Discard save and start a fresh market day/);
+  await expect(page.locator("#purse")).toHaveText("1 coin");
+  await expect(page.locator("#clock")).toHaveText("4h 00m");
+});
+
 test("price seed, resume at the merchant and walk home", async ({ baseURL }, testInfo) => {
   const profile = testInfo.outputPath("market-player");
   const launch = () => chromium.launchPersistentContext(profile, { baseURL });

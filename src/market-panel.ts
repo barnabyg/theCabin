@@ -42,7 +42,7 @@ export function openMarket() {
   } catch {
     const box = element("night");
     paragraph(box, "This market save could not be opened.");
-    button(box, "Discard save and start a fresh market day", restart);
+    button(box, "Discard save and start a fresh market day", () => restart());
     throw Error("Unreadable Market day save");
   }
 }
