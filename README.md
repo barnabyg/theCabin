@@ -38,6 +38,8 @@ For a first harvest of turnips, open **Build menu**, select **Garden**, then **P
 
 To replace the stream trip, reserve a **Well** on H6. The stone pile at F3 holds four stone. Deliver two, save, and close and reopen the browser. The blueprint should show two delivered and two outstanding. Fetch the remaining pair, deliver them, finish the well, then draw water and carry it one tile to the garden.
 
+Squash gives six portions after four watered days. For a late-sowing comparison, rest until day four, prepare two beds, and sow turnip in one and squash in the other. Water each bed daily. Turnips can be gathered on day six. The squash still needs two growing days when only one remains.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

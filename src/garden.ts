@@ -3,6 +3,7 @@ import type { Spring } from "./spring";
 
 export const crops = {
   turnip: { name: "Turnip", days: 2, yield: 2 },
+  squash: { name: "Squash", days: 4, yield: 6 },
 };
 export type Variety = keyof typeof crops;
 export interface Garden {
