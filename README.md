@@ -30,4 +30,12 @@ Reserve a cabin and fell the tree at D4. Choose **Repeat haul** to ferry logs to
 
 ## Verify
 
-After `npm ci` and `npx playwright install chromium`, run `npm run verify`. Biome checks formatting, lint and static diagnostics, TypeScript checks types, and Playwright drives the same controls available to the player. Verification also audits the locked dependencies, scans the project for secrets, checks package contents, and builds the static game in `dist/`. CI installs the Chromium system dependencies on Linux.
+From the repository root, run these commands in PowerShell:
+
+```powershell
+npm.cmd ci
+npx.cmd playwright install chromium
+npm.cmd run verify
+```
+
+Biome checks formatting, lint and static diagnostics, TypeScript checks types, and Playwright drives the same controls available to the player. Verification also audits the locked dependencies, scans the project for secrets, checks package contents, and builds the static game in `dist/`. CI installs the Chromium system dependencies on Linux.
