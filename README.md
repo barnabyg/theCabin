@@ -4,7 +4,9 @@ A single-player, top-down homesteading game set near a fictional river town in t
 
 ## Play
 
-Install Node.js 24.13 or later with npm. From the repository root (for example `C:/docs/git/theCabin`), run this in PowerShell:
+Install Node.js 24.13 or later with npm. On Windows, double-click `run.bat` to start the game in your default browser. Keep the launcher window open while playing. Close it to stop the game.
+
+You can also start the game from the repository root in PowerShell:
 
 ```powershell
 npm.cmd run play
