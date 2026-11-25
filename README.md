@@ -24,7 +24,9 @@ To automate the wooded site from daybreak, select G6 and choose **Mark storage a
 
 To prepare firewood, stand on gathered logs or carry them. Choose **Split 1 log** to spend four minutes making two pieces of firewood. A double batch takes eight minutes. The settler uses carried logs first and stacks the firewood on the ground. Select **Pick up firewood** to carry up to two pieces.
 
-Reserve a cabin and fell the tree at D4. Choose **Repeat haul** to ferry logs to the blueprint. **Pause haul** holds the settler and load in place, and **Resume haul** continues the route. Deliver four logs and two stone in all. At the footprint, lay the floor, raise the walls and fit the roof and hearth. Each stage remains visible while you fetch the next load.
+After you choose **Reserve footprint**, follow the cabin card above Field Notes. Its button takes you to a source, lets you gather materials, and leads you back to deliver them. Once a stage has its supplies, the same button lets you **Lay floor**, **Raise walls**, or **Fit roof and hearth**. The floor takes two logs, the walls two more, and the roof and hearth two stone. You can inspect other tiles or work by hand and the card will update with your progress.
+
+To ferry several loads at once, fell the tree at D4 and choose **Repeat haul**. **Pause haul** holds the settler and load in place, and **Resume haul** continues the route. When the haul finishes, the cabin card shows the next step.
 
 ## Survive the first night
 
