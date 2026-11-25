@@ -64,6 +64,8 @@ From the repository root, run `npm.cmd run play` with Node.js 24.13 or later, op
 
 **Buy food with a fur.** In First winter, build a pantry at F6 with two logs from C4. Collect a fur at I7 and take the road at P6. Buy one turnip seed, then try buying food with the remaining coin. The offer should still show eight portions and your pack should still hold the fur. Sell the fur, buy two portions at two coins each and take the 60-minute walk home. Store the food at F6. The pantry should hold two portions and your purse should be empty.
 
+For a winter water shortage, build a pantry at F6 with two logs. Store a turnip harvest there and rest through day seven. After the thirst warning, draw water twice at G7 and choose **Store drinking water** at the pantry. Spend the next night in your heated cabin. The pantry should show one fewer meal and one fewer drink. In a separate run leave the water supply empty for two winter nights to see the retreat from thirst.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

@@ -1,6 +1,7 @@
 import { growGardens } from "./garden";
 import type { Haul } from "./haul";
 import { Market, marketRules } from "./market";
+import { takeNightlyRations } from "./rations";
 import { dailyMinutes, Spring } from "./spring";
 import { Homestead } from "./world";
 
@@ -11,6 +12,12 @@ export const finalDay = 10;
 export class Campaign {
   constructor(readonly market: Market) {
     market.foodStock ??= marketRules.foodStock;
+  }
+  readonly rations = { hungry: false, thirsty: false };
+  retreat: "hunger" | "thirst" | undefined;
+
+  get ended() {
+    return !!this.retreat || this.market.spring.ended;
   }
 
   static start() {
@@ -30,7 +37,13 @@ export class Campaign {
 
   rest() {
     const { game, spring } = this.market;
-    if (spring.ended) return;
+    if (this.ended) return;
+    if (spring.day >= winterDay) this.retreat = takeNightlyRations(game, this.rations);
+    if (this.retreat) {
+      game.daylight = 0;
+      game.planning = false;
+      return;
+    }
     growGardens(game.plots);
     spring.rest();
     game.planning = false;
@@ -40,7 +53,12 @@ export class Campaign {
   save(haul?: Haul) {
     localStorage.setItem(
       campaignKey,
-      JSON.stringify({ version: 1, market: this.market.record(haul) }),
+      JSON.stringify({
+        version: 1,
+        market: this.market.record(haul),
+        rations: this.rations,
+        retreat: this.retreat,
+      }),
     );
   }
 
@@ -48,6 +66,16 @@ export class Campaign {
     const data = JSON.parse(encoded);
     if (data.version !== 1) throw Error("Unknown campaign save");
     const { market, haul } = Market.restore(data.market, finalDay);
-    return { campaign: new Campaign(market), haul };
+    const campaign = new Campaign(market);
+    if (data.rations !== undefined) {
+      if (typeof data.rations?.hungry !== "boolean" || typeof data.rations?.thirsty !== "boolean")
+        throw Error("Invalid ration history");
+      campaign.rations.hungry = data.rations.hungry;
+      campaign.rations.thirsty = data.rations.thirsty;
+    }
+    if (data.retreat !== undefined && data.retreat !== "hunger" && data.retreat !== "thirst")
+      throw Error("Invalid retreat");
+    campaign.retreat = data.retreat;
+    return { campaign, haul };
   }
 }

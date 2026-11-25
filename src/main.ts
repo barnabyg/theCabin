@@ -1,3 +1,4 @@
+import { storeDrinkingWater } from "./rations";
 import { openCampaign, renderCampaign } from "./campaign-panel";
 import { button, element, paragraph } from "./ui";
 import { gardenNotes, springJobs } from "./garden";
@@ -36,6 +37,9 @@ const game = trader?.game ?? session?.game ?? new Homestead();
 const landscape = startLandscape(game);
 let haul: Haul | undefined = winter?.haul ?? session?.haul;
 let ticker: number | undefined;
+function scenarioEnded() {
+  return campaign?.ended ?? spring?.ended ?? false;
+}
 function stopTimer() {
   window.clearInterval(ticker);
   ticker = undefined;
@@ -96,7 +100,7 @@ function pointerTile(event: MouseEvent) {
   return event.target instanceof HTMLButtonElement ? event.target : undefined;
 }
 tiles.addEventListener("click", (event) => {
-  if (game.night || spring?.ended || trader?.inTown || (market && !game.daylight)) return;
+  if (game.night || scenarioEnded() || trader?.inTown || (market && !game.daylight)) return;
   const tile = event.detail ? pointerTile(event) : event.target;
   if (!(tile instanceof HTMLButtonElement)) return;
   const index = cells.indexOf(tile);
@@ -187,14 +191,14 @@ function render() {
     spring.won = cabin && well && stored > 0;
     if (spring.won) haltHaul();
   }
-  if (!game.daylight && !market && !game.night && !spring?.ended) {
+  if (!game.daylight && !market && !game.night && !scenarioEnded()) {
     haltHaul();
     if (campaign) campaign.rest();
     else if (spring) nextSpringDay(game, spring);
     else game.beginNight();
   }
-  element("build").hidden = !!market || !!game.night || !!spring?.ended;
-  element("field-notes").hidden = !!game.night || !!spring?.ended;
+  element("build").hidden = !!market || !!game.night || scenarioEnded();
+  element("field-notes").hidden = !!game.night || scenarioEnded();
   renderMenu();
   renderHaul();
   const p = game.selected,
@@ -239,6 +243,7 @@ function render() {
   actions.replaceChildren();
   const jobs = game.jobs();
   if (!steps && growingSeason) jobs.push(...springJobs(game, growingSeason, market?.sowingOpen));
+  if (!steps && campaign) jobs.push(...storeDrinkingWater(game));
   if (!steps && trader) jobs.push(...trader.jobs());
   if (!steps && plot.site && plot.site.kind !== "Garden")
     jobs.push(...buildingJobs(plot.site, game.load));
@@ -302,7 +307,7 @@ const directions: Record<string, Point> = {
 };
 window.addEventListener("keydown", (event) => {
   if (trader?.inTown || (market && !game.daylight)) return;
-  if (game.night || spring?.ended || game.planning || (haul && !haul.paused && !haul.finished))
+  if (game.night || scenarioEnded() || game.planning || (haul && !haul.paused && !haul.finished))
     return;
   if (event.ctrlKey || event.altKey || event.metaKey) return;
   const delta = directions[event.key.toLowerCase()];
