@@ -1,9 +1,30 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { project, view } from "../src/map-camera";
 import { walkTo } from "./controls";
 
+async function openPaintedMap(page: Page, url: string) {
+  await page.goto(url);
+  // The river is flat-coloured until the bundled artwork has decoded and painted.
+  await expect
+    .poll(() =>
+      page.locator("canvas").evaluate((canvas) => {
+        if (!(canvas instanceof HTMLCanvasElement)) return 0;
+        const context = canvas.getContext("2d");
+        if (!context) return 0;
+        const sample = context.getImageData(
+          Math.floor(canvas.width / 2),
+          Math.floor(canvas.height * 0.91),
+          16,
+          16,
+        );
+        return new Set(new Uint32Array(sample.data.buffer)).size;
+      }),
+    )
+    .toBeGreaterThan(32);
+}
+
 test("the cabin opens on entry and restores its roof on exit", async ({ page }) => {
-  await page.goto("/?scenario=market");
+  await openPaintedMap(page, "/?scenario=market");
   const bounds = await page.locator("canvas").boundingBox();
   if (!bounds) throw new Error("Map is hidden");
   // Sample the centre of L4, away from the settler and the selected tile.
@@ -25,7 +46,7 @@ test("the cabin opens on entry and restores its roof on exit", async ({ page }) 
 test("the projected clearing keeps edge tiles, planning and the river aligned after resize", async ({
   page,
 }) => {
-  await page.goto("/");
+  await openPaintedMap(page, "/");
   const board = page.locator(".board");
   async function clickGround(x: number, z: number) {
     const p = project([x, 0, z]);
@@ -65,7 +86,7 @@ test("the projected clearing keeps edge tiles, planning and the river aligned af
 });
 
 test("a click on an overhanging pine selects its tree until it is felled", async ({ page }) => {
-  await page.goto("/");
+  await openPaintedMap(page, "/");
   const board = page.locator(".board");
   const bounds = await board.boundingBox();
   if (!bounds) throw new Error("Map is hidden");
