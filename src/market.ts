@@ -15,6 +15,8 @@ export const marketRules = {
   daylight: 240,
   reserve: 3,
   seedPrice: 3,
+  foodPrice: 2,
+  foodStock: 8,
   roadMinutes: 30,
   order: { firewood: 2, payment: 3 },
 };
@@ -25,6 +27,7 @@ export const pantry = { x: 5, y: 5 };
 export class Market {
   coins = 1;
   seedStock = 2;
+  foodStock?: number;
   purchased = { food: 0, fur: 0 };
   inTown = false;
   order: "offered" | "accepted" | "paid" = "offered";
@@ -121,6 +124,17 @@ export class Market {
     this.order = "paid";
   }
 
+  buyFood() {
+    if (!this.foodStock) return "The merchant has sold the last food portion.";
+    if (quantity(this.game.load) >= CAPACITY) return "Your pack is full.";
+    if (this.coins < marketRules.foodPrice)
+      return `Need ${marketRules.foodPrice} coins for one food portion.`;
+    this.coins -= marketRules.foodPrice;
+    this.foodStock--;
+    this.game.load.food++;
+    return "Bought one food portion.";
+  }
+
   buySeed() {
     if (!this.seedStock) return "The merchant has sold the last seed.";
     if (this.coins < marketRules.seedPrice)
@@ -139,6 +153,7 @@ export class Market {
       purchased,
       order,
       seedStock,
+      foodStock: this.foodStock,
       inTown,
       homestead: snapshot(this.game, this.spring, haul),
     };
@@ -167,6 +182,15 @@ export class Market {
     const market = new Market(game, spring);
     market.coins = data.coins;
     market.seedStock = data.seedStock;
+    if (data.foodStock !== undefined) {
+      if (
+        !Number.isSafeInteger(data.foodStock) ||
+        data.foodStock < 0 ||
+        data.foodStock > marketRules.foodStock
+      )
+        throw Error("Invalid merchant food stock");
+      market.foodStock = data.foodStock;
+    }
     for (const { material } of saleOffers) {
       const bought = data.purchased?.[material] ?? (material === "food" ? data.foodBought : 0) ?? 0;
       if (!Number.isSafeInteger(bought) || bought < 0) throw Error("Invalid merchant stock");

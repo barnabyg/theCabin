@@ -1,6 +1,6 @@
 import { Market, marketKey, marketRules, road, saleOffers, trapline } from "./market";
 import { button, element, heading, paragraph } from "./ui";
-import { coordinate, distance } from "./world";
+import { CAPACITY, coordinate, distance, minutes, quantity } from "./world";
 
 function restart(penniless = false) {
   try {
@@ -83,6 +83,21 @@ export function renderMerchant(town: HTMLElement, market: Market, render: () => 
     game.message = market.buySeed();
     render();
   });
+  if (market.foodStock !== undefined) {
+    paragraph(
+      town,
+      `${market.foodStock} food portion${market.foodStock === 1 ? "" : "s"} in stock · ${marketRules.foodPrice} coins each. Walk home with food · ${marketRules.roadMinutes * minutes.loadedStep} min.`,
+    );
+    button(
+      town,
+      `Buy 1 food portion · ${marketRules.foodPrice} coins`,
+      () => {
+        game.message = market.buyFood();
+        render();
+      },
+      !market.foodStock || quantity(game.load) >= CAPACITY,
+    );
+  }
   paragraph(
     town,
     `Food portions purchased · ${market.purchased.food} · Furs purchased · ${market.purchased.fur}`,

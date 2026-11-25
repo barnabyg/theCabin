@@ -1,6 +1,6 @@
 import { growGardens } from "./garden";
 import type { Haul } from "./haul";
-import { Market } from "./market";
+import { Market, marketRules } from "./market";
 import { dailyMinutes, Spring } from "./spring";
 import { Homestead } from "./world";
 
@@ -9,7 +9,9 @@ export const winterDay = 7;
 export const finalDay = 10;
 
 export class Campaign {
-  constructor(readonly market: Market) {}
+  constructor(readonly market: Market) {
+    market.foodStock ??= marketRules.foodStock;
+  }
 
   static start() {
     const spring = new Spring(finalDay);
