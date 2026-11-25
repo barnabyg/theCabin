@@ -11,7 +11,12 @@ export const plans = {
   },
 } as const;
 export type OutbuildingKind = keyof typeof plans;
-export type Outbuilding = ({ kind: "Well" } | { kind: "Pantry"; stored: number }) & {
+export interface Pantry {
+  kind: "Pantry";
+  stored: number;
+  water?: number;
+}
+export type Outbuilding = ({ kind: "Well" } | Pantry) & {
   delivered: number;
   complete: boolean;
 };

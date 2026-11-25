@@ -62,6 +62,8 @@ From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Ope
 
 From the repository root, run `npm.cmd run play` with Node.js 24.13 or later, open http://127.0.0.1:5173 and choose **First winter**. Walk to P6, buy a turnip seed in town with the opening four coins and return. Prepare a garden at G6 and sow. Save First winter, close the browser, and reopen in the same profile. **Resume First winter** restores the planted bed, day and one remaining coin.
 
+For a winter water shortage, build a pantry at F6 with two logs. Store a turnip harvest there and rest through day seven. After the thirst warning, draw water twice at G7 and choose **Store drinking water** at the pantry. Spend the next night in your heated cabin. The pantry should show one fewer meal and one fewer drink. In a separate run leave the water supply empty for two winter nights to see the retreat from thirst.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:
