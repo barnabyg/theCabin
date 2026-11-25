@@ -7,6 +7,8 @@ const options = {
   entryPoints: { main: "src/main.ts", styles: "src/style.css" },
   bundle: true,
   outdir: "dist",
+  loader: { ".webp": "file" },
+  assetNames: "art/[name]-[hash]",
   target: "es2022",
   minify: true,
   logLevel: "info",
