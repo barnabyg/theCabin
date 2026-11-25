@@ -3,8 +3,15 @@ import { plans } from "./outbuilding";
 import { button, paragraph } from "./ui";
 import { coordinate, distance, stockLabel, type Homestead } from "./world";
 
-export function springBuildMenu(menu: HTMLElement, game: Homestead, render: () => void) {
-  for (const kind of ["Cabin", "Garden", "Well", "Pantry"] as const)
+export function springBuildMenu(
+  menu: HTMLElement,
+  game: Homestead,
+  render: () => void,
+  campaign: boolean,
+) {
+  const choices: Homestead["planKind"][] = ["Cabin", "Garden", "Well", "Pantry"];
+  if (campaign) choices.push("Covered woodpile");
+  for (const kind of choices)
     button(menu, kind, () => {
       game.planKind = kind;
       game.preview = { ...game.position };
@@ -27,7 +34,7 @@ export function springBuildMenu(menu: HTMLElement, game: Homestead, render: () =
       menu,
       `Reserve ${kind.toLowerCase()}`,
       () => {
-        const building = kind === "Pantry" ? { kind, stored: 0 } : { kind };
+        const building = kind === "Well" ? { kind } : { kind, stored: 0 };
         game.plot(p).site = { ...building, delivered: 0, complete: false };
         game.selected = { ...p };
         game.planning = false;

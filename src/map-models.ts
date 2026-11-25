@@ -195,6 +195,22 @@ export function plotModel(plot: Plot, x: number, z: number, floor: number) {
     mesh.round(0x504a3e, x + 0.03, z + 0.09, 0.365, 0.088, 0.088, 0.02, 10);
     mesh.box(0x6c4e34, x + 0.4, z, 0.49, 0.045, 0.05, 0.14);
   }
+  if (site?.kind === "Covered woodpile" && site.complete) {
+    mesh.box(0x805b40, x - 0.33, z - 0.22, 0, 0.66, 0.45, 0.06, "plank");
+    for (const dx of [-0.32, 0.26])
+      for (const dz of [-0.22, 0.15])
+        mesh.box(0x816347, x + dx, z + dz, 0.06, 0.06, 0.06, 0.43, "log");
+    for (let i = 0; i < Math.min(12, site.stored); i++)
+      mesh.log(
+        x - 0.21 + (i % 4) * 0.135,
+        z - 0.17,
+        0.12 + Math.floor(i / 4) * 0.1,
+        0.41,
+        0.06,
+        false,
+      );
+    mesh.roof(x - 0.4, z - 0.29, 0.8, 0.59, 0.48, 0.13, 0x8a654b);
+  }
   if (site?.kind === "Pantry" && site.complete) {
     mesh.box(0xb08759, x - 0.31, z - 0.29, 0, 0.62, 0.58, 0.43, "plank");
     mesh.box(0x5c4938, x - 0.09, z + 0.29, 0, 0.18, 0.02, 0.34);

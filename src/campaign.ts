@@ -1,3 +1,4 @@
+import { autumnRainDay, soakExposedFirewood } from "./firewood";
 import { growGardens } from "./garden";
 import type { Haul } from "./haul";
 import { Market } from "./market";
@@ -29,6 +30,7 @@ export class Campaign {
   rest() {
     const { game, spring } = this.market;
     if (spring.ended) return;
+    if (spring.day === autumnRainDay) soakExposedFirewood(game);
     growGardens(game.plots);
     spring.rest();
     game.planning = false;

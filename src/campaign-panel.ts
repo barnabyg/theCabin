@@ -1,4 +1,5 @@
 import { Campaign, campaignKey, winterDay } from "./campaign";
+import { autumnRainDay } from "./firewood";
 import type { Haul } from "./haul";
 import { road } from "./market";
 import { renderMerchant } from "./market-panel";
@@ -66,6 +67,14 @@ export function renderCampaign(
   element("seeds").textContent = `${spring.seeds.turnip} turnip · ${spring.seeds.squash} squash`;
   element("purse").textContent = `${market.coins} coin${market.coins === 1 ? "" : "s"}`;
   if (!spring.ended) {
+    if (spring.day <= autumnRainDay) {
+      const forecast =
+        spring.day === autumnRainDay ? "Rain tonight" : `Rain forecast for day ${autumnRainDay}`;
+      paragraph(
+        box,
+        `${forecast} · One piece of firewood in each outdoor ground stack will spoil. Store split wood in a covered woodpile to keep it dry.`,
+      );
+    }
     if (market.inTown) renderMerchant(town, market, render);
     else
       paragraph(

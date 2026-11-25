@@ -79,7 +79,7 @@ function restorePlot(plot: Plot): Plot {
       !Object.hasOwn(plans, site.kind) ||
       !count(site.delivered, plans[site.kind].amount) ||
       typeof site.complete !== "boolean" ||
-      (site.kind === "Pantry" && !count(site.stored))
+      (site.kind !== "Well" && !count(site.stored))
     )
       throw Error("Invalid building");
   }
