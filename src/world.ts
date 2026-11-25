@@ -7,7 +7,6 @@ import { splitJobs } from "./firewood";
 
 export const COLS = 16,
   ROWS = 9,
-  TILE = 56,
   CAPACITY = 2;
 export const minutes = { emptyStep: 1, loadedStep: 2, transfer: 1 };
 const materials = ["logs", "stone", "firewood", "water", "food", "fur"] as const;

@@ -8,6 +8,7 @@ import { renderNight } from "./night-panel";
 import { Haul } from "./haul";
 import { footprint, withinFootprint, buildingMaterials, recipe, obstructions } from "./cabin";
 import { startLandscape } from "./landscape";
+import { positionTile } from "./map-camera";
 import {
   CAPACITY,
   COLS,
@@ -28,7 +29,7 @@ const market = openMarket();
 const spring = session?.spring;
 const growingSeason = market?.spring ?? spring;
 const game = market?.game ?? session?.game ?? new Homestead();
-const paint = startLandscape(game);
+const landscape = startLandscape(game);
 let haul: Haul | undefined = session?.haul;
 let ticker: number | undefined;
 function stopTimer() {
@@ -73,20 +74,44 @@ function renderHaul() {
   haulToggle.disabled = game.planning;
 }
 const cells: HTMLButtonElement[] = [];
+const tiles = element("tiles");
 for (let y = 0; y < 7; y++)
   for (let x = 0; x < COLS; x++) {
     const p = { x, y },
-      cell = button(element("tiles"), "", () => {
-        if (game.night || spring?.ended || market?.inTown || (market && !game.daylight)) return;
-        if (game.planning) game.preview = p;
-        else game.selected = p;
-        render();
-      });
+      cell = document.createElement("button");
+    cell.type = "button";
     cell.className = "cell";
+    positionTile(cell, p);
     cell.setAttribute("aria-label", coordinate(p));
-    cell.title = coordinate(p);
+    tiles.append(cell);
     cells.push(cell);
   }
+function pointerTile(event: MouseEvent) {
+  const object = game.planning ? undefined : landscape.pickObject(event);
+  if (object) return cells[object.y * COLS + object.x];
+  return event.target instanceof HTMLButtonElement ? event.target : undefined;
+}
+tiles.addEventListener("click", (event) => {
+  if (game.night || spring?.ended || market?.inTown || (market && !game.daylight)) return;
+  const tile = event.detail ? pointerTile(event) : event.target;
+  if (!(tile instanceof HTMLButtonElement)) return;
+  const index = cells.indexOf(tile);
+  const point = { x: index % COLS, y: Math.floor(index / COLS) };
+  if (tile !== event.target) tile.focus({ preventScroll: true });
+  if (game.planning) game.preview = point;
+  else game.selected = point;
+  render();
+});
+let hovered: HTMLButtonElement | undefined;
+function highlight(tile?: HTMLButtonElement) {
+  if (hovered === tile) return;
+  hovered?.classList.remove("hovered");
+  hovered = tile;
+  tile?.classList.add("hovered");
+  tiles.title = tile?.getAttribute("aria-label") ?? "";
+}
+tiles.addEventListener("pointermove", (event) => highlight(pointerTile(event)));
+tiles.addEventListener("pointerleave", () => highlight());
 function siteName(p: Point) {
   for (const [site, name] of [
     [wooded, "Wooded site"],
@@ -252,7 +277,7 @@ function render() {
   element("message").textContent = game.message;
   for (const [i, cell] of cells.entries())
     cell.setAttribute("aria-pressed", String(i === p.y * COLS + p.x));
-  paint();
+  landscape.paint();
 }
 const directions: Record<string, Point> = {
   arrowup: { x: 0, y: -1 },

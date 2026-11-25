@@ -1,285 +1,144 @@
 import { footprint } from "./cabin";
-import Phaser from "phaser";
-import { COLS, ROWS, TILE, openSite, wooded, type Homestead } from "./world";
-const W = COLS * TILE,
-  H = ROWS * TILE;
-const cabinWidth = TILE * footprint.width,
-  cabinHeight = TILE * footprint.height;
-type Graphics = Phaser.GameObjects.Graphics;
-function polygon(g: Graphics, color: number, points: number[][]) {
-  g.fillStyle(color).fillPoints(
-    points.map(([x, y]) => ({ x, y })),
-    true,
-  );
-}
-function pine(g: Graphics, x: number, y: number, tint: number) {
-  g.fillStyle(0x455c44, 0.33).fillEllipse(x + 8, y + 14, 43, 13);
-  g.fillStyle(0x68513b).fillRect(x - 3, y - 4, 6, 19);
-  for (const [dy, w] of [
-    [7, 23],
-    [-4, 19],
-    [-14, 13],
-  ]) {
-    polygon(g, 0x344d3d, [
-      [x, y + dy - 22],
-      [x - w, y + dy + 4],
-      [x - 6, y + dy + 2],
-      [x - 1, y + dy + 7],
-      [x + w, y + dy + 3],
-    ]);
-    polygon(g, tint, [
-      [x, y + dy - 22],
-      [x - w, y + dy + 3],
-      [x - 7, y + dy],
-      [x - 2, y + dy + 3],
-      [x + 3, y + dy - 1],
-    ]);
-  }
-}
-function bank(x: number) {
-  return 415 + Math.sin(x / 102) * 12 + Math.cos(x / 48) * 6;
-}
-export class Landscape extends Phaser.Scene {
-  private ground?: Graphics;
-  private objects?: Graphics;
-  constructor(private homestead: Homestead) {
-    super("clearing");
-  }
-  create() {
-    const g = this.add.graphics();
-    this.ground = g;
-    this.objects = this.add.graphics();
-    g.fillStyle(0xa3af80).fillRect(0, 0, W, H);
-    let seed = 1791;
-    const random = () => {
-      seed = (1664525 * seed + 1013904223) >>> 0;
-      return seed / 4294967296;
-    };
-    for (let i = 0; i < 280; i++) {
-      const x = random() * W,
-        y = random() * H;
-      g.fillStyle(i % 2 ? 0x84996d : 0xc7bf8a, 0.22).fillEllipse(
-        x,
-        y,
-        20 + random() * 65,
-        10 + random() * 30,
-      );
-    }
-    // The track crosses the clearing and follows the bank toward town.
-    for (let x = -10; x < W + 10; x += 4) {
-      const y = 306 + Math.sin(x / 138) * 24;
-      g.fillStyle(0xc4b389).fillEllipse(x, y, 22, 19);
-    }
-    for (let i = 0; i < 2100; i++) {
-      const x = random() * W,
-        y = random() * H;
-      g.lineStyle(1, i % 3 ? 0x667f55 : 0xe0d3a2, 0.52).lineBetween(
-        x,
-        y,
-        x + 2,
-        y - 2 - random() * 3,
-      );
-    }
-    for (let x = 0; x < W; x++) {
-      const y = bank(x);
-      g.fillStyle(0xcac198).fillRect(x, y - 4, 1, H - y + 4);
-      g.fillStyle(0x64958a).fillRect(x, y, 1, H - y);
-    }
-    for (let i = 0; i < 300; i++) {
-      const x = random() * W,
-        y = bank(x) + 4 + random() * 85;
-      g.lineStyle(i % 4 ? 1 : 2, i % 2 ? 0xa4c3a7 : 0x477e77, 0.7).lineBetween(
-        x,
-        y,
-        x + 3 + random() * 15,
-        y,
-      );
-    }
-    for (const p of [wooded, openSite]) {
-      const x = p.x * TILE,
-        y = p.y * TILE;
-      g.fillStyle(0xf3e7aa, 0.14).fillRect(x, y, cabinWidth, cabinHeight);
-      g.lineStyle(2, 0x736e4f, 0.8).strokeRect(x + 1, y + 1, cabinWidth - 2, cabinHeight - 2);
-      const label = this.add.text(x + 3, y - 17, p === wooded ? "WOODED SITE" : "OPEN SITE", {
-        fontFamily: "monospace",
-        fontSize: "12px",
-        color: "#faf5d8",
-        backgroundColor: "#485c45",
-        padding: { x: 5, y: 2 },
-      });
-      label.setDepth(2);
-    }
-    for (let x = 0; x <= COLS; x++)
-      g.lineStyle(1, 0x536548, 0.13).lineBetween(x * TILE, 0, x * TILE, 7 * TILE);
-    for (let y = 0; y <= 7; y++)
-      g.lineStyle(1, 0x536548, 0.13).lineBetween(0, y * TILE, W, y * TILE);
-    this.add
-      .text(W - 16, H - 24, "~ RIVER TO TOWN →", {
-        fontFamily: "monospace",
-        fontSize: "13px",
-        color: "#e4ecce",
-      })
-      .setOrigin(1, 0);
-    this.paint();
-  }
-  paint() {
-    if (!this.ground || !this.objects) return;
-    const g = this.objects;
-    g.clear();
-    for (const cabin of this.homestead.cabins) {
-      const x = cabin.origin.x * TILE,
-        y = cabin.origin.y * TILE;
-      g.fillStyle(0x344e53, 0.52).fillRect(x + 3, y + 3, cabinWidth - 6, cabinHeight - 6);
-      g.lineStyle(3, 0xf2e5c0).strokeRect(x + 7, y + 7, cabinWidth - 14, cabinHeight - 14);
-      g.lineBetween(x + 8, y + 8, x + cabinWidth - 8, y + cabinHeight - 8).lineBetween(
-        x + 8,
-        y + cabinHeight - 8,
-        x + cabinWidth - 8,
-        y + 8,
-      );
-    }
-    for (const cabin of this.homestead.cabins) {
-      if (!cabin.stage) continue;
-      const x = cabin.origin.x * TILE + 12,
-        y = cabin.origin.y * TILE + 13,
-        w = cabinWidth - 24,
-        h = cabinHeight - 26;
-      g.fillStyle(0x886d4c).fillRect(x, y, w, h);
-      for (let row = 2; row < h; row += 8)
-        g.lineStyle(2, 0xb7986c).lineBetween(x + 2, y + row, x + w - 2, y + row);
-      if (cabin.stage >= 2) {
-        g.lineStyle(9, 0x654d37).strokeRect(x + 3, y + 3, w - 6, h - 6);
-        g.fillStyle(0x8a7050).fillRect(x + w / 2 - 12, y + h - 10, 24, 12);
-      }
-      if (cabin.complete) {
-        polygon(g, 0x654735, [
-          [x - 6, y - 3],
-          [x + w + 6, y - 3],
-          [x + w - 4, y + h / 2],
-          [x + 4, y + h / 2],
-        ]);
-        polygon(g, 0x9a6949, [
-          [x + 4, y + h / 2],
-          [x + w - 4, y + h / 2],
-          [x + w + 6, y + h + 3],
-          [x - 6, y + h + 3],
-        ]);
-        for (let i = 8; i < w; i += 12)
-          g.lineStyle(2, 0x775540).lineBetween(x + i, y + h / 2 + 2, x + i - 4, y + h + 1);
-        g.fillStyle(0x596258).fillRect(x + w - 29, y + 8, 16, 21);
-        g.fillStyle(0xb4ad98).fillRect(x + w - 31, y + 5, 20, 7);
-      }
-    }
-    if (this.homestead.planning) {
-      const p = this.homestead.preview;
-      const w = this.homestead.planKind === "Cabin" ? cabinWidth : TILE;
-      const h = this.homestead.planKind === "Cabin" ? cabinHeight : TILE;
-      g.fillStyle(0xfbe6a9, 0.3).fillRect(p.x * TILE, p.y * TILE, w, h);
-      g.lineStyle(3, 0xffeba9).strokeRect(p.x * TILE + 2, p.y * TILE + 2, w - 4, h - 4);
-    }
-    for (const [i, plot] of this.homestead.plots.entries()) {
-      const x = ((i % COLS) + 0.5) * TILE,
-        y = (Math.floor(i / COLS) + 0.5) * TILE;
-      if (plot.timber === "Tree") pine(g, x, y, i % 2 ? 0x597649 : 0x4d7052);
-      if (plot.site?.kind === "Pantry") {
-        g.lineStyle(2, 0xe8dfb8).strokeRect(x - 20, y - 18, 40, 36);
-        if (plot.site.complete) {
-          g.fillStyle(0x805c3d).fillRect(x - 17, y - 9, 34, 26);
-          polygon(g, 0x604a3c, [
-            [x - 22, y - 8],
-            [x, y - 24],
-            [x + 22, y - 8],
-          ]);
-          g.fillStyle(0x473b2b).fillRect(x - 6, y - 4, 12, 21);
-          if (plot.site.stored) g.fillStyle(0xc29455).fillEllipse(x - 12, y + 13, 9, 8);
-        }
-      }
-      if (plot.site?.kind === "Well") {
-        g.lineStyle(3, 0xeee5c6).strokeEllipse(x, y + 2, 35, 24);
-        if (plot.site.complete) {
-          g.fillStyle(0x7a7d70).fillEllipse(x, y, 34, 23);
-          g.fillStyle(0x394f50).fillEllipse(x, y - 2, 22, 12);
-          g.lineStyle(3, 0x66492e)
-            .lineBetween(x - 14, y - 1, x - 14, y - 16)
-            .lineBetween(x + 14, y - 1, x + 14, y - 16)
-            .lineBetween(x - 16, y - 16, x + 16, y - 16);
-        }
-      }
-      if (plot.site?.kind === "Garden") {
-        g.fillStyle(0x755638).fillRoundedRect(x - 22, y - 19, 44, 38, 4);
-        for (const row of [-10, 0, 10]) {
-          g.lineStyle(2, 0xb78b5d).lineBetween(x - 18, y + row, x + 18, y + row);
-          if (plot.site.crop)
-            for (const col of [-12, 0, 12])
-              g.fillStyle(0x85a950).fillCircle(x + col, y + row, 2 + plot.site.crop.days);
-        }
-      }
-      if (plot.timber === "Stump") {
-        g.fillStyle(0x6f573a).fillRect(x - 8, y - 4, 16, 12);
-        g.fillStyle(0xc79b61).fillEllipse(x, y - 4, 18, 8);
-        g.lineStyle(1, 0x87663f).strokeEllipse(x, y - 4, 11, 5);
-      }
-      if (plot.stock.logs) {
-        for (let j = 0; j < Math.min(plot.stock.logs, 4); j++) {
-          const dx = x + 8 + (j % 2) * 6,
-            dy = y + 8 + Math.floor(j / 2) * 5;
-          g.lineStyle(6, 0x73583d).lineBetween(dx, dy, dx + 11, dy - 7);
-          g.fillStyle(0xd8ae73).fillCircle(dx, dy, 3);
-        }
-      }
-      for (let piece = 0; piece < Math.min(plot.stock.firewood, 6); piece++) {
-        const dx = x - 20 + (piece % 3) * 4,
-          dy = y + 12 - Math.floor(piece / 3) * 4;
-        g.lineStyle(4, 0x855b36).lineBetween(dx, dy, dx + 9, dy - 7);
-        g.lineStyle(2, 0xe6bd77).lineBetween(dx, dy - 1, dx + 9, dy - 8);
-      }
-      if (plot.stock.stone) {
-        for (const [dx, dy, s] of [
-          [-9, 3, 10],
-          [7, 7, 8],
-          [3, -5, 7],
-        ]) {
-          polygon(g, 0x6c776d, [
-            [x + dx - s, y + dy + 3],
-            [x + dx - 4, y + dy - s],
-            [x + dx + 4, y + dy - s + 1],
-            [x + dx + s, y + dy + 4],
-          ]);
-          g.lineStyle(2, 0xbac0a7).lineBetween(
-            x + dx - s + 2,
-            y + dy + 1,
-            x + dx - 4,
-            y + dy - s + 1,
-          );
-        }
-      }
-    }
-    const x = (this.homestead.position.x + 0.5) * TILE,
-      y = (this.homestead.position.y + 0.5) * TILE;
-    g.fillStyle(0x314737, 0.4).fillEllipse(x + 3, y + 13, 23, 8);
-    g.lineStyle(3, 0xffecb5).strokeEllipse(x, y + 10, 29, 13);
-    g.fillStyle(0x433d32)
-      .fillRect(x - 6, y + 5, 5, 9)
-      .fillRect(x + 2, y + 5, 5, 9);
-    g.fillStyle(0xa24c32).fillRoundedRect(x - 7, y - 6, 14, 15, 3);
-    g.fillStyle(0xe2bc85).fillCircle(x, y - 8, 6);
-    g.fillStyle(0x594936)
-      .fillEllipse(x, y - 12, 19, 5)
-      .fillRoundedRect(x - 5, y - 18, 10, 6, 2);
-  }
-}
-export function startLandscape(homestead: Homestead) {
-  const scene = new Landscape(homestead);
-  new Phaser.Game({
-    type: Phaser.CANVAS,
-    width: W,
-    height: H,
-    parent: "terrain",
-    scene,
-    audio: { noAudio: true },
-    banner: false,
-    render: { antialias: true },
-    fps: { target: 30 },
+import { view, type Vertex } from "./map-camera";
+import { groundPath, markGround, paintTerrain } from "./map-terrain";
+import { cabinModel, pine, plotModel, settler } from "./map-models";
+import type { Mesh } from "./map-mesh";
+import { COLS, type Homestead, type Point } from "./world";
+
+function groundDisc(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  z: number,
+  height: number,
+  radius: number,
+  depth: number,
+  color: string,
+) {
+  const points: Vertex[] = Array.from({ length: 24 }, (_, i) => {
+    const angle = (i * Math.PI) / 12;
+    return [x + radius * Math.cos(angle), height, z + depth * Math.sin(angle)];
   });
-  return () => scene.paint();
+  groundPath(ctx, points);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+export function startLandscape(game: Homestead) {
+  const terrain = document.getElementById("terrain");
+  if (!terrain) throw new Error("Missing terrain container");
+  const canvas = document.createElement("canvas");
+  canvas.setAttribute("aria-hidden", "true");
+  terrain.append(canvas);
+  const ctx = canvas.getContext("2d");
+  const background = document.createElement("canvas");
+  const ground = background.getContext("2d");
+  if (!ctx || !ground) throw new Error("Canvas drawing is unavailable");
+  const hitRegions: { outline: Path2D; tile?: Point }[] = [];
+
+  function paint() {
+    if (!ctx || !ground || !canvas.clientWidth) return;
+    const scale = (canvas.clientWidth * window.devicePixelRatio) / view.width;
+    const width = Math.max(1, Math.round(view.width * scale)),
+      height = Math.max(1, Math.round(view.height * scale));
+    if (background.width !== width || background.height !== height) {
+      background.width = canvas.width = width;
+      background.height = canvas.height = height;
+      ground.setTransform(width / view.width, 0, 0, height / view.height, 0, 0);
+      paintTerrain(ground);
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(background, 0, 0);
+    ctx.setTransform(width / view.width, 0, 0, height / view.height, 0, 0);
+    const objects: { south: number; mesh: Mesh; tile?: Point }[] = [];
+    let floor = 0;
+    for (const cabin of game.cabins) {
+      const { x, y: z } = cabin.origin;
+      markGround(ctx, x, z, footprint.width, footprint.height, "rgba(72,99,96,.38)", "#f5e5b6");
+      if (cabin.stage) {
+        const inside = cabin.contains(game.position);
+        if (inside) floor = 0.13;
+        groundDisc(ctx, x + 1.6, z + 1.14, 0, 1.54, 0.96, "rgba(54,70,50,.23)");
+        objects.push({ south: z + footprint.height - 0.12, mesh: cabinModel(cabin, inside) });
+      } else {
+        for (const [left, right] of [
+          [x, x + footprint.width],
+          [x + footprint.width, x],
+        ]) {
+          groundPath(ctx, [
+            [left, 0, z],
+            [right, 0, z + footprint.height],
+          ]);
+          ctx.stroke();
+        }
+      }
+    }
+    for (const [i, plot] of game.plots.entries()) {
+      const x = (i % COLS) + 0.5,
+        z = Math.floor(i / COLS) + 0.5;
+      if (plot.timber === "Tree") {
+        groundDisc(ctx, x + 0.14, z + 0.25, 0, 0.43, 0.26, "rgba(53,75,55,.26)");
+        objects.push({
+          south: z + 0.22,
+          mesh: pine(x, z + 0.22, i),
+          tile: { x: Math.floor(x), y: Math.floor(z) },
+        });
+      }
+      if (plot.site && plot.site.kind !== "Garden" && !plot.site.complete)
+        markGround(ctx, x - 0.4, z - 0.38, 0.8, 0.76, "rgba(72,99,96,.38)", "#f5e5b6");
+      if (plot.site || plot.timber === "Stump" || Object.values(plot.stock).some(Boolean)) {
+        const cabin = game.cabins.find(
+          (c) => c.stage && c.contains({ x: Math.floor(x), y: Math.floor(z) }),
+        );
+        if (cabin?.complete && !cabin.contains(game.position)) continue;
+        const south = cabin ? cabin.origin.y + footprint.height - 0.1 : z + 0.32;
+        objects.push({ south, mesh: plotModel(plot, x, z, cabin ? 0.13 : 0) });
+      }
+    }
+    hitRegions.length = 0;
+    for (const { mesh, tile } of objects.sort((a, b) => a.south - b.south))
+      hitRegions.push({ outline: mesh.draw(ctx), tile });
+
+    if (game.planning) {
+      const size = game.planKind === "Cabin" ? footprint : { width: 1, height: 1 };
+      markGround(
+        ctx,
+        game.preview.x,
+        game.preview.y,
+        size.width,
+        size.height,
+        "rgba(255,226,143,.24)",
+        "#ffe4a0",
+        3,
+      );
+    } else {
+      ctx.setLineDash([6, 4]);
+      markGround(
+        ctx,
+        game.selected.x,
+        game.selected.y,
+        1,
+        1,
+        "rgba(255,237,181,.09)",
+        "#fff0b7",
+        2.5,
+      );
+      ctx.setLineDash([]);
+    }
+    // Draw the locator and settler last so either stays legible beneath a canopy.
+    const x = game.position.x + 0.5,
+      z = game.position.y + 0.57;
+    groundDisc(ctx, x, z, floor, 0.235, 0.17, "#ffe8a9");
+    groundDisc(ctx, x, z, floor + 0.005, 0.19, 0.12, "#726c49");
+    hitRegions.push({ outline: settler(x, z, floor + 0.01).draw(ctx), tile: game.position });
+    hitRegions.reverse();
+  }
+  new ResizeObserver(paint).observe(canvas);
+  function pickObject(event: MouseEvent) {
+    const bounds = canvas.getBoundingClientRect();
+    const x = ((event.clientX - bounds.left) * canvas.width) / bounds.width;
+    const y = ((event.clientY - bounds.top) * canvas.height) / bounds.height;
+    return hitRegions.find((region) => ctx?.isPointInPath(region.outline, x, y))?.tile;
+  }
+  return { paint, pickObject };
 }
