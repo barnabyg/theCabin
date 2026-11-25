@@ -1,22 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 import { action, selectTile, walkTo } from "./controls";
+import { buildPantry } from "./winter-route";
 
 async function restToWinter(page: Page, fromDay: number) {
   for (let day = fromDay; day < 7; day++) await action(page, /^Rest until tomorrow/);
   await expect(page.locator("#calendar")).toContainText("Winter · Day 7");
-}
-
-async function buildPantry(page: Page) {
-  await action(page, /^Build menu/);
-  await action(page, /^Pantry$/);
-  await selectTile(page, "F6");
-  await action(page, /^Reserve pantry/);
-  await walkTo(page, "C4");
-  await action(page, /^Fell tree/);
-  await action(page, /^Pick up logs/);
-  await walkTo(page, "F6");
-  await action(page, /^Deliver to pantry/);
-  await action(page, /^Finish pantry/);
 }
 
 async function growTurnips(page: Page) {
