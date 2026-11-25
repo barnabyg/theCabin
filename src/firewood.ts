@@ -1,4 +1,15 @@
-import type { Job, Stock } from "./world";
+import { COLS, type Homestead, type Job, type Stock } from "./world";
+
+export const ordinaryNightFuel = 1;
+export const autumnRainDay = 6;
+
+export function soakExposedFirewood(game: Homestead) {
+  for (const [index, plot] of game.plots.entries()) {
+    if (!plot.stock.firewood) continue;
+    const tile = { x: index % COLS, y: Math.floor(index / COLS) };
+    if (!game.cabins.some((cabin) => cabin.complete && cabin.contains(tile))) plot.stock.firewood--;
+  }
+}
 
 const piecesPerLog = 2;
 const minutesPerLog = 4;

@@ -79,7 +79,8 @@ function restorePlot(plot: Plot): Plot {
       !Object.hasOwn(plans, site.kind) ||
       !count(site.delivered, plans[site.kind].amount) ||
       typeof site.complete !== "boolean" ||
-      (site.kind === "Pantry" && !count(site.stored))
+      (site.kind !== "Well" && !count(site.stored)) ||
+      (site.kind === "Pantry" && site.water !== undefined && !count(site.water))
     )
       throw Error("Invalid building");
   }
@@ -90,7 +91,7 @@ export function resumeSpring(encoded: string) {
   return restoreSpring(JSON.parse(encoded));
 }
 
-export function restoreSpring(data: ReturnType<typeof snapshot>) {
+export function restoreSpring(data: ReturnType<typeof snapshot>, lastDay = springDays) {
   if (data.version !== 1) throw Error("Unsupported save version");
   if (
     !Array.isArray(data.plots) ||
@@ -98,14 +99,14 @@ export function restoreSpring(data: ReturnType<typeof snapshot>) {
     !validPosition(data.position) ||
     !validPosition(data.selected) ||
     !count(data.daylight, dailyMinutes) ||
-    !count(data.spring.day, springDays + 1) ||
+    !count(data.spring.day, lastDay + 1) ||
     data.spring.day < 1 ||
     !count(data.spring.seeds.turnip) ||
     !count(data.spring.seeds.squash)
   )
     throw Error("Invalid spring day");
   const game = new Homestead();
-  const spring = new Spring();
+  const spring = new Spring(lastDay);
   spring.day = data.spring.day;
   spring.seeds = data.spring.seeds;
   game.position = data.position;

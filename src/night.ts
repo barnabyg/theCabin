@@ -4,6 +4,13 @@ import type { Job, Stock } from "./world";
 export class Hearth {
   fuel = 0;
   lit = false;
+  burn(pieces: number) {
+    if (!this.lit) return false;
+    const warm = this.fuel >= pieces;
+    this.fuel = Math.max(0, this.fuel - pieces);
+    if (!this.fuel) this.lit = false;
+    return warm;
+  }
   tending(load: Stock, stacks: Stock[], minutes: number): Job[] {
     const source = [load, ...stacks].find((stock) => stock.firewood > 0);
     const jobs: Job[] = [
@@ -46,9 +53,7 @@ export class Night {
   keepWatch() {
     if (this.outcome) return;
     const hearth = this.shelter?.hearth;
-    if (hearth?.lit && hearth.fuel > 0) {
-      hearth.fuel--;
-      if (!hearth.fuel) hearth.lit = false;
+    if (hearth?.burn(1)) {
       this.warmth = Math.min(3, this.warmth + 1);
     } else this.warmth = Math.max(0, this.warmth - 2);
     this.watch++;

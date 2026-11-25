@@ -1,3 +1,4 @@
+import type { Haul } from "./haul";
 import { Cabin, recipe } from "./cabin";
 import { sowingMinutes } from "./garden";
 import { Spring } from "./spring";
@@ -14,6 +15,8 @@ export const marketRules = {
   daylight: 240,
   reserve: 3,
   seedPrice: 3,
+  foodPrice: 2,
+  foodStock: 8,
   roadMinutes: 30,
   order: { firewood: 2, payment: 3 },
 };
@@ -24,6 +27,8 @@ export const pantry = { x: 5, y: 5 };
 export class Market {
   coins = 1;
   seedStock = 2;
+  squashStock = 1;
+  foodStock?: number;
   purchased = { food: 0, fur: 0 };
   inTown = false;
   order: "offered" | "accepted" | "paid" = "offered";
@@ -66,21 +71,19 @@ export class Market {
 
   jobs(): Job[] {
     const { game } = this;
+    const jobs: Job[] = [];
     if (!distance(game.position, trapline))
-      return [
-        {
-          label: "Collect 1 fur from the trapline",
-          minutes: 15,
-          enabled: quantity(game.load) < CAPACITY,
-          run: () => {
-            game.load.fur++;
-          },
+      jobs.push({
+        label: "Collect 1 fur from the trapline",
+        minutes: 15,
+        enabled: quantity(game.load) < CAPACITY,
+        run: () => {
+          game.load.fur++;
         },
-      ];
+      });
     const site = game.plot(game.position).site;
-    if (site?.kind !== "Pantry" || !site.complete) return [];
-    return [
-      {
+    if (site?.kind === "Pantry" && site.complete)
+      jobs.push({
         label: "Withdraw 1 portion",
         minutes: 1,
         enabled: site.stored > 0 && quantity(game.load) < CAPACITY,
@@ -88,8 +91,8 @@ export class Market {
           site.stored--;
           game.load.food++;
         },
-      },
-    ];
+      });
+    return jobs;
   }
 
   sell({ material, price }: SaleOffer) {
@@ -120,34 +123,54 @@ export class Market {
     this.order = "paid";
   }
 
-  buySeed() {
-    if (!this.seedStock) return "The merchant has sold the last seed.";
+  buyFood() {
+    if (!this.foodStock) return "The merchant has sold the last food portion.";
+    if (quantity(this.game.load) >= CAPACITY) return "Your pack is full.";
+    if (this.coins < marketRules.foodPrice)
+      return `Need ${marketRules.foodPrice} coins for one food portion.`;
+    this.coins -= marketRules.foodPrice;
+    this.foodStock--;
+    this.game.load.food++;
+    return "Bought one food portion.";
+  }
+
+  buySeed(variety: "turnip" | "squash" = "turnip") {
+    const stock = variety === "turnip" ? "seedStock" : "squashStock";
+    if (!this[stock]) return "The merchant has sold the last seed.";
     if (this.coins < marketRules.seedPrice)
       return `Need ${marketRules.seedPrice} coins for one seed.`;
     this.coins -= marketRules.seedPrice;
-    this.seedStock--;
-    this.spring.seeds.turnip++;
-    return "Bought one turnip seed.";
+    this[stock]--;
+    this.spring.seeds[variety]++;
+    return `Bought one ${variety} seed.`;
+  }
+
+  record(haul?: Haul) {
+    const { coins, purchased, order, seedStock, inTown } = this;
+    return {
+      version: 1,
+      coins,
+      purchased,
+      order,
+      seedStock,
+      foodStock: this.foodStock,
+      squashStock: this.squashStock,
+      inTown,
+      homestead: snapshot(this.game, this.spring, haul),
+    };
   }
 
   save() {
-    const { coins, seedStock, inTown } = this;
-    localStorage.setItem(
-      marketKey,
-      JSON.stringify({
-        version: 1,
-        coins,
-        purchased: this.purchased,
-        order: this.order,
-        seedStock,
-        inTown,
-        homestead: snapshot(this.game, this.spring),
-      }),
-    );
+    localStorage.setItem(marketKey, JSON.stringify(this.record()));
   }
 
   static resume(encoded: string) {
-    const data = JSON.parse(encoded);
+    const { market } = Market.restore(JSON.parse(encoded));
+    market.game.message = "Market day resumed.";
+    return market;
+  }
+
+  static restore(data: ReturnType<Market["record"]> & { foodBought?: number }, lastDay?: number) {
     if (
       data.version !== 1 ||
       typeof data.inTown !== "boolean" ||
@@ -158,10 +181,21 @@ export class Market {
       data.seedStock > 2
     )
       throw Error("Invalid market save");
-    const { game, spring } = restoreSpring(data.homestead);
+    const { game, spring, haul } = restoreSpring(data.homestead, lastDay);
     const market = new Market(game, spring);
     market.coins = data.coins;
     market.seedStock = data.seedStock;
+    market.squashStock = data.squashStock ?? 1;
+    if (market.squashStock !== 0 && market.squashStock !== 1) throw Error("Invalid squash stock");
+    if (data.foodStock !== undefined) {
+      if (
+        !Number.isSafeInteger(data.foodStock) ||
+        data.foodStock < 0 ||
+        data.foodStock > marketRules.foodStock
+      )
+        throw Error("Invalid merchant food stock");
+      market.foodStock = data.foodStock;
+    }
     for (const { material } of saleOffers) {
       const bought = data.purchased?.[material] ?? (material === "food" ? data.foodBought : 0) ?? 0;
       if (!Number.isSafeInteger(bought) || bought < 0) throw Error("Invalid merchant stock");
@@ -172,7 +206,6 @@ export class Market {
       throw Error("Invalid order");
     market.order = order;
     market.inTown = data.inTown;
-    game.message = "Market day resumed.";
-    return market;
+    return { market, haul };
   }
 }

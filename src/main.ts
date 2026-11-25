@@ -1,3 +1,5 @@
+import { storeDrinkingWater } from "./rations";
+import { openCampaign, renderCampaign } from "./campaign-panel";
 import { button, element, paragraph } from "./ui";
 import { gardenNotes, springJobs } from "./garden";
 import { buildingNotes, buildingJobs } from "./outbuilding";
@@ -26,12 +28,18 @@ import {
 import { openMarket, renderMarket } from "./market-panel";
 const session = openScenario();
 const market = openMarket();
-const spring = session?.spring;
+const winter = openCampaign();
+const campaign = winter?.campaign;
+const trader = campaign?.market ?? market;
+const spring = campaign?.market.spring ?? session?.spring;
 const growingSeason = market?.spring ?? spring;
-const game = market?.game ?? session?.game ?? new Homestead();
+const game = trader?.game ?? session?.game ?? new Homestead();
 const landscape = startLandscape(game);
-let haul: Haul | undefined = session?.haul;
+let haul: Haul | undefined = winter?.haul ?? session?.haul;
 let ticker: number | undefined;
+function scenarioEnded() {
+  return campaign?.ended ?? spring?.ended ?? false;
+}
 function stopTimer() {
   window.clearInterval(ticker);
   ticker = undefined;
@@ -71,7 +79,7 @@ function renderHaul() {
   element("haul-controls").hidden = haul.finished;
   load.textContent = `Settler at ${coordinate(game.position)} · ${stockLabel(game.load)}`;
   haulToggle.textContent = haul.paused ? "Resume haul" : "Pause haul";
-  haulToggle.disabled = game.planning;
+  haulToggle.disabled = game.planning || !!trader?.inTown;
 }
 const cells: HTMLButtonElement[] = [];
 const tiles = element("tiles");
@@ -92,7 +100,7 @@ function pointerTile(event: MouseEvent) {
   return event.target instanceof HTMLButtonElement ? event.target : undefined;
 }
 tiles.addEventListener("click", (event) => {
-  if (game.night || spring?.ended || market?.inTown || (market && !game.daylight)) return;
+  if (game.night || scenarioEnded() || trader?.inTown || (market && !game.daylight)) return;
   const tile = event.detail ? pointerTile(event) : event.target;
   if (!(tile instanceof HTMLButtonElement)) return;
   const index = cells.indexOf(tile);
@@ -133,7 +141,7 @@ function renderMenu() {
   menu.hidden = !game.planning;
   menu.replaceChildren();
   if (!game.planning) return;
-  if (spring && springBuildMenu(menu, game, render)) return;
+  if (spring && springBuildMenu(menu, game, render, !!campaign)) return;
   const h = document.createElement("h2");
   h.textContent = "Cabin & stone hearth";
   menu.append(h);
@@ -178,18 +186,19 @@ function haltHaul() {
   haul = undefined;
 }
 function render() {
-  if (spring && spring.day <= springDays) {
+  if (!campaign && spring && spring.day <= springDays) {
     const { cabin, well, stored } = harvestProgress(game);
     spring.won = cabin && well && stored > 0;
     if (spring.won) haltHaul();
   }
-  if (!game.daylight && !market && !game.night && !spring?.ended) {
+  if (!game.daylight && !market && !game.night && !scenarioEnded()) {
     haltHaul();
-    if (spring) nextSpringDay(game, spring);
+    if (campaign) campaign.rest();
+    else if (spring) nextSpringDay(game, spring);
     else game.beginNight();
   }
-  element("build").hidden = !!market || !!game.night || !!spring?.ended;
-  element("field-notes").hidden = !!game.night || !!spring?.ended;
+  element("build").hidden = !!market || !!game.night || scenarioEnded();
+  element("field-notes").hidden = !!game.night || scenarioEnded();
   renderMenu();
   renderHaul();
   const p = game.selected,
@@ -234,7 +243,8 @@ function render() {
   actions.replaceChildren();
   const jobs = game.jobs();
   if (!steps && growingSeason) jobs.push(...springJobs(game, growingSeason, market?.sowingOpen));
-  if (!steps && market) jobs.push(...market.jobs());
+  if (!steps && campaign) jobs.push(...storeDrinkingWater(game));
+  if (!steps && trader) jobs.push(...trader.jobs());
   if (!steps && plot.site && plot.site.kind !== "Garden")
     jobs.push(...buildingJobs(plot.site, game.load));
   for (const job of game.planning || (haul && !haul.paused && !haul.finished) ? [] : jobs)
@@ -266,7 +276,13 @@ function render() {
   element("load").textContent = `${stockLabel(game.load)} (${quantity(game.load)}/${CAPACITY})`;
   element("clock").textContent =
     `${Math.floor(game.daylight / 60)}h ${String(game.daylight % 60).padStart(2, "0")}m`;
-  if (market) renderMarket(market, render);
+  if (campaign)
+    renderCampaign(campaign, haul, render, () => {
+      haltHaul();
+      campaign.rest();
+      render();
+    });
+  else if (market) renderMarket(market, render);
   else if (spring)
     renderSpring(game, spring, haul, () => {
       haltHaul();
@@ -290,8 +306,8 @@ const directions: Record<string, Point> = {
   d: { x: 1, y: 0 },
 };
 window.addEventListener("keydown", (event) => {
-  if (market?.inTown || (market && !game.daylight)) return;
-  if (game.night || spring?.ended || game.planning || (haul && !haul.paused && !haul.finished))
+  if (trader?.inTown || (market && !game.daylight)) return;
+  if (game.night || scenarioEnded() || game.planning || (haul && !haul.paused && !haul.finished))
     return;
   if (event.ctrlKey || event.altKey || event.metaKey) return;
   const delta = directions[event.key.toLowerCase()];

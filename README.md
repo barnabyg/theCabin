@@ -58,6 +58,20 @@ From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Ope
 
 **Win from an empty purse.** Choose **Start with an empty purse**. Walk to town, take the two-firewood order for three coins, and walk home. Fell the tree at D4, split one log and pick up both pieces of firewood. Carry them to town, deliver the order, buy one turnip seed and return. Sow at G6 and wait until sundown. The order pays once and the pantry still holds four portions.
 
+## First winter
+
+From the repository root, run `npm.cmd run play` with Node.js 24.13 or later, open http://127.0.0.1:5173 and choose **First winter**. Walk to P6, buy a turnip seed in town with the opening four coins and return. Prepare a garden at G6 and sow. Save First winter, close the browser, and reopen in the same profile. **Resume First winter** restores the planted bed, day and one remaining coin.
+
+**Buy food with a fur.** In First winter, build a pantry at F6 with two logs from C4. Collect a fur at I7 and take the road at P6. Buy one turnip seed, then try buying food with the remaining coin. The offer should still show eight portions and your pack should still hold the fur. Sell the fur, buy two portions at two coins each and take the 60-minute walk home. Store the food at F6. The pantry should hold two portions and your purse should be empty.
+
+For a winter water shortage, build a pantry at F6 with two logs. Store a turnip harvest there and rest through day seven. After the thirst warning, draw water twice at G7 and choose **Store drinking water** at the pantry. Spend the next night in your heated cabin. The pantry should show one fewer meal and one fewer drink. In a separate run leave the water supply empty for two winter nights to see the retreat from thirst.
+
+**Keep winter fuel dry.** From the repository root run `npm.cmd run play`, open http://127.0.0.1:5173 and choose **First winter**. Reserve a **Covered woodpile** at H6. Fell D4, deliver two logs to H6 and finish the woodpile. Split the other two logs at D4, carry two pieces to H6 and choose **Store firewood**. Leave two pieces at D4. Rest through the rain on day six. On day seven, D4 holds one piece and H6 still holds two ordinary nights of fuel. At H6, withdraw a piece to carry to a finished cabin and add to its hearth.
+
+**Reach thaw on the harvest.** Buy a squash seed, sow at G6 on day one, and water it on each of the first four days. Use the remaining daylight to build a cabin and pantry. Harvest on day five and store at least four portions and four drinks. Split three logs and load at least five pieces into the hearth. Winter starts on day seven with three hours of daylight. Spend the four nights inside the cabin with the hearth lit. The cold spell on day eight burns two pieces. Reaching day eleven shows **Spring thaw** and offers a fresh start. For the cold retreat, stock food and water but leave the hearth empty for two consecutive winter nights.
+
+**Reach thaw on trade.** Start a fresh First winter. Build a pantry at F6, collect two furs at I7 and sell them in town. Your purse should hold ten coins. Buy two food portions, carry them home and store them. Rest and make a second trip for two more. With four meals and two coins left, build the cabin and store four drinks. Load five firewood, light the hearth and spend each winter night in the cabin. You should reach **Spring thaw** without planting a crop.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:
