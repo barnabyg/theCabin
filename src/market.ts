@@ -167,7 +167,9 @@ export class Market {
   }
 
   static resume(encoded: string) {
-    return Market.restore(JSON.parse(encoded)).market;
+    const { market } = Market.restore(JSON.parse(encoded));
+    market.game.message = "Market day resumed.";
+    return market;
   }
 
   static restore(data: ReturnType<Market["record"]> & { foodBought?: number }, lastDay?: number) {
@@ -206,7 +208,6 @@ export class Market {
       throw Error("Invalid order");
     market.order = order;
     market.inTown = data.inTown;
-    game.message = "Market day resumed.";
     return { market, haul };
   }
 }

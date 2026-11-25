@@ -28,6 +28,7 @@ test("buy a first sowing from bare ground and reopen the planted campaign", asyn
     page = browser.pages()[0];
     await page.goto("/");
     await page.getByRole("link", { name: "Resume First winter" }).click();
+    await expect(page.getByRole("status")).toHaveText("First winter resumed.");
     await expect(page.locator("#inspect")).toContainText("Turnip · 0/2");
     await expect(page.locator("#calendar")).toContainText("Day 1");
     await expect(page.locator("#purse")).toHaveText("1 coin");

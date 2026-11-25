@@ -101,6 +101,7 @@ export class Campaign {
     if (data.retreat !== undefined && !["hunger", "thirst", "cold"].includes(data.retreat))
       throw Error("Invalid retreat");
     campaign.retreat = data.retreat;
+    market.game.message = "First winter resumed.";
     return { campaign, haul };
   }
 }
