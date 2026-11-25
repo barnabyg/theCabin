@@ -10,14 +10,14 @@ async function deliver(page: Page, material: string, source: string, target: str
   await action(page, job);
 }
 
-export async function buildPantry(page: Page) {
+export async function buildPantry(page: Page, tile = "F6") {
   await action(page, /^Build menu/);
   await action(page, /^Pantry$/);
-  await selectTile(page, "F6");
+  await selectTile(page, tile);
   await action(page, /^Reserve pantry/);
   await walkTo(page, "C4");
   await action(page, /^Fell tree/);
-  await deliver(page, "logs", "C4", "F6", /^Deliver to pantry/);
+  await deliver(page, "logs", "C4", tile, /^Deliver to pantry/);
   await action(page, /^Finish pantry/);
 }
 

@@ -71,21 +71,19 @@ export class Market {
 
   jobs(): Job[] {
     const { game } = this;
+    const jobs: Job[] = [];
     if (!distance(game.position, trapline))
-      return [
-        {
-          label: "Collect 1 fur from the trapline",
-          minutes: 15,
-          enabled: quantity(game.load) < CAPACITY,
-          run: () => {
-            game.load.fur++;
-          },
+      jobs.push({
+        label: "Collect 1 fur from the trapline",
+        minutes: 15,
+        enabled: quantity(game.load) < CAPACITY,
+        run: () => {
+          game.load.fur++;
         },
-      ];
+      });
     const site = game.plot(game.position).site;
-    if (site?.kind !== "Pantry" || !site.complete) return [];
-    return [
-      {
+    if (site?.kind === "Pantry" && site.complete)
+      jobs.push({
         label: "Withdraw 1 portion",
         minutes: 1,
         enabled: site.stored > 0 && quantity(game.load) < CAPACITY,
@@ -93,8 +91,8 @@ export class Market {
           site.stored--;
           game.load.food++;
         },
-      },
-    ];
+      });
+    return jobs;
   }
 
   sell({ material, price }: SaleOffer) {
