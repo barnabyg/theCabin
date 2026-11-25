@@ -188,7 +188,7 @@ canvas {
   color: #59604f;
   font-size: 13px;
 }
-.map-key span {
+.map-key span:not([hidden]) {
   display: flex;
   gap: 7px;
   align-items: center;
@@ -197,6 +197,10 @@ canvas {
   width: 12px;
   height: 12px;
   display: inline-block;
+}
+.key.storage {
+  background: #94e1dc;
+  border: 1px solid #417d80;
 }
 .settler {
   background: #b85534;

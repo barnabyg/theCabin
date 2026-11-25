@@ -47,7 +47,39 @@ export interface Job {
   run: () => void;
   enabled?: boolean;
 }
+export function timberJob(tile: Plot): Job | undefined {
+  if (tile.timber === "Tree")
+    return {
+      label: "Fell tree · 4 logs",
+      minutes: 12,
+      run: () => {
+        tile.timber = "Stump";
+        tile.stock.logs += 4;
+      },
+    };
+  if (tile.timber === "Stump")
+    return {
+      label: "Clear stump with spade",
+      minutes: 8,
+      run: () => {
+        tile.timber = null;
+      },
+    };
+}
+export function pickup(load: Stock, pile: Stock, material: Material): Job {
+  const amount = Math.min(CAPACITY - quantity(load), pile[material]);
+  return {
+    label: `Pick up ${material}`,
+    minutes: minutes.transfer,
+    enabled: amount > 0,
+    run: () => {
+      pile[material] -= amount;
+      load[material] += amount;
+    },
+  };
+}
 export class Homestead {
+  storage?: Point;
   position: Point = { x: 6, y: 5 };
   selected: Point = { ...this.position };
   plots: Plot[] = Array.from({ length: COLS * ROWS }, () => ({
@@ -147,36 +179,10 @@ export class Homestead {
         },
       ];
     const jobs: Job[] = [];
-    if (tile.timber === "Stump")
-      jobs.push({
-        label: "Clear stump with spade",
-        minutes: 8,
-        run: () => {
-          tile.timber = null;
-        },
-      });
-    if (tile.timber === "Tree")
-      jobs.push({
-        label: "Fell tree · 4 logs",
-        minutes: 12,
-        run: () => {
-          tile.timber = "Stump";
-          tile.stock.logs += 4;
-        },
-      });
-    for (const material of materials) {
-      if (!tile.stock[material]) continue;
-      const amount = Math.min(CAPACITY - quantity(this.load), tile.stock[material]);
-      jobs.push({
-        label: `Pick up ${material}`,
-        minutes: minutes.transfer,
-        enabled: amount > 0,
-        run: () => {
-          tile.stock[material] -= amount;
-          this.load[material] += amount;
-        },
-      });
-    }
+    const timber = timberJob(tile);
+    if (timber) jobs.push(timber);
+    for (const material of materials)
+      if (tile.stock[material]) jobs.push(pickup(this.load, tile.stock, material));
     if (quantity(this.load))
       jobs.push({
         label: "Set down load",

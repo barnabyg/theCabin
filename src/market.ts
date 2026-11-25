@@ -1,4 +1,4 @@
-import type { Haul } from "./haul";
+import type { WorkOrder } from "./haul";
 import { Cabin, recipe } from "./cabin";
 import { sowingMinutes } from "./garden";
 import { Spring } from "./spring";
@@ -145,7 +145,7 @@ export class Market {
     return `Bought one ${variety} seed.`;
   }
 
-  record(haul?: Haul) {
+  record(haul?: WorkOrder) {
     const { coins, purchased, order, seedStock, inTown } = this;
     return {
       version: 1,

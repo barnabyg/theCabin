@@ -54,6 +54,8 @@ export function startLandscape(game: Homestead) {
     ctx.drawImage(background, 0, 0);
     ctx.setTransform(width / view.width, 0, 0, height / view.height, 0, 0);
     const objects: { south: number; draw: () => Path2D; tile?: Point }[] = [];
+    if (game.storage)
+      markGround(ctx, game.storage.x, game.storage.y, 1, 1, "rgba(93,180,187,.38)", "#94e1dc", 3);
     let floor = 0;
     for (const cabin of game.cabins) {
       const { x, y: z } = cabin.origin;

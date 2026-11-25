@@ -1,6 +1,6 @@
 import { Campaign, campaignKey, winterDay } from "./campaign";
 import { ordinaryNightFuel, autumnRainDay } from "./firewood";
-import type { Haul } from "./haul";
+import type { WorkOrder } from "./haul";
 import { pantryReserves } from "./rations";
 import { road } from "./market";
 import { renderMerchant } from "./market-panel";
@@ -50,7 +50,7 @@ export function openCampaign() {
 
 export function renderCampaign(
   campaign: Campaign,
-  haul: Haul | undefined,
+  haul: WorkOrder | undefined,
   render: () => void,
   rest: () => void,
 ) {

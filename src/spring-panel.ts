@@ -3,7 +3,7 @@ import { growGardens } from "./garden";
 import { saveKey, resumeSpring, saveSpring } from "./spring-save";
 import { button, element, heading, paragraph } from "./ui";
 import type { Homestead } from "./world";
-import type { Haul } from "./haul";
+import type { WorkOrder } from "./haul";
 
 export function openScenario() {
   const link = element("scenario-link");
@@ -55,7 +55,7 @@ function restart() {
 export function renderSpring(
   game: Homestead,
   spring: Spring,
-  haul: Haul | undefined,
+  haul: WorkOrder | undefined,
   rest: () => void,
 ) {
   element("calendar").textContent =
