@@ -1,5 +1,5 @@
 import { Campaign, campaignKey, winterDay } from "./campaign";
-import { autumnRainDay } from "./firewood";
+import { ordinaryNightFuel, autumnRainDay } from "./firewood";
 import type { Haul } from "./haul";
 import { pantryReserves } from "./rations";
 import { road } from "./market";
@@ -74,6 +74,21 @@ export function renderCampaign(
       `Pantry reserves · ${meals} meal${meals === 1 ? "" : "s"} · ${drinks} drink${drinks === 1 ? "" : "s"} · Each winter night uses 1 portion and 1 water.`,
     );
     if (spring.day >= winterDay) {
+      const fuel = campaign.fuelTonight;
+      paragraph(
+        box,
+        fuel > ordinaryNightFuel
+          ? `Cold spell · The hearth needs ${fuel} firewood tonight, twice the ordinary burn.`
+          : `Winter night · The hearth needs ${fuel} firewood tonight.`,
+      );
+      if (campaign.unheated)
+        paragraph(box, "Last night was unheated. Another unheated night will force a retreat.");
+      const hearth = campaign.shelter?.hearth;
+      if (!hearth?.lit || hearth.fuel < fuel)
+        paragraph(
+          box,
+          "Before resting, return to a finished cabin, add split firewood and light the hearth.",
+        );
       if (!meals)
         paragraph(
           box,
@@ -115,9 +130,14 @@ export function renderCampaign(
     heading(box, "Retreat to town");
     paragraph(
       box,
-      `Two nights without ${campaign.retreat === "hunger" ? "food" : "drinking water"} forced a retreat from ${campaign.retreat}.`,
+      campaign.retreat === "cold"
+        ? "Two unheated nights forced you to retreat from the cold."
+        : `Two nights without ${campaign.retreat === "hunger" ? "food" : "drinking water"} forced a retreat from ${campaign.retreat}.`,
     );
-  } else heading(box, "Spring thaw");
+  } else {
+    heading(box, "Spring thaw");
+    paragraph(box, "The stream runs clear again. You kept the homestead through the winter.");
+  }
   button(box, "Save First winter", () => {
     try {
       campaign.save(haul);

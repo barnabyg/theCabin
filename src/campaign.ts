@@ -1,4 +1,4 @@
-import { autumnRainDay, soakExposedFirewood } from "./firewood";
+import { ordinaryNightFuel, autumnRainDay, soakExposedFirewood } from "./firewood";
 import { growGardens } from "./garden";
 import type { Haul } from "./haul";
 import { Market, marketRules } from "./market";
@@ -15,7 +15,16 @@ export class Campaign {
     market.foodStock ??= marketRules.foodStock;
   }
   readonly rations = { hungry: false, thirsty: false };
-  retreat: "hunger" | "thirst" | undefined;
+  unheated = false;
+  retreat: "hunger" | "thirst" | "cold" | undefined;
+
+  get fuelTonight() {
+    return this.market.spring.day === winterDay + 1 ? ordinaryNightFuel * 2 : ordinaryNightFuel;
+  }
+
+  get shelter() {
+    return this.market.inTown ? undefined : this.market.game.shelter;
+  }
 
   get ended() {
     return !!this.retreat || this.market.spring.ended;
@@ -39,7 +48,17 @@ export class Campaign {
   rest() {
     const { game, spring } = this.market;
     if (this.ended) return;
-    if (spring.day >= winterDay) this.retreat = takeNightlyRations(game, this.rations);
+    if (spring.day >= winterDay) {
+      this.retreat = takeNightlyRations(game, this.rations);
+      let warm = false;
+      const shelter = this.shelter;
+      for (const cabin of game.cabins) {
+        const heated = cabin.hearth.burn(this.fuelTonight);
+        if (cabin === shelter) warm = heated;
+      }
+      if (!warm && this.unheated && !this.retreat) this.retreat = "cold";
+      this.unheated = !warm;
+    }
     if (this.retreat) {
       game.daylight = 0;
       game.planning = false;
@@ -49,7 +68,7 @@ export class Campaign {
     growGardens(game.plots);
     spring.rest();
     game.planning = false;
-    game.daylight = spring.ended ? 0 : dailyMinutes;
+    game.daylight = spring.ended ? 0 : spring.day >= winterDay ? dailyMinutes / 2 : dailyMinutes;
   }
 
   save(haul?: Haul) {
@@ -60,6 +79,7 @@ export class Campaign {
         market: this.market.record(haul),
         rations: this.rations,
         retreat: this.retreat,
+        unheated: this.unheated,
       }),
     );
   }
@@ -75,7 +95,10 @@ export class Campaign {
       campaign.rations.hungry = data.rations.hungry;
       campaign.rations.thirsty = data.rations.thirsty;
     }
-    if (data.retreat !== undefined && data.retreat !== "hunger" && data.retreat !== "thirst")
+    if (data.unheated !== undefined && typeof data.unheated !== "boolean")
+      throw Error("Invalid warmth history");
+    campaign.unheated = data.unheated ?? false;
+    if (data.retreat !== undefined && !["hunger", "thirst", "cold"].includes(data.retreat))
       throw Error("Invalid retreat");
     campaign.retreat = data.retreat;
     return { campaign, haul };

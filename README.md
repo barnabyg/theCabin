@@ -68,6 +68,8 @@ For a winter water shortage, build a pantry at F6 with two logs. Store a turnip 
 
 **Keep winter fuel dry.** From the repository root run `npm.cmd run play`, open http://127.0.0.1:5173 and choose **First winter**. Reserve a **Covered woodpile** at H6. Fell D4, deliver two logs to H6 and finish the woodpile. Split the other two logs at D4, carry two pieces to H6 and choose **Store firewood**. Leave two pieces at D4. Rest through the rain on day six. On day seven, D4 holds one piece and H6 still holds two ordinary nights of fuel. At H6, withdraw a piece to carry to a finished cabin and add to its hearth.
 
+**Reach thaw on the harvest.** Buy a squash seed, sow at G6 on day one, and water it on each of the first four days. Use the remaining daylight to build a cabin and pantry. Harvest on day five and store at least four portions and four drinks. Split three logs and load at least five pieces into the hearth. Winter starts on day seven with three hours of daylight. Spend the four nights inside the cabin with the hearth lit. The cold spell on day eight burns two pieces. Reaching day eleven shows **Spring thaw** and offers a fresh start. For the cold retreat, stock food and water but leave the hearth empty for two consecutive winter nights.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

@@ -86,6 +86,14 @@ export function renderMerchant(town: HTMLElement, market: Market, render: () => 
   if (market.foodStock !== undefined) {
     paragraph(
       town,
+      `${market.squashStock} squash seed in stock · four watered days for six portions.`,
+    );
+    button(town, `Buy 1 squash seed · ${marketRules.seedPrice} coins`, () => {
+      game.message = market.buySeed("squash");
+      render();
+    });
+    paragraph(
+      town,
       `${market.foodStock} food portion${market.foodStock === 1 ? "" : "s"} in stock · ${marketRules.foodPrice} coins each. Walk home with food · ${marketRules.roadMinutes * minutes.loadedStep} min.`,
     );
     button(
