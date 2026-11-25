@@ -20,6 +20,8 @@ Click the tree at D4 in the wooded site and choose **Walk here**, then **Fell tr
 
 Open **Build menu** to compare sites. The open footprint at K4 is clear. The wooded footprint at D4 needs the tree felled, its stump dug out, and the stone at E5 gathered. Return to the clearing to work, then reopen the menu to reserve the same footprint.
 
+To automate the wooded site from daybreak, select G6 and choose **Mark storage area**. Open **Build menu**, choose **Wooded site**, then **Clear area**. The settler fells the tree, digs out its stump and carries the four logs and two stone to G6 in loads of two. **Pause clearing** holds the current load and position. Choose **Resume clearing** to continue. When D4 shows **Ready to reserve**, reopen the Build menu and reserve the footprint. At G6, use **Repeat haul** to deliver each material to the blueprint. You can mark any open land tile outside the footprint for storage. Moving the designation leaves previously stored materials on their original tile.
+
 To prepare firewood, stand on gathered logs or carry them. Choose **Split 1 log** to spend four minutes making two pieces of firewood. A double batch takes eight minutes. The settler uses carried logs first and stacks the firewood on the ground. Select **Pick up firewood** to carry up to two pieces.
 
 Reserve a cabin and fell the tree at D4. Choose **Repeat haul** to ferry logs to the blueprint. **Pause haul** holds the settler and load in place, and **Resume haul** continues the route. Deliver four logs and two stone in all. At the footprint, lay the floor, raise the walls and fit the roof and hearth. Each stage remains visible while you fetch the next load.

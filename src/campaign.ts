@@ -1,6 +1,6 @@
 import { ordinaryNightFuel, autumnRainDay, soakExposedFirewood } from "./firewood";
 import { growGardens } from "./garden";
-import type { Haul } from "./haul";
+import type { WorkOrder } from "./haul";
 import { Market, marketRules } from "./market";
 import { takeNightlyRations } from "./rations";
 import { dailyMinutes, Spring } from "./spring";
@@ -71,7 +71,7 @@ export class Campaign {
     game.daylight = spring.ended ? 0 : spring.day >= winterDay ? dailyMinutes / 2 : dailyMinutes;
   }
 
-  save(haul?: Haul) {
+  save(haul?: WorkOrder) {
     localStorage.setItem(
       campaignKey,
       JSON.stringify({

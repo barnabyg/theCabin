@@ -1,7 +1,7 @@
-import { Cabin, footprint, recipe } from "./cabin";
+import { Cabin, fixedObstruction, footprint, footprintTiles, recipe } from "./cabin";
 import { crops } from "./garden";
 import { plans } from "./outbuilding";
-import { Haul } from "./haul";
+import { ClearArea, Haul, type WorkOrder } from "./haul";
 import { dailyMinutes, Spring, springDays } from "./spring";
 import {
   CAPACITY,
@@ -18,13 +18,15 @@ import {
 
 export const saveKey = "the-cabin.first-harvest";
 
-export function snapshot(game: Homestead, spring: Spring, haul?: Haul) {
+export function snapshot(game: Homestead, spring: Spring, haul?: WorkOrder) {
   return {
     version: 1,
     spring: { day: spring.day, seeds: spring.seeds },
     position: game.position,
     selected: game.selected,
     daylight: game.daylight,
+    storage: game.storage,
+    clearing: haul instanceof ClearArea && !haul.finished ? haul.origin : undefined,
     plots: game.plots,
     load: game.load,
     cabins: game.cabins.map(({ origin, delivered, stage, hearth }) => ({
@@ -34,7 +36,7 @@ export function snapshot(game: Homestead, spring: Spring, haul?: Haul) {
       hearth,
     })),
     haul:
-      haul && !haul.finished
+      haul instanceof Haul && !haul.finished
         ? {
             source: haul.source,
             cabin: game.cabins.indexOf(haul.cabin),
@@ -44,7 +46,7 @@ export function snapshot(game: Homestead, spring: Spring, haul?: Haul) {
   };
 }
 
-export function saveSpring(game: Homestead, spring: Spring, haul?: Haul) {
+export function saveSpring(game: Homestead, spring: Spring, haul?: WorkOrder) {
   localStorage.setItem(saveKey, JSON.stringify(snapshot(game, spring, haul)));
 }
 
@@ -135,8 +137,28 @@ export function restoreSpring(data: ReturnType<typeof snapshot>, lastDay = sprin
     Object.assign(cabin.hearth, record.hearth);
     return cabin;
   });
-  let haul: Haul | undefined;
-  if (data.haul) {
+  if (data.storage !== undefined) {
+    if (
+      !validPosition(data.storage) ||
+      fixedObstruction(game, data.storage) ||
+      game.plot(data.storage).timber
+    )
+      throw Error("Invalid storage area");
+    game.storage = data.storage;
+  }
+  let haul: WorkOrder | undefined;
+  if (data.clearing !== undefined) {
+    if (
+      !game.storage ||
+      data.haul ||
+      !validPosition(data.clearing) ||
+      footprintTiles(data.clearing).some((tile) => fixedObstruction(game, tile))
+    )
+      throw Error("Invalid clearing order");
+    haul = new ClearArea(data.clearing, game.storage);
+    game.preview = { ...data.clearing };
+    haul.paused = true;
+  } else if (data.haul) {
     if (
       !validPosition(data.haul.source) ||
       !game.cabins[data.haul.cabin] ||

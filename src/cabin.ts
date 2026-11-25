@@ -1,6 +1,7 @@
 import {
   minutes,
   coordinate,
+  distance,
   land,
   type Homestead,
   type Job,
@@ -73,19 +74,26 @@ export class Cabin {
     return withinFootprint(this.origin, p);
   }
 }
+export function footprintTiles(origin: Point, size = footprint) {
+  const tiles: Point[] = [];
+  for (let y = origin.y; y < origin.y + size.height; y++)
+    for (let x = origin.x; x < origin.x + size.width; x++) tiles.push({ x, y });
+  return tiles;
+}
+export function fixedObstruction(game: Homestead, tile: Point) {
+  if (!land(tile)) return "Outside buildable land";
+  if (game.cabins.some((cabin) => cabin.contains(tile))) return "Reserved blueprint";
+  if (game.storage && distance(game.storage, tile) === 0) return "Storage area";
+  return game.plot(tile).site?.kind;
+}
 export function obstructions(game: Homestead, origin: Point, size = footprint) {
   const blocked: string[] = [];
-  for (let y = origin.y; y < origin.y + size.height; y++)
-    for (let x = origin.x; x < origin.x + size.width; x++) {
-      const p = { x, y };
-      let reason: string | null = null;
-      if (!land(p)) reason = "Outside buildable land";
-      else if (game.cabins.some((cabin) => cabin.contains(p))) reason = "Reserved blueprint";
-      else {
-        const plot = game.plot(p);
-        reason = plot.site?.kind ?? plot.timber ?? (plot.stock.stone ? "Loose stone" : null);
-      }
-      if (reason) blocked.push(`${coordinate(p)} · ${reason}`);
-    }
+  for (const tile of footprintTiles(origin, size)) {
+    const reason =
+      fixedObstruction(game, tile) ??
+      game.plot(tile).timber ??
+      (game.plot(tile).stock.stone ? "Loose stone" : null);
+    if (reason) blocked.push(`${coordinate(tile)} · ${reason}`);
+  }
   return blocked;
 }

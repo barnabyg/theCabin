@@ -7,8 +7,16 @@ import { springBuildMenu } from "./spring-build";
 import { openScenario, renderSpring, nextSpringDay } from "./spring-panel";
 import { harvestProgress, springDays } from "./spring";
 import { renderNight } from "./night-panel";
-import { Haul } from "./haul";
-import { footprint, withinFootprint, buildingMaterials, recipe, obstructions } from "./cabin";
+import { ClearArea, Haul, type WorkOrder } from "./haul";
+import {
+  footprint,
+  footprintTiles,
+  fixedObstruction,
+  withinFootprint,
+  buildingMaterials,
+  recipe,
+  obstructions,
+} from "./cabin";
 import { startLandscape } from "./landscape";
 import { positionTile } from "./map-camera";
 import {
@@ -35,7 +43,7 @@ const spring = campaign?.market.spring ?? session?.spring;
 const growingSeason = market?.spring ?? spring;
 const game = trader?.game ?? session?.game ?? new Homestead();
 const landscape = startLandscape(game);
-let haul: Haul | undefined = winter?.haul ?? session?.haul;
+let haul: WorkOrder | undefined = winter?.haul ?? session?.haul;
 let ticker: number | undefined;
 function scenarioEnded() {
   return campaign?.ended ?? spring?.ended ?? false;
@@ -48,6 +56,10 @@ function advanceHaul() {
   if (!haul) return;
   haul.advance(game);
   if (haul.finished || haul.paused) stopTimer();
+  if (haul instanceof ClearArea && haul.finished) {
+    game.preview = { ...haul.origin };
+    game.planKind = "Cabin";
+  }
   render();
 }
 function startHaul() {
@@ -56,7 +68,14 @@ function startHaul() {
   if (haul && !haul.finished && !haul.paused) ticker = window.setInterval(advanceHaul, 320);
 }
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden || !spring || !haul || haul.finished || haul.paused) return;
+  if (
+    !document.hidden ||
+    (!spring && !(haul instanceof ClearArea)) ||
+    !haul ||
+    haul.finished ||
+    haul.paused
+  )
+    return;
   haul.paused = true;
   stopTimer();
   render();
@@ -69,16 +88,25 @@ const haulToggle = button(element("haul-controls"), "Pause haul", () => {
     render();
   } else startHaul();
 });
+const cancelClearing = button(element("haul-controls"), "Cancel clearing", () => {
+  haltHaul();
+  game.message = "Clearing cancelled. Materials remain where the settler left them.";
+  render();
+});
 function renderHaul() {
   element("haul").hidden = !haul;
   if (!haul) return;
-  const status = haul.finished ? "Haul complete" : haul.paused ? "Paused" : "Hauling";
+  const clearing = haul instanceof ClearArea;
+  cancelClearing.hidden = !clearing || !haul.paused;
+  const status = haul.paused ? "Paused" : clearing ? "Clearing" : "Hauling";
   element("haul-summary").textContent =
-    `${status} · ${haul.material} · ${coordinate(haul.source)} → ${coordinate(haul.cabin.origin)}`;
+    haul instanceof ClearArea
+      ? `${haul.finished ? "Ready to reserve" : status} · Cabin site ${coordinate(haul.origin)} · Storage at ${coordinate(haul.storage)}`
+      : `${haul.finished ? "Haul complete" : status} · ${haul.material} · ${coordinate(haul.source)} → ${coordinate(haul.cabin.origin)}`;
   const load = element("haul-load");
   element("haul-controls").hidden = haul.finished;
   load.textContent = `Settler at ${coordinate(game.position)} · ${stockLabel(game.load)}`;
-  haulToggle.textContent = haul.paused ? "Resume haul" : "Pause haul";
+  haulToggle.textContent = `${haul.paused ? "Resume" : "Pause"} ${clearing ? "clearing" : "haul"}`;
   haulToggle.disabled = game.planning || !!trader?.inTown;
 }
 const cells: HTMLButtonElement[] = [];
@@ -166,7 +194,38 @@ function renderMenu() {
     `Footprint · ${coordinate(game.preview)} · ${footprint.width} × ${footprint.height} tiles`,
   );
   const blocked = obstructions(game, game.preview);
-  paragraph(menu, blocked.join(" / ") || "Footprint clear");
+  const clearingSite =
+    haul instanceof ClearArea && !haul.finished && !distance(game.preview, haul.origin);
+  paragraph(
+    menu,
+    blocked.join(" / ") || (clearingSite ? "Clearing order in progress" : "Footprint clear"),
+  );
+  const tiles = footprintTiles(game.preview);
+  if (
+    !tiles.some((tile) => fixedObstruction(game, tile)) &&
+    tiles.some((tile) => {
+      const { timber, stock } = game.plot(tile);
+      return timber || stock.logs || stock.stone;
+    })
+  ) {
+    paragraph(
+      menu,
+      game.storage
+        ? `Haul logs and stone to storage at ${coordinate(game.storage)}.`
+        : "To clear this site, return to the clearing, select an open tile and choose Mark storage area.",
+    );
+    button(
+      menu,
+      "Clear area",
+      () => {
+        if (!game.storage) return;
+        haul = new ClearArea({ ...game.preview }, game.storage);
+        game.planning = false;
+        startHaul();
+      },
+      !game.storage,
+    );
+  }
   button(
     menu,
     "Reserve footprint",
@@ -174,7 +233,7 @@ function renderMenu() {
       game.reserve();
       render();
     },
-    blocked.length > 0,
+    blocked.length > 0 || clearingSite,
   );
   button(menu, "Return to clearing", () => {
     game.planning = false;
@@ -185,20 +244,35 @@ function haltHaul() {
   stopTimer();
   haul = undefined;
 }
+function restFromWork() {
+  if (haul instanceof ClearArea) {
+    stopTimer();
+    if (!haul.finished) haul.paused = true;
+  } else haltHaul();
+}
 function render() {
+  if (
+    haul instanceof ClearArea &&
+    (haul.finished
+      ? obstructions(game, haul.origin).length > 0
+      : footprintTiles(haul.origin).some((tile) => fixedObstruction(game, tile)))
+  )
+    haltHaul();
   if (!campaign && spring && spring.day <= springDays) {
     const { cabin, well, stored } = harvestProgress(game);
     spring.won = cabin && well && stored > 0;
     if (spring.won) haltHaul();
   }
   if (!game.daylight && !market && !game.night && !scenarioEnded()) {
-    haltHaul();
+    restFromWork();
     if (campaign) campaign.rest();
     else if (spring) nextSpringDay(game, spring);
     else game.beginNight();
   }
+  if (game.night || scenarioEnded()) haltHaul();
   element("build").hidden = !!market || !!game.night || scenarioEnded();
   element("field-notes").hidden = !!game.night || scenarioEnded();
+  element("storage-key").hidden = !game.storage;
   renderMenu();
   renderHaul();
   const p = game.selected,
@@ -206,6 +280,8 @@ function render() {
   element("tile-title").textContent = `${siteName(p)} · ${coordinate(p)}`;
   const info = element("inspect");
   info.replaceChildren();
+  const atStorage = game.storage && !distance(p, game.storage);
+  if (atStorage) paragraph(info, "Storage area");
   if (spring && streamBank(p)) paragraph(info, "Stream bank · Draw water here.");
   if (growingSeason && plot.site?.kind === "Garden") {
     paragraph(info, "Garden");
@@ -241,6 +317,20 @@ function render() {
   );
   const actions = element("actions");
   actions.replaceChildren();
+  if (
+    !market &&
+    !game.planning &&
+    !plot.timber &&
+    !fixedObstruction(game, p) &&
+    (!haul || haul.finished || (haul.paused && !(haul instanceof ClearArea)))
+  ) {
+    button(actions, game.storage ? "Move storage area here" : "Mark storage area", () => {
+      game.storage = { ...p };
+      if (haul instanceof ClearArea) haltHaul();
+      game.message = `Storage area marked at ${coordinate(p)}.`;
+      render();
+    });
+  }
   const jobs = game.jobs();
   if (!steps && growingSeason) jobs.push(...springJobs(game, growingSeason, market?.sowingOpen));
   if (!steps && campaign) jobs.push(...storeDrinkingWater(game));
@@ -278,14 +368,14 @@ function render() {
     `${Math.floor(game.daylight / 60)}h ${String(game.daylight % 60).padStart(2, "0")}m`;
   if (campaign)
     renderCampaign(campaign, haul, render, () => {
-      haltHaul();
+      restFromWork();
       campaign.rest();
       render();
     });
   else if (market) renderMarket(market, render);
   else if (spring)
     renderSpring(game, spring, haul, () => {
-      haltHaul();
+      restFromWork();
       nextSpringDay(game, spring);
       render();
     });
