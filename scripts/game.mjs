@@ -16,7 +16,7 @@ const options = {
 if (process.argv.includes("--serve")) {
   const bundler = await context(options);
   await bundler.watch();
-  const port = Number(process.env.CABIN_PORT ?? 5173);
+  const port = Number(process.env.CABIN_PORT ?? 43187);
   const server = await bundler.serve({ host: "127.0.0.1", port, servedir: "dist" });
   const url = `http://127.0.0.1:${server.port}`;
   console.log(`The Cabin is ready at ${url}`);
