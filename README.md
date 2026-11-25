@@ -66,6 +66,8 @@ From the repository root, run `npm.cmd run play` with Node.js 24.13 or later, op
 
 For a winter water shortage, build a pantry at F6 with two logs. Store a turnip harvest there and rest through day seven. After the thirst warning, draw water twice at G7 and choose **Store drinking water** at the pantry. Spend the next night in your heated cabin. The pantry should show one fewer meal and one fewer drink. In a separate run leave the water supply empty for two winter nights to see the retreat from thirst.
 
+**Keep winter fuel dry.** From the repository root run `npm.cmd run play`, open http://127.0.0.1:5173 and choose **First winter**. Reserve a **Covered woodpile** at H6. Fell D4, deliver two logs to H6 and finish the woodpile. Split the other two logs at D4, carry two pieces to H6 and choose **Store firewood**. Leave two pieces at D4. Rest through the rain on day six. On day seven, D4 holds one piece and H6 still holds two ordinary nights of fuel. At H6, withdraw a piece to carry to a finished cabin and add to its hearth.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

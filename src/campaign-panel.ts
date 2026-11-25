@@ -1,4 +1,5 @@
 import { Campaign, campaignKey, winterDay } from "./campaign";
+import { autumnRainDay } from "./firewood";
 import type { Haul } from "./haul";
 import { pantryReserves } from "./rations";
 import { road } from "./market";
@@ -83,6 +84,14 @@ export function renderCampaign(
           box,
           `${campaign.rations.thirsty ? "Thirsty after a missed drink. Another missed drink forces retreat." : "No drinking water for tonight."} Fetch stream or well water and store it in a finished pantry before resting.`,
         );
+    }
+    if (spring.day <= autumnRainDay) {
+      const forecast =
+        spring.day === autumnRainDay ? "Rain tonight" : `Rain forecast for day ${autumnRainDay}`;
+      paragraph(
+        box,
+        `${forecast} · One piece of firewood in each outdoor ground stack will spoil. Store split wood in a covered woodpile to keep it dry.`,
+      );
     }
     if (market.inTown) renderMerchant(town, market, render);
     else

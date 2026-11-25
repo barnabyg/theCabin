@@ -141,7 +141,7 @@ function renderMenu() {
   menu.hidden = !game.planning;
   menu.replaceChildren();
   if (!game.planning) return;
-  if (spring && springBuildMenu(menu, game, render)) return;
+  if (spring && springBuildMenu(menu, game, render, !!campaign)) return;
   const h = document.createElement("h2");
   h.textContent = "Cabin & stone hearth";
   menu.append(h);
