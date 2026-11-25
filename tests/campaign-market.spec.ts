@@ -53,7 +53,7 @@ test("trade a fur for food, resume at the merchant, and fill the home pantry", a
     await expect(page.getByRole("button", { name: /^Buy 1 food portion/ })).toBeDisabled();
     await action(page, /^Walk home · 60 min/);
     await walkTo(page, "F6");
-    await action(page, /^Store /);
+    await action(page, /^Store harvest/);
     await expect(page.locator("#inspect")).toContainText("Stored · 2 portions");
     await expect(page.locator("#load")).toHaveText("Empty (0/2)");
   } finally {

@@ -70,6 +70,8 @@ For a winter water shortage, build a pantry at F6 with two logs. Store a turnip 
 
 **Reach thaw on the harvest.** Buy a squash seed, sow at G6 on day one, and water it on each of the first four days. Use the remaining daylight to build a cabin and pantry. Harvest on day five and store at least four portions and four drinks. Split three logs and load at least five pieces into the hearth. Winter starts on day seven with three hours of daylight. Spend the four nights inside the cabin with the hearth lit. The cold spell on day eight burns two pieces. Reaching day eleven shows **Spring thaw** and offers a fresh start. For the cold retreat, stock food and water but leave the hearth empty for two consecutive winter nights.
 
+**Reach thaw on trade.** Start a fresh First winter. Build a pantry at F6, collect two furs at I7 and sell them in town. Your purse should hold ten coins. Buy two food portions, carry them home and store them. Rest and make a second trip for two more. With four meals and two coins left, build the cabin and store four drinks. Load five firewood, light the hearth and spend each winter night in the cabin. You should reach **Spring thaw** without planting a crop.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:
