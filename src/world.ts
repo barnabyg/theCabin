@@ -164,34 +164,37 @@ export class Homestead {
     job.run();
     this.message = `${job.label} · ${coordinate(this.position)}`;
   }
+  walkJob(p: Point): Job {
+    return {
+      label: "Walk here",
+      minutes: distance(this.position, p) * this.pace,
+      run: () => {
+        this.position = { ...p };
+      },
+    };
+  }
+  setDownJob(): Job {
+    const tile = this.plot(this.position);
+    return {
+      label: "Set down load",
+      minutes: minutes.transfer,
+      run: () => {
+        for (const material of materials) tile.stock[material] += this.load[material];
+        this.load = freshStock();
+      },
+    };
+  }
   jobs(): Job[] {
     const p = this.selected,
       tile = this.plot(p),
       here = distance(this.position, p) === 0;
-    if (!here)
-      return [
-        {
-          label: "Walk here",
-          minutes: distance(this.position, p) * this.pace,
-          run: () => {
-            this.position = { ...p };
-          },
-        },
-      ];
+    if (!here) return [this.walkJob(p)];
     const jobs: Job[] = [];
     const timber = timberJob(tile);
     if (timber) jobs.push(timber);
     for (const material of materials)
       if (tile.stock[material]) jobs.push(pickup(this.load, tile.stock, material));
-    if (quantity(this.load))
-      jobs.push({
-        label: "Set down load",
-        minutes: minutes.transfer,
-        run: () => {
-          for (const material of materials) tile.stock[material] += this.load[material];
-          this.load = freshStock();
-        },
-      });
+    if (quantity(this.load)) jobs.push(this.setDownJob());
     const plan = this.cabins.find((cabin) => cabin.contains(this.position));
     if (plan) jobs.push(...plan.jobs(this.load));
     if (plan?.complete) jobs.push(...plan.hearth.tending(this.load, this.cabinStacks(plan), 1));

@@ -160,7 +160,8 @@ canvas {
   width: 100%;
   height: 100%;
 }
-#tiles {
+#tiles,
+#cabin-controls {
   margin: 0;
   padding: 0;
   border: 0;
@@ -230,6 +231,9 @@ kbd {
 }
 .card .overline {
   margin-bottom: 6px;
+}
+#cabin-guide {
+  border-left: 4px solid #b08c48;
 }
 .card p {
   margin: 8px 0;

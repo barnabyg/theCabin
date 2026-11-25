@@ -8,7 +8,9 @@ import { openScenario, renderSpring, nextSpringDay } from "./spring-panel";
 import { harvestProgress, springDays } from "./spring";
 import { renderNight } from "./night-panel";
 import { ClearArea, Haul, type WorkOrder } from "./haul";
+import { nextCabinStep } from "./cabin-guide";
 import {
+  type Cabin,
   footprint,
   footprintTiles,
   fixedObstruction,
@@ -42,6 +44,11 @@ const trader = campaign?.market ?? market;
 const spring = campaign?.market.spring ?? session?.spring;
 const growingSeason = market?.spring ?? spring;
 const game = trader?.game ?? session?.game ?? new Homestead();
+const cabinControls = element("cabin-controls");
+const cabinNext = element("cabin-next");
+if (!(cabinControls instanceof HTMLFieldSetElement) || !(cabinNext instanceof HTMLButtonElement))
+  throw new Error("Missing cabin construction controls");
+let guidedCabin: Cabin | undefined;
 const landscape = startLandscape(game);
 let haul: WorkOrder | undefined = winter?.haul ?? session?.haul;
 let ticker: number | undefined;
@@ -135,7 +142,11 @@ tiles.addEventListener("click", (event) => {
   const point = { x: index % COLS, y: Math.floor(index / COLS) };
   if (tile !== event.target) tile.focus({ preventScroll: true });
   if (game.planning) game.preview = point;
-  else game.selected = point;
+  else {
+    game.selected = point;
+    const cabin = game.cabins.find((c) => c.contains(point) && !c.complete);
+    if (cabin) guidedCabin = cabin;
+  }
   render();
 });
 let hovered: HTMLButtonElement | undefined;
@@ -231,7 +242,9 @@ function renderMenu() {
     "Reserve footprint",
     () => {
       game.reserve();
+      guidedCabin = game.cabins.at(-1);
       render();
+      if (!element("cabin-guide").hidden) cabinNext.focus();
     },
     blocked.length > 0 || clearingSite,
   );
@@ -249,6 +262,42 @@ function restFromWork() {
     stopTimer();
     if (!haul.finished) haul.paused = true;
   } else haltHaul();
+}
+function renderCabinGuide() {
+  const guide = element("cabin-guide");
+  if (!guidedCabin || guidedCabin.complete)
+    guidedCabin = game.cabins.find((c) => !c.complete) ?? guidedCabin;
+  const cabin = guidedCabin;
+  guide.hidden =
+    !cabin ||
+    game.planning ||
+    !!game.night ||
+    scenarioEnded() ||
+    !!trader?.inTown ||
+    !!(haul && !haul.finished) ||
+    (cabin.complete && !cabin.contains(game.selected));
+  if (!cabin || guide.hidden) return;
+  const { note, job } = nextCabinStep(game, cabin);
+  const shortDay = job && job.minutes > game.daylight;
+  element("cabin-stage").textContent =
+    `Cabin at ${coordinate(cabin.origin)} · ${cabin.complete ? "Complete" : `Stage ${cabin.stage + 1} of 3`}`;
+  element("cabin-heading").textContent = cabin.nextStage?.label ?? "Cabin complete";
+  element("cabin-instruction").textContent = shortDay
+    ? `${note} This step needs ${job.minutes} minutes of daylight. You have ${game.daylight} left.`
+    : note;
+  cabinControls.hidden = !job;
+  if (!job) {
+    cabinNext.onclick = null;
+    return;
+  }
+  cabinNext.textContent = `${job.label} · ${job.minutes} min`;
+  cabinNext.setAttribute("aria-label", `Next step · ${cabinNext.textContent}`);
+  cabinNext.toggleAttribute("disabled", !!shortDay);
+  cabinNext.onclick = () => {
+    game.commit(job);
+    game.selected = { ...game.position };
+    render();
+  };
 }
 function render() {
   if (
@@ -275,6 +324,7 @@ function render() {
   element("storage-key").hidden = !game.storage;
   renderMenu();
   renderHaul();
+  renderCabinGuide();
   const p = game.selected,
     plot = game.plot(p);
   element("tile-title").textContent = `${siteName(p)} · ${coordinate(p)}`;

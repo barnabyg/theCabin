@@ -48,6 +48,8 @@ test("resume the spring cabin on the same day with the load and delivery intact"
     await expect(page.locator("#tile-title")).toContainText("E5");
     await expect(page.locator("#inspect")).toContainText("Settler is here");
     await expect(page.locator("#load")).toContainText("2 stone");
+    await expect(page.locator("#cabin-heading")).toHaveText("Lay floor");
+    await expect(page.locator("#cabin-next")).toContainText("Walk to the cabin at K4");
     await walkTo(page, "K4");
     await expect(page.locator("#inspect")).toContainText("Delivered · 2 logs, 0 stone");
     await action(page, /^Deliver materials/);

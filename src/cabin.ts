@@ -39,6 +39,21 @@ export class Cabin {
   remaining(material: BuildingMaterial) {
     return recipe[material] - this.delivered[material];
   }
+  get nextStage() {
+    return stages[this.stage];
+  }
+  buildJob(): Job | undefined {
+    const next = this.nextStage;
+    if (!next) return;
+    return {
+      label: next.label,
+      minutes: next.minutes,
+      enabled: this.delivered.logs >= next.logs && this.delivered.stone >= next.stone,
+      run: () => {
+        this.stage++;
+      },
+    };
+  }
   delivery(load: Stock): Job | undefined {
     if (!buildingMaterials.some((material) => load[material] > 0 && this.remaining(material) > 0))
       return;
@@ -57,16 +72,8 @@ export class Cabin {
   jobs(load: Stock): Job[] {
     const delivery = this.delivery(load),
       jobs = delivery ? [delivery] : [];
-    const next = stages[this.stage];
-    if (next)
-      jobs.push({
-        label: next.label,
-        minutes: next.minutes,
-        enabled: this.delivered.logs >= next.logs && this.delivered.stone >= next.stone,
-        run: () => {
-          this.stage++;
-        },
-      });
+    const build = this.buildJob();
+    if (build) jobs.push(build);
     return jobs;
   }
   constructor(readonly origin: Point) {}
