@@ -164,11 +164,9 @@ canvas {
   margin: 0;
   padding: 0;
   border: 0;
-  display: grid;
-  grid-template-columns: repeat(16, minmax(0, 1fr));
-  grid-template-rows: repeat(9, minmax(0, 1fr));
 }
 .cell {
+  position: absolute;
   appearance: none;
   background: transparent;
   border: 0;
@@ -176,13 +174,13 @@ canvas {
   padding: 0;
   cursor: crosshair;
 }
-.cell:hover,
-.cell:focus-visible {
-  outline: 2px solid #fff3bc;
-  outline-offset: -3px;
+.cell.hovered {
+  background: rgba(255, 244, 196, 0.3);
 }
-.cell[aria-pressed="true"] {
-  border: 2px dashed #f9ebad;
+.cell:focus-visible {
+  background: rgba(255, 244, 196, 0.45);
+  outline: 4px solid #fff3bc;
+  outline-offset: -5px;
 }
 .map-key,
 .controls {
