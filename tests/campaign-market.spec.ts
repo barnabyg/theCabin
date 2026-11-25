@@ -1,5 +1,6 @@
 import { chromium, expect, test } from "@playwright/test";
-import { action, selectTile, walkTo } from "./controls";
+import { action, walkTo } from "./controls";
+import { buildPantry } from "./winter-route";
 
 test("trade a fur for food, resume at the merchant, and fill the home pantry", async ({
   baseURL,
@@ -9,16 +10,7 @@ test("trade a fur for food, resume at the merchant, and fill the home pantry", a
   try {
     let page = browser.pages()[0];
     await page.goto("/?scenario=winter");
-    await action(page, /^Build menu/);
-    await action(page, /^Pantry$/);
-    await selectTile(page, "F6");
-    await action(page, /^Reserve pantry/);
-    await walkTo(page, "C4");
-    await action(page, /^Fell tree/);
-    await action(page, /^Pick up logs/);
-    await walkTo(page, "F6");
-    await action(page, /^Deliver to pantry/);
-    await action(page, /^Finish pantry/);
+    await buildPantry(page);
 
     await walkTo(page, "I7");
     await action(page, /^Collect 1 fur/);
