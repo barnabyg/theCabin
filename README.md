@@ -58,6 +58,10 @@ From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Ope
 
 **Win from an empty purse.** Choose **Start with an empty purse**. Walk to town, take the two-firewood order for three coins, and walk home. Fell the tree at D4, split one log and pick up both pieces of firewood. Carry them to town, deliver the order, buy one turnip seed and return. Sow at G6 and wait until sundown. The order pays once and the pantry still holds four portions.
 
+## First winter
+
+From the repository root, run `npm.cmd run play` with Node.js 24.13 or later, open http://127.0.0.1:5173 and choose **First winter**. Walk to P6, buy a turnip seed in town with the opening four coins and return. Prepare a garden at G6 and sow. Save First winter, close the browser, and reopen in the same profile. **Resume First winter** restores the planted bed, day and one remaining coin.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

@@ -72,6 +72,35 @@ function showOrder(town: HTMLElement, market: Market, render: () => void) {
   }
 }
 
+export function renderMerchant(town: HTMLElement, market: Market, render: () => void) {
+  const { game } = market;
+  heading(town, "River town merchant");
+  paragraph(
+    town,
+    `${market.seedStock} turnip seed${market.seedStock === 1 ? "" : "s"} in stock · ${marketRules.seedPrice} coins each`,
+  );
+  button(town, `Buy 1 turnip seed · ${marketRules.seedPrice} coins`, () => {
+    game.message = market.buySeed();
+    render();
+  });
+  paragraph(
+    town,
+    `Food portions purchased · ${market.purchased.food} · Furs purchased · ${market.purchased.fur}`,
+  );
+  for (const offer of saleOffers)
+    button(
+      town,
+      `Sell 1 ${offer.material} · ${offer.price} coins`,
+      () => {
+        market.sell(offer);
+        game.message = `Sold 1 ${offer.material}.`;
+        render();
+      },
+      !game.load[offer.material],
+    );
+  showOrder(town, market, render);
+}
+
 export function renderMarket(market: Market, render: () => void) {
   const { game, spring } = market;
   const ended = !game.daylight;
@@ -102,31 +131,7 @@ export function renderMarket(market: Market, render: () => void) {
     if (!reasons.length) paragraph(box, "Your turnips are sown and the pantry reserve is intact.");
     if (market.inTown) heading(town, "River town at sundown");
   } else if (market.inTown) {
-    heading(town, "River town merchant");
-    paragraph(
-      town,
-      `${market.seedStock} turnip seed${market.seedStock === 1 ? "" : "s"} in stock · ${marketRules.seedPrice} coins each`,
-    );
-    button(town, `Buy 1 turnip seed · ${marketRules.seedPrice} coins`, () => {
-      game.message = market.buySeed();
-      render();
-    });
-    paragraph(
-      town,
-      `Food portions purchased · ${market.purchased.food} · Furs purchased · ${market.purchased.fur}`,
-    );
-    for (const offer of saleOffers)
-      button(
-        town,
-        `Sell 1 ${offer.material} · ${offer.price} coins`,
-        () => {
-          market.sell(offer);
-          game.message = `Sold 1 ${offer.material}.`;
-          render();
-        },
-        !game.load[offer.material],
-      );
-    showOrder(town, market, render);
+    renderMerchant(town, market, render);
     walk(town, "Walk home");
   } else {
     paragraph(

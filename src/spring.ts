@@ -4,11 +4,12 @@ export const springDays = 6;
 export const dailyMinutes = 360;
 
 export class Spring {
+  constructor(readonly lastDay = springDays) {}
   day = 1;
   seeds = { turnip: 2, squash: 2 };
   won = false;
   get ended() {
-    return this.won || this.day > springDays;
+    return this.won || this.day > this.lastDay;
   }
   rest() {
     if (!this.ended) this.day++;

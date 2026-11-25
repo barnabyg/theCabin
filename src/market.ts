@@ -1,3 +1,4 @@
+import type { Haul } from "./haul";
 import { Cabin, recipe } from "./cabin";
 import { sowingMinutes } from "./garden";
 import { Spring } from "./spring";
@@ -130,24 +131,28 @@ export class Market {
     return "Bought one turnip seed.";
   }
 
+  record(haul?: Haul) {
+    const { coins, purchased, order, seedStock, inTown } = this;
+    return {
+      version: 1,
+      coins,
+      purchased,
+      order,
+      seedStock,
+      inTown,
+      homestead: snapshot(this.game, this.spring, haul),
+    };
+  }
+
   save() {
-    const { coins, seedStock, inTown } = this;
-    localStorage.setItem(
-      marketKey,
-      JSON.stringify({
-        version: 1,
-        coins,
-        purchased: this.purchased,
-        order: this.order,
-        seedStock,
-        inTown,
-        homestead: snapshot(this.game, this.spring),
-      }),
-    );
+    localStorage.setItem(marketKey, JSON.stringify(this.record()));
   }
 
   static resume(encoded: string) {
-    const data = JSON.parse(encoded);
+    return Market.restore(JSON.parse(encoded)).market;
+  }
+
+  static restore(data: ReturnType<Market["record"]> & { foodBought?: number }, lastDay?: number) {
     if (
       data.version !== 1 ||
       typeof data.inTown !== "boolean" ||
@@ -158,7 +163,7 @@ export class Market {
       data.seedStock > 2
     )
       throw Error("Invalid market save");
-    const { game, spring } = restoreSpring(data.homestead);
+    const { game, spring, haul } = restoreSpring(data.homestead, lastDay);
     const market = new Market(game, spring);
     market.coins = data.coins;
     market.seedStock = data.seedStock;
@@ -173,6 +178,6 @@ export class Market {
     market.order = order;
     market.inTown = data.inTown;
     game.message = "Market day resumed.";
-    return market;
+    return { market, haul };
   }
 }
