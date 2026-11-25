@@ -79,7 +79,7 @@ function renderHaul() {
   element("haul-controls").hidden = haul.finished;
   load.textContent = `Settler at ${coordinate(game.position)} · ${stockLabel(game.load)}`;
   haulToggle.textContent = haul.paused ? "Resume haul" : "Pause haul";
-  haulToggle.disabled = game.planning;
+  haulToggle.disabled = game.planning || !!trader?.inTown;
 }
 const cells: HTMLButtonElement[] = [];
 const tiles = element("tiles");

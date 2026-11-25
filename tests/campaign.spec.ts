@@ -1,5 +1,5 @@
 import { chromium, expect, test } from "@playwright/test";
-import { action, selectTile, walkTo } from "./controls";
+import { action, reserveOpen, selectTile, walkTo } from "./controls";
 
 test("buy a first sowing from bare ground and reopen the planted campaign", async ({
   baseURL,
@@ -34,4 +34,20 @@ test("buy a first sowing from bare ground and reopen the planted campaign", asyn
   } finally {
     await browser.close();
   }
+});
+
+test("leave a paused haul at home while visiting town", async ({ page }) => {
+  await page.goto("/?scenario=winter");
+  await reserveOpen(page);
+  await walkTo(page, "D4");
+  await action(page, /^Fell tree/);
+  await action(page, /^Repeat haul/);
+  await action(page, /^Pause haul/);
+  await walkTo(page, "P6");
+  await action(page, /^Walk to town/);
+  const resume = page.getByRole("button", { name: "Resume haul" });
+  await expect(resume).toBeDisabled();
+  await action(page, /^Walk home/);
+  await expect(resume).toBeEnabled();
+  await expect(page.locator("#tile-title")).toContainText("P6");
 });
