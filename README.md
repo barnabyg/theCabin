@@ -12,7 +12,7 @@ You can also start the game from the repository root in PowerShell:
 npm.cmd run play
 ```
 
-Open http://127.0.0.1:5173 in a desktop browser. The command installs locked dependencies and starts the local game. Use Ctrl+C to stop.
+Open the local address printed by the launcher in a desktop browser. The first screen shows **One cold night**, a homestead map and six hours of daylight. Choose **First winter** in the scenario links to start the campaign. The command installs locked dependencies and starts the local game. Use Ctrl+C to stop.
 
 To see the finished cabin immediately, choose **Market day**. Select K4 and choose **Walk here** to see the cutaway and hearth. Press the up arrow to step outside onto K3 and see the full roof again.
 

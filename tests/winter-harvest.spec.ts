@@ -1,5 +1,5 @@
 import { chromium, expect, test } from "@playwright/test";
-import { action } from "./controls";
+import { action, selectTile } from "./controls";
 import { harvestStores, rest } from "./winter-route";
 
 test("recover during a cold spell and reach thaw on the harvest after reopening", async ({
@@ -9,7 +9,9 @@ test("recover during a cold spell and reach thaw on the harvest after reopening"
   let browser = await launch();
   try {
     let page = browser.pages()[0];
-    await page.goto("/?scenario=winter");
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "One cold night" })).toBeVisible();
+    await page.getByRole("link", { name: "First winter" }).click();
     await harvestStores(page);
     await expect(page.locator("#clock")).toContainText("2h");
     await rest(page);
@@ -46,6 +48,23 @@ test("recover during a cold spell and reach thaw on the harvest after reopening"
     await action(page, /^Start a fresh First winter/);
     await expect(page.locator("#calendar")).toContainText("Spring · Day 1");
     await expect(page.locator("#purse")).toHaveText("4 coins");
+    await expect(page.locator("#clock")).toHaveText("6h 00m");
+    await expect(page.locator("#load")).toHaveText("Empty (0/2)");
+    await expect(page.locator("#seeds")).toHaveText("0 turnip · 0 squash");
+    await expect(page.locator("#night")).toContainText("0 meals · 0 drinks");
+    await expect(page.locator("#night")).toContainText("In hearths · 0 firewood");
+    await expect(page.locator("#tile-title")).toContainText("G6");
+    await expect(page.locator("#inspect")).not.toContainText("Garden");
+    await selectTile(page, "D4");
+    await expect(page.locator("#inspect")).toContainText("Tree");
+    await selectTile(page, "E5");
+    await expect(page.locator("#inspect")).toContainText("On the ground · 2 stone");
+    await selectTile(page, "F6");
+    await expect(page.locator("#inspect")).not.toContainText("Pantry");
+    await selectTile(page, "K4");
+    await expect(page.locator("#inspect")).not.toContainText("Hearth");
+    await page.goto("/");
+    await expect(page.getByRole("link", { name: "First winter", exact: true })).toBeVisible();
   } finally {
     await browser.close();
   }
