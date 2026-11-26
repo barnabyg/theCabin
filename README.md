@@ -16,7 +16,7 @@ Open the local address printed by the launcher in a desktop browser. The first s
 
 The game uses port 43187 and Playwright uses 43188. Set `CABIN_PORT` or `CABIN_TEST_PORT` before launching to choose a different port. Browser saves belong to the address where you played. To resume a save from the previous default, set `$env:CABIN_PORT = "5173"` and launch the game in the same browser profile.
 
-To see the finished cabin immediately, choose **Market day**. Select K4 and choose **Walk here** to see the cutaway and hearth. Press the up arrow to step outside onto K3 and see the full roof again.
+To see the finished cabin immediately, choose **Market day**. Select K4 and choose **Walk here** to look inside. The roof and upper chimney lift away, exposing the bench, stone hearth and walking space between the low front walls. Press the up arrow to step outside onto K3 and see the full roof again.
 
 Click the tree at D4 in the wooded site and choose **Walk here**, then **Fell tree**. The stump and four logs remain. Pick up two logs, walk one tile east with the right arrow, and set down the load. You should see two logs on E4 and two still on D4. A loaded step costs two minutes, an empty step one. Select a distant tile to preview the whole trip. Time advances only on committed actions.
 

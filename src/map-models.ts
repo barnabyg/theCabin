@@ -85,11 +85,12 @@ export function cabinModel(cabin: Cabin, inside: boolean) {
   if (cabin.complete) {
     const chimneyX = x + w - 0.6,
       chimneyZ = z + 0.2;
-    for (let i = 0; i < 3; i++)
+    for (let i = 0; i < (inside ? 1 : 3); i++)
       mesh.box(0x909081, chimneyX, chimneyZ, 0.12 + i * 0.6, 0.38, 0.35, 0.6, "stone");
-    mesh.box(0xacaa94, chimneyX - 0.04, chimneyZ - 0.04, 1.92, 0.46, 0.43, 0.09);
-    mesh.box(0x4b4d47, chimneyX + 0.04, chimneyZ + 0.04, 2.011, 0.3, 0.27, 0.008);
     if (!inside) {
+      mesh.box(0xacaa94, chimneyX - 0.04, chimneyZ - 0.04, 1.92, 0.46, 0.43, 0.09);
+      mesh.box(0x4b4d47, chimneyX + 0.04, chimneyZ + 0.04, 2.011, 0.3, 0.27, 0.008);
+      mesh.roof(x - 0.12, z - 0.1, w + 0.24, d + 0.18, 0.98, 0.59, 0x895d43);
       for (let board = 0; board < 5; board++)
         mesh.box(
           0x775436,
@@ -116,13 +117,13 @@ export function cabinModel(cabin: Cabin, inside: boolean) {
       mesh.box(0xab845d, x + 0.18, z + 0.19, floor + 0.22, 0.94, 0.31, 0.065, "plank");
     }
     mesh.box(0x77766a, chimneyX - 0.1, chimneyZ + 0.23, floor, 0.57, 0.38, 0.22, "stone");
+    mesh.box(0x989486, chimneyX - 0.07, chimneyZ + 0.32, 0.34, 0.1, 0.18, 0.24, "stone");
+    mesh.box(0x989486, chimneyX + 0.35, chimneyZ + 0.32, 0.34, 0.1, 0.18, 0.24, "stone");
+    mesh.box(0xa39c89, chimneyX - 0.09, chimneyZ + 0.29, 0.58, 0.56, 0.22, 0.1, "stone");
     mesh.box(0x3d3930, chimneyX + 0.03, chimneyZ + 0.35, 0.34, 0.32, 0.04, 0.21);
     mesh.log(chimneyX + 0.04, chimneyZ + 0.47, 0.34, 0.28, 0.035, true);
     if (cabin.hearth.lit)
       mesh.round(0xffaf49, chimneyX + 0.18, chimneyZ + 0.43, 0.34, 0.13, 0.01, 0.27, 5);
-    // Retain a strip of roof at the rear so the finished cabin reads as such indoors.
-    const roofDepth = inside ? d * 0.27 : d + 0.18;
-    mesh.roof(x - 0.12, z - 0.1, w + 0.24, roofDepth, 0.98, 0.59, 0x895d43);
   }
   return mesh;
 }

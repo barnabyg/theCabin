@@ -27,20 +27,21 @@ test("the cabin opens on entry and restores its roof on exit", async ({ page }) 
   await openPaintedMap(page, "/?scenario=market");
   const bounds = await page.locator("canvas").boundingBox();
   if (!bounds) throw new Error("Map is hidden");
-  // Sample the centre of L4, away from the settler and the selected tile.
-  const p = project([11.5, 0, 3.68]);
-  const clip = {
-    x: Math.round(bounds.x + (p.x * bounds.width) / view.width) - 5,
-    y: Math.round(bounds.y + (p.y * bounds.height) / view.height) - 5,
-    width: 10,
-    height: 10,
-  };
-  const exterior = await page.screenshot({ clip });
+  // Check the roof over L4 and the upper chimney independently.
+  const clips = [project([11.5, 0, 3.68]), project([12.47, 1.95, 3.53])].map((p) => ({
+    x: Math.round(bounds.x + (p.x * bounds.width) / view.width) - 2,
+    y: Math.round(bounds.y + (p.y * bounds.height) / view.height) - 2,
+    width: 4,
+    height: 4,
+  }));
+  const sample = () => Promise.all(clips.map((clip) => page.screenshot({ clip })));
+  const exterior = await sample();
   await walkTo(page, "K4");
-  expect(await page.screenshot({ clip })).not.toEqual(exterior);
+  const interior = await sample();
+  for (const [i, patch] of interior.entries()) expect(patch).not.toEqual(exterior[i]);
   await page.keyboard.press("ArrowUp");
   await expect(page.locator("#tile-title")).toContainText("K3");
-  expect(await page.screenshot({ clip })).toEqual(exterior);
+  expect(await sample()).toEqual(exterior);
 });
 
 test("the projected clearing keeps edge tiles, planning and the river aligned after resize", async ({
