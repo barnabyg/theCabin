@@ -20,6 +20,8 @@ async function deliver(
   delivery: RegExp,
 ) {
   await walkTo(page, source);
+  if (resource === "stone" && (await page.getByRole("button", { name: /^Work rock/ }).count()))
+    await action(page, /^Work rock/);
   await action(page, new RegExp(`^Pick up ${resource}`));
   await walkTo(page, target);
   await action(page, delivery);

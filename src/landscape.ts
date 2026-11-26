@@ -109,7 +109,12 @@ export function startLandscape(
       }
       if (plot.site && plot.site.kind !== "Garden" && !plot.site.complete)
         markGround(ctx, x - 0.4, z - 0.38, 0.8, 0.76, "rgba(72,99,96,.38)", "#f5e5b6");
-      if (plot.site || plot.timber === "Stump" || Object.values(plot.stock).some(Boolean)) {
+      if (
+        plot.rawStone ||
+        plot.site ||
+        plot.timber === "Stump" ||
+        Object.values(plot.stock).some(Boolean)
+      ) {
         const cabin = game.cabins.find(
           (c) => c.stage && c.contains({ x: Math.floor(x), y: Math.floor(z) }),
         );

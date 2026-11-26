@@ -28,7 +28,7 @@ test("clear the chosen cabin footprint, store each load and build from the stock
   await page.clock.runFor(15000);
   await expect(page.locator("#haul")).toContainText("Ready to reserve · Cabin site D4");
   await expect(page.locator("#inspect")).toContainText("On the ground · 4 logs, 2 stone");
-  await expect(page.locator("#clock")).toHaveText("4h 55m");
+  await expect(page.locator("#clock")).toHaveText("4h 49m");
   await selectTile(page, "C4");
   await expect(page.locator("#inspect")).toContainText("Tree");
   await action(page, /^Build menu/);

@@ -19,6 +19,7 @@ export const rest = (page: Page) => action(page, /^Rest until tomorrow/);
 
 async function deliver(page: Page, material: string, source: string, target: string, job: RegExp) {
   await walkTo(page, source);
+  if (material === "stone") await action(page, /^Work rock/);
   await action(page, new RegExp(`^Pick up ${material}`));
   await walkTo(page, target);
   await action(page, job);

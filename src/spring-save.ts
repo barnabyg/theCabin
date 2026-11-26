@@ -66,6 +66,7 @@ function restoreStock(record: Stock) {
 
 function restorePlot(plot: Plot): Plot {
   const { site, timber } = plot;
+  if (plot.rawStone !== undefined && !count(plot.rawStone)) throw Error("Invalid rock deposit");
   if (timber !== null && timber !== "Tree" && timber !== "Stump") throw Error("Invalid timber");
   if (site?.kind === "Garden") {
     const c = site.crop;

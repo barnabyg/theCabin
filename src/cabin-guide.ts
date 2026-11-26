@@ -6,6 +6,7 @@ import {
   distance,
   land,
   pickup,
+  pickaxeJob,
   quantity,
   timberJob,
   type Homestead,
@@ -57,6 +58,11 @@ export function nextCabinStep(game: Homestead, cabin: Cabin): CabinStep {
   if (tree) {
     const fell = timberJob(tree.plot);
     if (fell) return at(tree.tile, `Walk to the tree at ${coordinate(tree.tile)}`, fell, note);
+  }
+  const rock = material === "stone" && sources.find(({ plot }) => plot.rawStone);
+  if (rock) {
+    const work = pickaxeJob(rock.plot);
+    if (work) return at(rock.tile, `Walk to the rock at ${coordinate(rock.tile)}`, work, note);
   }
   return { note: `This stage needs ${material}. The clearing has no more to gather.` };
 }

@@ -16,11 +16,19 @@ test("build from a reservation by following the cabin's next action", async ({ p
   ]) {
     await expect(guide.getByRole("heading")).toHaveText(stage);
     await expect(next).toContainText(
-      stage === "Lay floor" ? "Walk to the tree" : `Walk to the ${material}`,
+      stage === "Lay floor"
+        ? "Walk to the tree"
+        : material === "stone"
+          ? "Walk to the rock"
+          : "Walk to the logs",
     );
     await next.click();
     if (stage === "Lay floor") {
       await expect(next).toContainText("Fell tree");
+      await next.click();
+    }
+    if (material === "stone") {
+      await expect(next).toContainText("Work rock with pickaxe");
       await next.click();
     }
     for (const label of [
@@ -79,6 +87,7 @@ test("interrupt a repeat haul, preserve its load, then finish the cabin in stage
   await action(page, /^Lay floor/);
   await expect(page.locator("#inspect")).toContainText("Floor laid");
   await walkTo(page, "E5");
+  await action(page, /^Work rock with pickaxe/);
   await action(page, /^Pick up stone/);
   await walkTo(page, "K4");
   await expect(page.locator("#inspect")).toContainText("Floor laid");

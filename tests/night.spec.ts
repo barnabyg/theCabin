@@ -9,6 +9,7 @@ async function furnish(page: Page, site: "K4" | "D4") {
   if (site === "D4") {
     await action(page, /^Clear stump/);
     await walkTo(page, "E5");
+    await action(page, /^Work rock with pickaxe/);
     await action(page, /^Pick up stone/);
     await action(page, /^Build menu/);
     await action(page, /^Wooded site/);
@@ -30,6 +31,7 @@ async function furnish(page: Page, site: "K4" | "D4") {
   }
   if (site === "K4") {
     await walkTo(page, "E5");
+    await action(page, /^Work rock with pickaxe/);
     await action(page, /^Pick up stone/);
     await walkTo(page, site);
     await action(page, /^Deliver materials/);

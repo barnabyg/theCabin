@@ -35,8 +35,9 @@ test("resume the spring cabin on the same day with the load and delivery intact"
     await action(page, /^Deliver materials/);
     await action(page, /^Rest until tomorrow/);
     await walkTo(page, "E5");
+    await action(page, /^Work rock with pickaxe/);
     await action(page, /^Pick up stone/);
-    await expect(page.locator("#clock")).toHaveText("5h 52m");
+    await expect(page.locator("#clock")).toHaveText("5h 46m");
     await action(page, /^Save spring day/);
     await context.close();
     context = await launch();
@@ -44,7 +45,7 @@ test("resume the spring cabin on the same day with the load and delivery intact"
     await page.goto("/");
     await page.getByRole("link", { name: "Resume First harvest" }).click();
     await expect(page.locator("#calendar")).toContainText("Day 2");
-    await expect(page.locator("#clock")).toHaveText("5h 52m");
+    await expect(page.locator("#clock")).toHaveText("5h 46m");
     await expect(page.locator("#tile-title")).toContainText("E5");
     await expect(page.locator("#inspect")).toContainText("Settler is here");
     await expect(page.locator("#load")).toContainText("2 stone");

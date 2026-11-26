@@ -110,6 +110,6 @@ export function obstructionAt(game: Homestead, tile: Point) {
   return (
     fixedObstruction(game, tile) ??
     game.plot(tile).timber ??
-    (game.plot(tile).stock.stone ? "Loose stone" : null)
+    (game.plot(tile).rawStone ? "Raw rock" : game.plot(tile).stock.stone ? "Loose stone" : null)
   );
 }

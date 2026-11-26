@@ -19,6 +19,7 @@ test("finish a well after reopening with two of its four stone delivered", async
     );
     await action(page, /^Reserve well/);
     await walkTo(page, "F3");
+    await action(page, /^Work rock with pickaxe/);
     await action(page, /^Pick up stone/);
     await walkTo(page, "H6");
     await action(page, /^Deliver to well/);

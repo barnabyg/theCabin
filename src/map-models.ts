@@ -173,6 +173,10 @@ export function plotModel(plot: Plot, x: number, z: number, floor: number) {
       0.07,
     );
   }
+  if (plot.rawStone) {
+    const size = plot.rawStone > 2 ? 0.41 : 0.31;
+    mesh.round(0x747b71, x, z, floor, size, size * 0.73, size * 0.85, 7, 0.3, "stone");
+  }
   if (plot.stock.stone) {
     for (const [dx, dz, r] of [
       [-0.14, 0.05, 0.19],

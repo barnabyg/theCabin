@@ -56,6 +56,7 @@ async function prepareHearth(page: Page) {
     ["E5", "stone"],
   ]) {
     await walkTo(page, source);
+    if (material === "stone") await action(page, /^Work rock/);
     await action(page, new RegExp(`^Pick up ${material}`));
     await walkTo(page, "K4");
     await action(page, /^Deliver materials/);

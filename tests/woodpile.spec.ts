@@ -43,6 +43,7 @@ test("autumn rain spoils loose fuel while covered firewood survives reopening an
       ["E5", /^Pick up stone/],
     ] as const) {
       await walkTo(page, tile);
+      if (tile === "E5") await action(page, /^Work rock/);
       await action(page, pickup);
       await walkTo(page, "K4");
       await action(page, /^Deliver materials/);

@@ -14,7 +14,7 @@ for (const site of ["Open site", "Wooded site"]) {
     await expect(menu).toContainText("longer haul to the open site at K4");
     await action(page, /^Wooded site$/);
     await expect(menu).toContainText("D4 · Tree");
-    await expect(menu).toContainText("E5 · Loose stone");
+    await expect(menu).toContainText("E5 · Raw rock");
     const tree = page.getByRole("button", { name: "D4", exact: true });
     await expect(tree).toHaveAccessibleDescription("Tree blocks this footprint");
     await expect(page.getByRole("button", { name: "Reserve footprint" })).toBeDisabled();

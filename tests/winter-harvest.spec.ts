@@ -58,7 +58,7 @@ test("recover during a cold spell and reach thaw on the harvest after reopening"
     await selectTile(page, "D4");
     await expect(page.locator("#inspect")).toContainText("Tree");
     await selectTile(page, "E5");
-    await expect(page.locator("#inspect")).toContainText("On the ground · 2 stone");
+    await expect(page.locator("#inspect")).toContainText("Raw rock · Yields 2 stone");
     await selectTile(page, "F6");
     await expect(page.locator("#inspect")).not.toContainText("Pantry");
     await selectTile(page, "K4");
