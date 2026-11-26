@@ -19,7 +19,6 @@ test("autumn rain spoils loose fuel while covered firewood survives reopening an
       "Tree blocks this footprint",
     );
     await selectTile(page, "H6");
-    await action(page, /^Reserve covered woodpile/);
     await walkTo(page, "D4");
     await action(page, /^Fell tree/);
     await action(page, /^Pick up logs/);

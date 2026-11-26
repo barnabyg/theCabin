@@ -15,7 +15,6 @@ test("carry stream water, resume a growing turnip bed and gather its yield once"
     await selectTile(page, "D4");
     await expect(page.getByRole("button", { name: "Prepare garden" })).toBeDisabled();
     await selectTile(page, "G6");
-    await action(page, /^Prepare garden/);
     await expect(page.locator("#inspect")).toContainText("2 watered days");
     await action(page, /^Sow turnip/);
     await expect(page.locator("#seeds")).toContainText("1 turnip");

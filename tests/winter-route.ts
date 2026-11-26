@@ -29,7 +29,6 @@ export async function buildPantry(page: Page, tile = "F6") {
   await action(page, /^Build menu/);
   await action(page, /^Pantry$/);
   await selectTile(page, tile);
-  await action(page, /^Reserve pantry/);
   await walkTo(page, "C4");
   await action(page, /^Fell tree/);
   await deliver(page, "logs", "C4", tile, /^Deliver to pantry/);
@@ -79,7 +78,6 @@ export async function sowSquash(page: Page) {
   await action(page, /^Build menu/);
   await action(page, /^Garden$/);
   await selectTile(page, "G6");
-  await action(page, /^Prepare garden/);
   await spendDaylight(page, /^Sow squash/, 4);
   await expect(page.locator("#seeds")).toHaveText("0 turnip · 0 squash");
 }

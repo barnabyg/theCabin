@@ -121,7 +121,9 @@ test("the QHD clearing uses desktop space and keeps its controls in view", async
   expect(board.width).toBeGreaterThan(1800);
   expect(board.width / board.height).toBeCloseTo(16 / 9, 2);
   expect(notes.x).toBeGreaterThan(board.x + board.width);
-  await expect(page.locator(".controls")).toBeInViewport({ ratio: 1 });
+  await expect(page.locator("#walk-controls")).toBeInViewport({ ratio: 1 });
+  await page.getByRole("button", { name: "Build menu" }).click();
+  await expect(page.locator("#placement-controls")).toBeInViewport({ ratio: 1 });
 });
 
 test("the projected clearing keeps edge tiles, planning and the river aligned after resize", async ({
@@ -158,8 +160,7 @@ test("the projected clearing keeps edge tiles, planning and the river aligned af
   await clickGround(3.5, 3.5);
   await expect(page.locator("#plan-menu")).toContainText("Footprint · D4");
   await clickGround(10.5, 3.5);
-  await expect(page.locator("#plan-menu")).toContainText("Footprint · K4");
-  await page.getByRole("button", { name: "Return to clearing" }).click();
+  await expect(page.locator("#inspect")).toContainText("Blueprint · K4");
   await page.getByRole("button", { name: "D4", exact: true }).focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("#tile-title")).toContainText("D4");

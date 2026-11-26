@@ -254,7 +254,10 @@ export function plotModel(plot: Plot, x: number, z: number, floor: number) {
       mesh.round(0x93998c, x + dx, z + dz, floor, r, r * 0.38, r * 0.7, 9, dx * 5, "stone");
   }
 
-  const site = plot.site;
+  return siteModel(plot.site, x, z, mesh);
+}
+
+export function siteModel(site: Plot["site"], x: number, z: number, mesh = new Mesh()) {
   if (site?.kind === "Garden") {
     mesh.box(site.crop?.watered ? 0x573f2b : 0x795939, x - 0.42, z - 0.38, 0, 0.84, 0.76, 0.045);
     for (const row of [-0.24, 0, 0.24]) {

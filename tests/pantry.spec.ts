@@ -6,10 +6,6 @@ async function plan(page: Page, kind: "Well" | "Garden" | "Pantry", tile: string
   await expect(page.getByRole("button", { name: kind, exact: true })).toBeVisible();
   await action(page, new RegExp(`^${kind}$`));
   await selectTile(page, tile);
-  await action(
-    page,
-    kind === "Garden" ? /^Prepare garden/ : new RegExp(`^Reserve ${kind.toLowerCase()}`),
-  );
 }
 
 async function deliver(
