@@ -30,14 +30,22 @@ To automate the wooded site from daybreak, select G6 and choose **Mark storage a
 
 To prepare firewood, stand on gathered logs or carry them. Choose **Split 1 log** to spend four minutes making two pieces of firewood. A double batch takes eight minutes. The settler uses carried logs first and stacks the firewood on the ground. Select **Pick up firewood** to carry up to two pieces.
 
-After you choose **Reserve footprint**, follow the cabin card above Field Notes. Its button takes you to a source, lets you gather materials, and leads you back to deliver them. Once a stage has its supplies, the same button lets you **Lay floor**, **Raise walls**, or **Fit roof and hearth**. The floor takes two logs, the walls two more, and the roof and hearth two stone. You can inspect other tiles or work by hand and the card will update with your progress.
+After you choose **Reserve footprint**, the cabin card guides you to each source, back to the footprint and through the work itself. Its five stages model a French post-on-sill dwelling in the Illinois Country.
+
+1. **Set footings and sills**. Level the plot, bed the stone supports and lay the base timbers and rough floor. Deliver one stone and one log.
+2. **Raise wall posts**. Hew the timbers and seat them upright in the sills. Tie their tops together and leave the door and window openings. Deliver two more logs.
+3. **Frame and shingle roof**. Fit the rafters and cover them with overlapping split shingles. Deliver the fourth log.
+4. **Daub joints and fit door**. Pack clay and grass into the gaps, finish the floor and hang the door. The game includes gathering local infill in this action.
+5. **Build hearth and chimney**. Deliver the second stone and finish the fireplace and flue. You can now fuel the hearth and shelter overnight.
+
+Each load stands for a share of the real building materials. The five work actions take 45 game minutes so the first-night scenario remains playable in one sitting. Cahokia's courthouse began as a post-on-sill residence around 1740. The Martin-Boismenue House preserves the arrangement of upright timbers, sill and stone foundation. [Cahokia Courthouse](https://dnrhistoric.illinois.gov/experience/sites/site.cahokia-courthouse.html) · [Martin-Boismenue House](https://dnrhistoric.illinois.gov/experience/sites/southwest/martin-boismenue.html)
 
 To ferry several loads at once, fell the tree at D4 and choose **Repeat haul**. **Pause haul** holds the settler and load in place, and **Resume haul** continues the route. When the haul finishes, the cabin card shows the next step.
 
 ## Survive the first night
 
 1. Reserve the open site at K4. Fell the tree at D4 and repeat-haul its four logs to K4. Work the rock and pick up two stone at E5, walk to K4 and deliver them.
-2. At K4 choose **Lay floor**, **Raise walls**, then **Fit roof and hearth**. Fell the tree at C4 and carry two of its logs back to K4. **Split 2 logs** produces four firewood on the cabin floor.
+2. At K4 follow the five construction actions from **Set footings and sills** through **Build hearth and chimney**. Fell the tree at C4 and carry two of its logs back to K4. **Split 2 logs** produces four firewood on the cabin floor.
 3. **Add firewood** once, **Light hearth**, then **Wait for nightfall** while inside the cabin. With one piece burning, the low-fuel warning appears. Add the other three pieces over the four watches. Each lit watch burns one piece. Keeping warm through the fourth watch reaches **Dawn at the cabin**.
 4. Choose **Start again at daybreak**. For the wooded route, fell D4, clear its stump, gather the stone at E5, then reserve D4. Deliver the stone and pick up and deliver the logs at the footprint. Build and tend the hearth as above. The same timber travels seven loaded steps to the open site and zero to the wooded site.
 5. For the retreat ending, finish either cabin and wait for nightfall inside with an empty hearth. Two cold watches exhaust your warmth. **Start again** restores the original clearing, tools, purse and daylight.

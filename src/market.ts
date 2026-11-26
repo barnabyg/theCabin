@@ -1,5 +1,5 @@
 import type { WorkOrder } from "./haul";
-import { Cabin, recipe } from "./cabin";
+import { Cabin, cabinStageCount, recipe } from "./cabin";
 import { sowingMinutes } from "./garden";
 import { Spring } from "./spring";
 import { restoreSpring, snapshot } from "./spring-save";
@@ -44,7 +44,7 @@ export class Market {
     game.daylight = marketRules.daylight;
     const cabin = new Cabin({ ...openSite });
     cabin.delivered = { ...recipe };
-    cabin.stage = 3;
+    cabin.stage = cabinStageCount;
     game.cabins.push(cabin);
     game.plot(pantry).site = { kind: "Pantry", complete: true, delivered: 2, stored: 4 };
     game.plot(game.position).site = { kind: "Garden" };

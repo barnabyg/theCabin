@@ -22,14 +22,59 @@ export function withinFootprint(origin: Point, p: Point, size = footprint) {
     p.y < origin.y + size.height
   );
 }
-export const recipe = { logs: 4, stone: 2 };
+const stages = [
+  {
+    label: "Set footings and sills",
+    progress: "Sills set",
+    minutes: 10,
+    logs: 1,
+    stone: 1,
+    instruction:
+      "Level the ground with the spade, bed the stones and fit the timber base and rough floor.",
+  },
+  {
+    label: "Raise wall posts",
+    progress: "Wall posts raised",
+    minutes: 12,
+    logs: 3,
+    stone: 1,
+    instruction:
+      "Hew the timbers, seat the uprights in the sills and tie their tops together. Leave openings for the door and window.",
+  },
+  {
+    label: "Frame and shingle roof",
+    progress: "Roof shingled",
+    minutes: 10,
+    logs: 4,
+    stone: 1,
+    instruction: "Raise the rafters, then cover them with overlapping rows of split wood shingles.",
+  },
+  {
+    label: "Daub joints and fit door",
+    progress: "Walls sealed",
+    minutes: 5,
+    logs: 4,
+    stone: 1,
+    instruction:
+      "Pack local clay and grass between the posts, finish the floor and hang the plank door.",
+  },
+  {
+    label: "Build hearth and chimney",
+    progress: "Stone hearth ready",
+    minutes: 8,
+    logs: 4,
+    stone: 2,
+    instruction:
+      "Bed the hearthstones and finish the chimney through the roof before lighting a fire.",
+  },
+] as const;
+export const cabinStageCount = stages.length;
+export const recipe = {
+  logs: stages[stages.length - 1].logs,
+  stone: stages[stages.length - 1].stone,
+};
 export type BuildingMaterial = keyof typeof recipe;
 export const buildingMaterials = ["logs", "stone"] as const;
-const stages = [
-  { label: "Lay floor", minutes: 10, logs: 2, stone: 0 },
-  { label: "Raise walls", minutes: 14, logs: 4, stone: 0 },
-  { label: "Fit roof and hearth", minutes: 16, logs: 4, stone: 2 },
-] as const;
 export class Cabin {
   hearth = new Hearth();
   delivered = { logs: 0, stone: 0 };
@@ -37,8 +82,14 @@ export class Cabin {
   get complete() {
     return this.stage === stages.length;
   }
+  get roofed() {
+    return this.stage >= 3;
+  }
+  get sealed() {
+    return this.stage >= 4;
+  }
   get progress() {
-    return ["Blueprint", "Floor laid", "Walls raised", "Stone hearth ready"][this.stage];
+    return stages[this.stage - 1]?.progress ?? "Blueprint";
   }
   remaining(material: BuildingMaterial) {
     return recipe[material] - this.delivered[material];

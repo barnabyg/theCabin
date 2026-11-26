@@ -11,6 +11,7 @@ import { ClearArea, Haul, type WorkOrder } from "./haul";
 import { nextCabinStep } from "./cabin-guide";
 import {
   type Cabin,
+  cabinStageCount,
   footprint,
   footprintTiles,
   fixedObstruction,
@@ -310,7 +311,7 @@ function renderCabinGuide() {
   const { note, job } = nextCabinStep(game, cabin);
   const shortDay = job && job.minutes > game.daylight;
   element("cabin-stage").textContent =
-    `Cabin at ${coordinate(cabin.origin)} · ${cabin.complete ? "Complete" : `Stage ${cabin.stage + 1} of 3`}`;
+    `Cabin at ${coordinate(cabin.origin)} · ${cabin.complete ? "Complete" : `Stage ${cabin.stage + 1} of ${cabinStageCount}`}`;
   element("cabin-heading").textContent = cabin.nextStage?.label ?? "Cabin complete";
   element("cabin-instruction").textContent = shortDay
     ? `${note} This step needs ${job.minutes} minutes of daylight. You have ${game.daylight} left.`

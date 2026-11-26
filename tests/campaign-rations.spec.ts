@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { action, selectTile, walkTo } from "./controls";
+import { finishDeliveredCabin, action, selectTile, walkTo } from "./controls";
 import { buildPantry } from "./winter-route";
 
 async function restToWinter(page: Page, fromDay: number) {
@@ -61,7 +61,7 @@ async function prepareHearth(page: Page) {
     await walkTo(page, "K4");
     await action(page, /^Deliver materials/);
   }
-  for (const job of [/^Lay floor/, /^Raise walls/, /^Fit roof and hearth/]) await action(page, job);
+  await finishDeliveredCabin(page);
   await walkTo(page, "C4");
   await action(page, /^Pick up logs/);
   await walkTo(page, "K4");

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { action } from "./controls";
+import { action, cabinStages } from "./controls";
 
 for (const site of ["Open site", "Wooded site"]) {
   test(`a new First winter player can compare sites and complete shelter at the ${site}`, async ({
@@ -38,9 +38,9 @@ for (const site of ["Open site", "Wooded site"]) {
     await expect(guide).toContainText(`Cabin at ${site === "Open site" ? "K4" : "D4"}`);
     const next = guide.getByRole("button");
     await expect(next).toBeFocused();
-    for (const stage of ["Lay floor", "Raise walls", "Fit roof and hearth"]) {
+    for (const stage of cabinStages) {
       await expect(guide.getByRole("heading")).toHaveText(stage);
-      for (let step = 0; step < 6 && !(await next.textContent())?.startsWith(stage); step++) {
+      for (let step = 0; step < 12 && !(await next.textContent())?.startsWith(stage); step++) {
         await next.click();
       }
       await expect(next).toContainText(stage);

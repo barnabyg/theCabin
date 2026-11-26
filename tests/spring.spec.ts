@@ -1,5 +1,5 @@
 import { chromium, expect, test } from "@playwright/test";
-import { action, reserveOpen, walkTo } from "./controls";
+import { finishDeliveredCabin, action, reserveOpen, walkTo } from "./controls";
 
 test("restart after frost when browser storage is disabled", async ({ page }) => {
   await page.addInitScript(() => {
@@ -49,7 +49,7 @@ test("resume the spring cabin on the same day with the load and delivery intact"
     await expect(page.locator("#tile-title")).toContainText("E5");
     await expect(page.locator("#inspect")).toContainText("Settler is here");
     await expect(page.locator("#load")).toContainText("2 stone");
-    await expect(page.locator("#cabin-heading")).toHaveText("Lay floor");
+    await expect(page.locator("#cabin-heading")).toHaveText("Set footings and sills");
     await expect(page.locator("#cabin-next")).toContainText("Walk to the cabin at K4");
     await walkTo(page, "K4");
     await expect(page.locator("#inspect")).toContainText("Delivered · 2 logs, 0 stone");
@@ -59,8 +59,7 @@ test("resume the spring cabin on the same day with the load and delivery intact"
     await action(page, /^Pick up logs/);
     await walkTo(page, "K4");
     await action(page, /^Deliver materials/);
-    for (const job of [/^Lay floor/, /^Raise walls/, /^Fit roof and hearth/])
-      await action(page, job);
+    await finishDeliveredCabin(page);
     await expect(page.locator("#inspect")).toContainText("Stone hearth ready");
     for (let day = 2; day <= 6; day++) await action(page, /^Rest until tomorrow/);
     await expect(page.getByText(/Frost arrived with no harvest in the pantry/)).toBeVisible();

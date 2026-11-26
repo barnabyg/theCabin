@@ -1,5 +1,5 @@
 import { chromium, expect, test } from "@playwright/test";
-import { action, reserveOpen, selectTile, walkTo } from "./controls";
+import { finishDeliveredCabin, action, reserveOpen, selectTile, walkTo } from "./controls";
 
 test("autumn rain spoils loose fuel while covered firewood survives reopening and feeds the hearth", async ({
   baseURL,
@@ -48,8 +48,7 @@ test("autumn rain spoils loose fuel while covered firewood survives reopening an
       await walkTo(page, "K4");
       await action(page, /^Deliver materials/);
     }
-    for (const job of [/^Lay floor/, /^Raise walls/, /^Fit roof and hearth/])
-      await action(page, job);
+    await finishDeliveredCabin(page);
     for (let day = 1; day < 6; day++) await action(page, /^Rest until tomorrow/);
     await expect(page.locator("#night")).toContainText("Rain tonight");
     await selectTile(page, "D4");

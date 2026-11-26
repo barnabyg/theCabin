@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
+import { action, walkTo } from "./controls";
 
 // Browser saves captured through player controls in a54285f (harvest) and c49fe2b (market).
 const saved = JSON.parse(readFileSync("tests/fixtures/v1-browser-saves.json", "utf8"));
@@ -22,4 +23,8 @@ test("resume older harvest and market saves with their original goods", async ({
   await expect(page.getByRole("button", { name: /^Take order/ })).toBeVisible();
   await expect(page.locator("#purse")).toHaveText("3 coins");
   await expect(page.locator("#load")).toHaveText("1 food (1/2)");
+  await action(page, /^Walk home/);
+  await walkTo(page, "K4");
+  await expect(page.locator("#inspect")).toContainText("Stone hearth ready");
+  await expect(page.locator("#inspect")).toContainText("Outstanding · 0 logs, 0 stone");
 });

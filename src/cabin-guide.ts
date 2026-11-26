@@ -27,8 +27,7 @@ export function nextCabinStep(game: Homestead, cabin: Cabin): CabinStep {
     job: distance(game.position, target) ? { ...game.walkJob(target), label: walkLabel } : job,
   });
   const returnLabel = `Walk to the cabin at ${coordinate(site)}`;
-  if (build.enabled)
-    return at(site, returnLabel, build, "The materials for this stage are at the cabin.");
+  if (build.enabled) return at(site, returnLabel, build, stage.instruction);
 
   const delivery = cabin.delivery(game.load);
   if (delivery)

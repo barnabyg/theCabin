@@ -1,4 +1,11 @@
-import { Cabin, fixedObstruction, footprint, footprintTiles, recipe } from "./cabin";
+import {
+  Cabin,
+  cabinStageCount,
+  fixedObstruction,
+  footprint,
+  footprintTiles,
+  recipe,
+} from "./cabin";
 import { crops } from "./garden";
 import { plans } from "./outbuilding";
 import { ClearArea, Haul, type WorkOrder } from "./haul";
@@ -20,7 +27,7 @@ export const saveKey = "the-cabin.first-harvest";
 
 export function snapshot(game: Homestead, spring: Spring, haul?: WorkOrder) {
   return {
-    version: 1,
+    version: 2,
     spring: { day: spring.day, seeds: spring.seeds },
     position: game.position,
     selected: game.selected,
@@ -95,7 +102,7 @@ export function resumeSpring(encoded: string) {
 }
 
 export function restoreSpring(data: ReturnType<typeof snapshot>, lastDay = springDays) {
-  if (data.version !== 1) throw Error("Unsupported save version");
+  if (data.version !== 1 && data.version !== 2) throw Error("Unsupported save version");
   if (
     !Array.isArray(data.plots) ||
     data.plots.length !== COLS * ROWS ||
@@ -127,14 +134,15 @@ export function restoreSpring(data: ReturnType<typeof snapshot>, lastDay = sprin
       }) ||
       !count(record.delivered.logs, recipe.logs) ||
       !count(record.delivered.stone, recipe.stone) ||
-      !count(record.stage, 3) ||
+      !count(record.stage, data.version === 1 ? 3 : cabinStageCount) ||
       !count(record.hearth.fuel) ||
       typeof record.hearth.lit !== "boolean"
     )
       throw Error("Invalid cabin");
     const cabin = new Cabin(record.origin);
     cabin.delivered = record.delivered;
-    cabin.stage = record.stage;
+    // Released v1 saves numbered the finished roof and hearth as stage three.
+    cabin.stage = data.version === 1 && record.stage === 3 ? cabinStageCount : record.stage;
     Object.assign(cabin.hearth, record.hearth);
     return cabin;
   });

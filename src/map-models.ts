@@ -33,27 +33,34 @@ export function settler(x: number, z: number, floor: number) {
   return mesh;
 }
 
-function wall(
+function postWall(
   mesh: Mesh,
   x: number,
   z: number,
   width: number,
   depth: number,
-  courses: number,
-  base: number,
+  height: number,
+  sealed: boolean,
 ) {
   const alongX = width > depth;
-  for (let i = 0; i < courses; i++) {
-    const extension = i % 2 ? 0.1 : 0.045;
-    mesh.log(
-      alongX ? x - extension : x + width / 2,
-      alongX ? z + depth / 2 : z - extension,
-      base + i * 0.14,
-      Math.max(width, depth) + extension * 2,
-      0.079,
-      alongX,
+  const length = Math.max(width, depth);
+  const count = Math.ceil(length / 0.22);
+  const spacing = length / count;
+  if (sealed) mesh.box(0xd3bf98, x + 0.015, z + 0.015, 0.12, width - 0.03, depth - 0.03, height);
+  for (let i = 0; i < count; i++) {
+    const offset = i * spacing;
+    mesh.box(
+      i % 2 ? 0x886441 : 0x97714d,
+      alongX ? x + offset : x,
+      alongX ? z : z + offset,
+      0.12,
+      alongX ? spacing - 0.035 : width,
+      alongX ? depth : spacing - 0.035,
+      height,
+      "log",
     );
   }
+  mesh.box(0x735338, x, z, 0.12 + height, width, depth, 0.055, "log");
 }
 
 export function cabinModel(cabin: Cabin, inside: boolean) {
@@ -63,91 +70,149 @@ export function cabinModel(cabin: Cabin, inside: boolean) {
   const w = footprint.width - 0.24,
     d = footprint.height - 0.26;
   const floor = 0.12;
+  for (const dx of [0, w / 2 - 0.12, w - 0.24])
+    for (const dz of [0, d - 0.24])
+      mesh.box(0x9d9888, x + dx, z + dz, 0, 0.24, 0.24, 0.07, "stone");
+  for (const dz of [0, d - 0.13]) mesh.box(0x77563a, x, z + dz, 0.07, w, 0.13, 0.05, "log");
+  mesh.nextLayer();
   for (let i = 0; i < 12; i++)
     mesh.box(
       i % 2 ? 0xb88755 : 0xc29665,
       x + (i * w) / 12,
-      z,
-      0,
+      z + 0.05,
+      0.08,
       w / 12 - 0.012,
-      d,
-      floor,
+      d - 0.1,
+      floor - 0.08,
       "plank",
     );
   if (cabin.stage < 2) return mesh;
   mesh.nextLayer();
-  wall(mesh, x, z, w, 0.15, 6, floor);
+  postWall(mesh, x, z, w, 0.15, 0.805, cabin.sealed);
   mesh.nextLayer();
-  wall(mesh, x, z + 0.12, 0.15, d - 0.12, inside ? 3 : 6, floor);
-  wall(mesh, x + w - 0.15, z + 0.12, 0.15, d - 0.12, inside ? 3 : 6, floor);
+  postWall(mesh, x, z + 0.12, 0.15, d - 0.12, inside ? 0.29 : 0.805, cabin.sealed);
+  postWall(mesh, x + w - 0.15, z + 0.12, 0.15, d - 0.12, inside ? 0.29 : 0.805, cabin.sealed);
   const front = z + d - 0.14;
   // Leave a doorway in the south wall and lower it to the sill in cutaway.
-  wall(mesh, x, front, w * 0.39, 0.16, inside ? 1 : 6, floor);
-  wall(mesh, x + w * 0.61, front, w * 0.39, 0.16, inside ? 1 : 6, floor);
-  if (cabin.complete) {
-    const chimneyX = x + w - 0.6,
-      chimneyZ = z + 0.2;
-    mesh.nextLayer();
-    if (!inside) {
-      for (let board = 0; board < 5; board++)
-        mesh.box(
-          0x775436,
-          x + w * (0.39 + board * 0.044),
-          front + 0.08,
-          floor,
-          w * 0.043,
-          0.08,
-          0.76,
-          "plank",
-        );
-      mesh.box(0xc8a172, x + w * 0.4, front + 0.16, 0.29, w * 0.2, 0.025, 0.06);
-      mesh.box(0x604c37, x + 0.28, front + 0.16, 0.43, 0.37, 0.05, 0.32);
-      mesh.box(0xc3ae7e, x + 0.31, front + 0.21, 0.46, 0.31, 0.02, 0.26);
-      mesh.box(0x72583e, x + 0.45, front + 0.23, 0.46, 0.035, 0.02, 0.26);
-      mesh.box(0x72583e, x + 0.31, front + 0.23, 0.58, 0.31, 0.025, 0.035);
-      mesh.box(0x8d6947, x + 0.22, front + 0.14, 0.4, 0.49, 0.16, 0.045, "plank");
-      mesh.box(0x4e4334, x + w * 0.56, front + 0.175, 0.52, 0.075, 0.036, 0.04);
-      mesh.box(0x918672, x + w * 0.37, front + 0.16, 0, w * 0.26, 0.23, 0.085, "stone");
-      mesh.nextLayer();
-      const eaves = 0.98,
-        rise = 0.59,
-        roofWidth = w + 0.24;
-      mesh.roof(x - 0.12, z - 0.1, roofWidth, d + 0.18, eaves, rise, 0x895d43);
-
-      // The exposed chimney starts at the pitch of the east roof slope.
-      mesh.nextLayer();
-      const stack: Vertex[] = [
-        [chimneyX, 1.92, chimneyZ],
-        [chimneyX + 0.38, 1.92, chimneyZ],
-        [chimneyX + 0.38, 1.92, chimneyZ + 0.35],
-        [chimneyX, 1.92, chimneyZ + 0.35],
-      ];
-      const flashing = stack.map(
-        ([cx, , cz]): Vertex => [cx, eaves + (rise * (x + w + 0.12 - cx)) / (roofWidth / 2), cz],
+  if (inside) postWall(mesh, x, front, w * 0.39, 0.16, 0.085, cabin.sealed);
+  else {
+    postWall(mesh, x, front, 0.28, 0.16, 0.805, cabin.sealed);
+    postWall(mesh, x + 0.65, front, w * 0.39 - 0.65, 0.16, 0.805, cabin.sealed);
+    postWall(mesh, x + 0.28, front, 0.37, 0.16, 0.255, cabin.sealed);
+    mesh.box(0x805d3c, x + 0.28, front, 0.75, 0.37, 0.16, 0.23, "log");
+  }
+  postWall(mesh, x + w * 0.61, front, w * 0.39, 0.16, inside ? 0.085 : 0.805, cabin.sealed);
+  if (!cabin.roofed) return mesh;
+  const chimneyX = x + w - 0.6,
+    chimneyZ = z + 0.2;
+  mesh.nextLayer();
+  if (inside) {
+    // A single rear truss marks the roof stage without covering the room.
+    const ridge = x + w / 2,
+      far = z + 0.12;
+    for (const edge of [x, x + w]) {
+      const left = Math.min(edge, ridge),
+        right = Math.max(edge, ridge);
+      const low = left === ridge ? 1.48 : 0.98,
+        high = right === ridge ? 1.48 : 0.98;
+      mesh.face(
+        0x805d3c,
+        [
+          [right, high - 0.06, far],
+          [left, low - 0.06, far],
+          [left, low, far],
+          [right, high, far],
+        ],
+        "log",
       );
-      for (const [i, top] of stack.entries()) {
-        const j = (i + 1) % stack.length;
-        mesh.face(0x909081, [flashing[i], flashing[j], stack[j], top], "stone");
-      }
-      mesh.box(0xacaa94, chimneyX - 0.04, chimneyZ - 0.04, 1.92, 0.46, 0.43, 0.09);
-      mesh.box(0x4b4d47, chimneyX + 0.04, chimneyZ + 0.04, 2.011, 0.3, 0.27, 0.008);
-    } else {
-      // A plank bench at the rear leaves the walking and storage space visible.
-      for (const dx of [0.24, 0.94])
-        mesh.box(0x70533a, x + dx, z + 0.22, floor, 0.1, 0.25, 0.22, "log");
-      mesh.box(0xab845d, x + 0.18, z + 0.19, floor + 0.22, 0.94, 0.31, 0.065, "plank");
-      mesh.box(0x909081, chimneyX, chimneyZ, floor, 0.38, 0.35, 0.6, "stone");
-      mesh.box(0x77766a, chimneyX - 0.1, chimneyZ + 0.23, floor, 0.57, 0.38, 0.22, "stone");
-      mesh.box(0x989486, chimneyX - 0.07, chimneyZ + 0.32, 0.34, 0.1, 0.18, 0.24, "stone");
-      mesh.box(0x989486, chimneyX + 0.35, chimneyZ + 0.32, 0.34, 0.1, 0.18, 0.24, "stone");
-      mesh.box(0xa39c89, chimneyX - 0.09, chimneyZ + 0.29, 0.58, 0.56, 0.22, 0.1, "stone");
-      mesh.box(0x3d3930, chimneyX + 0.03, chimneyZ + 0.35, 0.34, 0.32, 0.04, 0.21);
-      mesh.log(chimneyX + 0.04, chimneyZ + 0.47, 0.34, 0.28, 0.035, true);
-      if (cabin.hearth.lit)
-        mesh.round(0xffaf49, chimneyX + 0.18, chimneyZ + 0.43, 0.34, 0.13, 0.01, 0.27, 5);
     }
+    if (cabin.complete) cabinInterior(mesh, x, z, chimneyX, chimneyZ, floor, cabin.hearth.lit);
+  } else {
+    if (cabin.sealed) cabinDoorAndWindow(mesh, x, front, w, floor);
+    mesh.nextLayer();
+    cabinRoof(mesh, x, z, w, d, chimneyX, chimneyZ, cabin.complete);
   }
   return mesh;
+}
+
+function cabinDoorAndWindow(mesh: Mesh, x: number, front: number, w: number, floor: number) {
+  for (let board = 0; board < 5; board++)
+    mesh.box(
+      0x775436,
+      x + w * (0.39 + board * 0.044),
+      front + 0.08,
+      floor,
+      w * 0.043,
+      0.08,
+      0.76,
+      "plank",
+    );
+  mesh.box(0xc8a172, x + w * 0.4, front + 0.16, 0.29, w * 0.2, 0.025, 0.06);
+  mesh.box(0x604c37, x + 0.28, front + 0.16, 0.43, 0.37, 0.05, 0.32);
+  mesh.box(0xc3ae7e, x + 0.31, front + 0.21, 0.46, 0.31, 0.02, 0.26);
+  mesh.box(0x72583e, x + 0.45, front + 0.23, 0.46, 0.035, 0.02, 0.26);
+  mesh.box(0x72583e, x + 0.31, front + 0.23, 0.58, 0.31, 0.025, 0.035);
+  mesh.box(0x8d6947, x + 0.22, front + 0.14, 0.4, 0.49, 0.16, 0.045, "plank");
+  mesh.box(0x4e4334, x + w * 0.56, front + 0.175, 0.52, 0.075, 0.036, 0.04);
+  mesh.box(0x918672, x + w * 0.37, front + 0.16, 0, w * 0.26, 0.23, 0.085, "stone");
+}
+
+function cabinRoof(
+  mesh: Mesh,
+  x: number,
+  z: number,
+  w: number,
+  d: number,
+  chimneyX: number,
+  chimneyZ: number,
+  complete: boolean,
+) {
+  const eaves = 0.98,
+    rise = 0.59,
+    roofWidth = w + 0.24;
+  mesh.roof(x - 0.12, z - 0.1, roofWidth, d + 0.18, eaves, rise, 0x895d43);
+
+  if (!complete) return;
+  // The exposed chimney starts at the pitch of the east roof slope.
+  mesh.nextLayer();
+  const stack: Vertex[] = [
+    [chimneyX, 1.92, chimneyZ],
+    [chimneyX + 0.38, 1.92, chimneyZ],
+    [chimneyX + 0.38, 1.92, chimneyZ + 0.35],
+    [chimneyX, 1.92, chimneyZ + 0.35],
+  ];
+  const flashing = stack.map(
+    ([cx, , cz]): Vertex => [cx, eaves + (rise * (x + w + 0.12 - cx)) / (roofWidth / 2), cz],
+  );
+  for (const [i, top] of stack.entries()) {
+    const j = (i + 1) % stack.length;
+    mesh.face(0x909081, [flashing[i], flashing[j], stack[j], top], "stone");
+  }
+  mesh.box(0xacaa94, chimneyX - 0.04, chimneyZ - 0.04, 1.92, 0.46, 0.43, 0.09);
+  mesh.box(0x4b4d47, chimneyX + 0.04, chimneyZ + 0.04, 2.011, 0.3, 0.27, 0.008);
+}
+
+function cabinInterior(
+  mesh: Mesh,
+  x: number,
+  z: number,
+  chimneyX: number,
+  chimneyZ: number,
+  floor: number,
+  lit: boolean,
+) {
+  // A plank bench at the rear leaves the walking and storage space visible.
+  for (const dx of [0.24, 0.94])
+    mesh.box(0x70533a, x + dx, z + 0.22, floor, 0.1, 0.25, 0.22, "log");
+  mesh.box(0xab845d, x + 0.18, z + 0.19, floor + 0.22, 0.94, 0.31, 0.065, "plank");
+  mesh.box(0x909081, chimneyX, chimneyZ, floor, 0.38, 0.35, 0.6, "stone");
+  mesh.box(0x77766a, chimneyX - 0.1, chimneyZ + 0.23, floor, 0.57, 0.38, 0.22, "stone");
+  mesh.box(0x989486, chimneyX - 0.07, chimneyZ + 0.32, 0.34, 0.1, 0.18, 0.24, "stone");
+  mesh.box(0x989486, chimneyX + 0.35, chimneyZ + 0.32, 0.34, 0.1, 0.18, 0.24, "stone");
+  mesh.box(0xa39c89, chimneyX - 0.09, chimneyZ + 0.29, 0.58, 0.56, 0.22, 0.1, "stone");
+  mesh.box(0x3d3930, chimneyX + 0.03, chimneyZ + 0.35, 0.34, 0.32, 0.04, 0.21);
+  mesh.log(chimneyX + 0.04, chimneyZ + 0.47, 0.34, 0.28, 0.035, true);
+  if (lit) mesh.round(0xffaf49, chimneyX + 0.18, chimneyZ + 0.43, 0.34, 0.13, 0.01, 0.27, 5);
 }
 
 export function plotModel(plot: Plot, x: number, z: number, floor: number) {

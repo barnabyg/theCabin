@@ -118,7 +118,7 @@ export function startLandscape(
         const cabin = game.cabins.find(
           (c) => c.stage && c.contains({ x: Math.floor(x), y: Math.floor(z) }),
         );
-        if (cabin?.complete && !cabin.contains(game.position)) continue;
+        if (cabin?.roofed && !cabin.contains(game.position)) continue;
         const south = cabin ? cabin.origin.y + footprint.height - 0.1 : z + 0.32;
         objects.push({
           south,
