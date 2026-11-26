@@ -3,16 +3,19 @@ import type { Point } from "./world";
 // X runs east, Z runs south, and height is measured in tiles above the clearing.
 export type Vertex = [x: number, height: number, z: number];
 export const view = { width: 1200, height: 675 };
-const pitch = Math.PI / 4;
-const sin = Math.sin(pitch);
-const cos = Math.cos(pitch);
+// Calibrated in the clearing artwork's 1200 x 675 view. The distant meadow
+// meets the trees at y=102 and the nearest buildable row ends at the bank.
+const horizonY = 102;
+const bank = { z: 7, y: 480, pixelsPerTile: 70 };
+const focalLength = 740;
+const cameraZ = bank.z + focalLength / bank.pixelsPerTile;
+const eyeHeight = (bank.y - horizonY) / bank.pixelsPerTile;
 
 export function project([x, height, z]: Vertex): Point {
-  const south = z - 3.8;
-  const scale = 1510 / (24 - south * cos - height * sin);
+  const scale = focalLength / (cameraZ - z);
   return {
     x: view.width / 2 + (x - 8) * scale,
-    y: 326 + (south * sin - height * cos) * scale,
+    y: horizonY + (eyeHeight - height) * scale,
   };
 }
 

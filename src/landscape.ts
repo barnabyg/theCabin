@@ -1,7 +1,7 @@
 import type { Campaign } from "./campaign";
 import { footprint, footprintTiles, obstructionAt, planSize } from "./cabin";
 import { view, type Vertex } from "./map-camera";
-import { groundPath, markGround, paintTerrain } from "./map-terrain";
+import { groundPath, markGround, paintMapCoordinates, paintTerrain } from "./map-terrain";
 import { cabinModel, pine, plotModel, settler } from "./map-models";
 import { loadMapArt, type MapArt } from "./map-art";
 import { COLS, type Homestead, type Point } from "./world";
@@ -191,6 +191,7 @@ export function startLandscape(
         }
       }
     }
+    paintMapCoordinates(ctx);
     hitRegions.reverse();
   }
   new ResizeObserver(paint).observe(canvas);

@@ -85,6 +85,12 @@ export function paintTerrain(
       "#897951",
     );
   }
+  label(ctx, wooded.x + 1.7, wooded.y - 0.15, "WOODED SITE");
+  label(ctx, openSite.x + 1.5, openSite.y - 0.15, "OPEN SITE");
+  label(ctx, 14, 8.65, "RIVER TO TOWN →");
+}
+
+export function paintMapCoordinates(ctx: CanvasRenderingContext2D) {
   // Put the map references on the banks, outside the tile hit regions.
   ctx.font = "bold 13px monospace";
   ctx.textAlign = "center";
@@ -103,7 +109,4 @@ export function paintTerrain(
     ctx.strokeText(String(z + 1), p.x, p.y + 4);
     ctx.fillText(String(z + 1), p.x, p.y + 4);
   }
-  label(ctx, wooded.x + 1.7, wooded.y - 0.15, "WOODED SITE");
-  label(ctx, openSite.x + 1.5, openSite.y - 0.15, "OPEN SITE");
-  label(ctx, 14, 8.65, "RIVER TO TOWN →");
 }
