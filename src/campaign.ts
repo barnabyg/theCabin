@@ -18,8 +18,15 @@ export class Campaign {
   unheated = false;
   retreat: "hunger" | "thirst" | "cold" | undefined;
 
+  get weatherTonight() {
+    const day = this.market.spring.day;
+    if (day === autumnRainDay) return "Rain";
+    if (day === winterDay + 1) return "Cold spell";
+    return undefined;
+  }
+
   get fuelTonight() {
-    return this.market.spring.day === winterDay + 1 ? ordinaryNightFuel * 2 : ordinaryNightFuel;
+    return this.weatherTonight === "Cold spell" ? ordinaryNightFuel * 2 : ordinaryNightFuel;
   }
 
   get shelter() {
@@ -64,7 +71,7 @@ export class Campaign {
       game.planning = false;
       return;
     }
-    if (spring.day === autumnRainDay) soakExposedFirewood(game);
+    if (this.weatherTonight === "Rain") soakExposedFirewood(game);
     growGardens(game.plots);
     spring.rest();
     game.planning = false;

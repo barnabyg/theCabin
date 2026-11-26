@@ -1,5 +1,4 @@
 import type { Campaign } from "./campaign";
-import { ordinaryNightFuel } from "./firewood";
 import { element } from "./ui";
 import spring from "./art/spring.mp3";
 import summer from "./art/summer.mp3";
@@ -8,7 +7,15 @@ import winter from "./art/winter.mp3";
 import cold from "./art/cold.mp3";
 import thaw from "./art/thaw.mp3";
 
-const seasonalClips = { Spring: spring, Summer: summer, Autumn: rain, Winter: winter, Thaw: thaw };
+const cueClips = {
+  Spring: spring,
+  Summer: summer,
+  Autumn: "",
+  Winter: winter,
+  Thaw: thaw,
+  Rain: rain,
+  "Cold spell": cold,
+};
 
 export function seasonSounds() {
   const toggle = element("season-sounds");
@@ -63,7 +70,7 @@ export function seasonSounds() {
     if (event.target !== toggle) play();
   });
   return (campaign: Campaign) => {
-    clip = campaign.fuelTonight > ordinaryNightFuel ? cold : seasonalClips[campaign.season];
+    clip = cueClips[campaign.weatherTonight ?? campaign.season];
     play();
   };
 }

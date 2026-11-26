@@ -63,12 +63,7 @@ export function renderCampaign(
   town.hidden = !market.inTown;
   element("map-panel").hidden = market.inTown;
   element("field-notes").hidden = market.inTown || campaign.ended;
-  const weather =
-    spring.day === autumnRainDay
-      ? " · Rain tonight"
-      : campaign.fuelTonight > ordinaryNightFuel
-        ? " · Cold spell tonight"
-        : "";
+  const weather = campaign.weatherTonight ? ` · ${campaign.weatherTonight} tonight` : "";
   element("calendar").textContent =
     `${campaign.season} · Day ${spring.day} · Winter begins day ${winterDay}${weather}`;
   element("seeds").textContent = `${spring.seeds.turnip} turnip · ${spring.seeds.squash} squash`;
@@ -100,7 +95,7 @@ export function renderCampaign(
       const fuel = campaign.fuelTonight;
       paragraph(
         box,
-        fuel > ordinaryNightFuel
+        campaign.weatherTonight === "Cold spell"
           ? `Cold spell · The hearth needs ${fuel} firewood tonight (${fuel - ordinaryNightFuel} extra).`
           : `Winter night · The hearth needs ${fuel} firewood tonight.`,
       );
@@ -125,7 +120,9 @@ export function renderCampaign(
     }
     if (spring.day <= autumnRainDay) {
       const forecast =
-        spring.day === autumnRainDay ? "Rain tonight" : `Rain forecast for day ${autumnRainDay}`;
+        campaign.weatherTonight === "Rain"
+          ? "Rain tonight"
+          : `Rain forecast for day ${autumnRainDay}`;
       paragraph(
         box,
         `${forecast} · One piece of firewood in each outdoor ground stack will spoil. Store split wood in a covered woodpile to keep it dry.`,
