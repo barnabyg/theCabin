@@ -69,14 +69,23 @@ export function startLandscape(
     if (game.storage)
       markGround(ctx, game.storage.x, game.storage.y, 1, 1, "rgba(93,180,187,.38)", "#94e1dc", 3);
     let floor = 0;
+    let settlerDepth = Infinity;
     for (const cabin of game.cabins) {
       const { x, y: z } = cabin.origin;
       if (cabin.stage) {
         const inside = cabin.contains(game.position);
         if (inside) floor = 0.13;
         groundDisc(ctx, x + 1.6, z + 1.14, 0, 1.54, 0.96, "rgba(54,70,50,.23)");
+        const south = z + footprint.height - 0.12;
+        if (
+          cabin.walled &&
+          game.position.y < z &&
+          game.position.x >= x &&
+          game.position.x < x + footprint.width
+        )
+          settlerDepth = Math.min(settlerDepth, south);
         objects.push({
-          south: z + footprint.height - 0.12,
+          south,
           draw: () => cabinModel(cabin, inside).draw(ctx, art?.materials),
         });
       } else {
@@ -142,13 +151,9 @@ export function startLandscape(
     }
     const x = game.position.x + 0.5,
       z = game.position.y + 0.57;
-    // Keep the settler visible among trees, but let a nearer cabin conceal them.
-    const behindCabin = game.cabins.some(
-      ({ origin, stage }) =>
-        stage >= 2 && z < origin.y && x >= origin.x && x <= origin.x + footprint.width,
-    );
-    objects.push({
-      south: behindCabin ? z : Infinity,
+    // A stable sort draws the settler immediately before a nearer cabin, after intervening pines.
+    objects.unshift({
+      south: settlerDepth,
       tile: game.position,
       draw: () => {
         groundDisc(ctx, x, z, floor, 0.235, 0.17, "#ffe8a9");

@@ -67,6 +67,26 @@ test("the near roof hides the settler standing behind the cabin", async ({ page 
   expect(Math.max(...after.map((value, i) => Math.abs(value - roof[i])))).toBeLessThan(8);
 });
 
+test("a distant cabin leaves the settler visible under the M1 pine", async ({ page }) => {
+  async function sample(url: string) {
+    await openPaintedMap(page, url);
+    await walkTo(page, "M1");
+    const board = await page.locator("canvas").boundingBox();
+    if (!board) throw new Error("Map is hidden");
+    const centre = project([12.5, 0.35, 0.57]);
+    return page.screenshot({
+      clip: {
+        x: Math.round(board.x + (centre.x * board.width) / view.width) - 3,
+        y: Math.round(board.y + (centre.y * board.height) / view.height) - 3,
+        width: 6,
+        height: 6,
+      },
+    });
+  }
+  const alone = await sample("/");
+  expect(await sample("/?scenario=market")).toEqual(alone);
+});
+
 test("the QHD clearing uses desktop space and keeps its controls in view", async ({ page }) => {
   await page.setViewportSize({ width: 2560, height: 1440 });
   await openPaintedMap(page, "/");

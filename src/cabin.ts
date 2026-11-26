@@ -82,6 +82,9 @@ export class Cabin {
   get complete() {
     return this.stage === stages.length;
   }
+  get walled() {
+    return this.stage >= 2;
+  }
   get roofed() {
     return this.stage >= 3;
   }

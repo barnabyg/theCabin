@@ -86,7 +86,7 @@ export function cabinModel(cabin: Cabin, inside: boolean) {
       floor - 0.08,
       "plank",
     );
-  if (cabin.stage < 2) return mesh;
+  if (!cabin.walled) return mesh;
   mesh.nextLayer();
   postWall(mesh, x, z, w, 0.15, 0.805, cabin.sealed);
   mesh.nextLayer();
