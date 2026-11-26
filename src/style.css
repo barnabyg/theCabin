@@ -300,6 +300,21 @@ button small {
 .map-key {
   flex-wrap: wrap;
 }
+@media (min-width: 1540px) {
+  main {
+    --notes-width: clamp(340px, 18vw, 480px);
+    --gutter: clamp(24px, 2vw, 64px);
+    /* Fit a 16:9 clearing between the status header and the map controls. */
+    max-width: max(
+      1540px,
+      calc((100dvh - 395px) * 16 / 9 + var(--notes-width) + 20px + 2 * var(--gutter))
+    );
+    padding-inline: var(--gutter);
+  }
+  .layout {
+    grid-template-columns: minmax(0, 1fr) var(--notes-width);
+  }
+}
 @media (max-width: 820px) {
   .layout {
     grid-template-columns: 1fr;

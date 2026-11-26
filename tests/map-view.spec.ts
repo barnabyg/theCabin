@@ -44,6 +44,18 @@ test("the cabin opens on entry and restores its roof on exit", async ({ page }) 
   expect(await sample()).toEqual(exterior);
 });
 
+test("the QHD clearing uses desktop space and keeps its controls in view", async ({ page }) => {
+  await page.setViewportSize({ width: 2560, height: 1440 });
+  await openPaintedMap(page, "/");
+  const board = await page.locator(".board").boundingBox();
+  const notes = await page.locator("#field-notes").boundingBox();
+  if (!board || !notes) throw new Error("The map and Field Notes must be visible");
+  expect(board.width).toBeGreaterThan(1800);
+  expect(board.width / board.height).toBeCloseTo(16 / 9, 2);
+  expect(notes.x).toBeGreaterThan(board.x + board.width);
+  await expect(page.locator(".controls")).toBeInViewport({ ratio: 1 });
+});
+
 test("the projected clearing keeps edge tiles, planning and the river aligned after resize", async ({
   page,
 }) => {
@@ -57,8 +69,8 @@ test("the projected clearing keeps edge tiles, planning and the river aligned af
       position: { x: (p.x * bounds.width) / view.width, y: (p.y * bounds.height) / view.height },
     });
   }
-  for (const width of [1440, 680]) {
-    await page.setViewportSize({ width, height: 980 });
+  for (const width of [2560, 1440, 680]) {
+    await page.setViewportSize({ width, height: width === 2560 ? 1440 : 980 });
     for (const [x, z, name] of [
       [0.1, 0.1, "A1"],
       [15.9, 0.1, "P1"],
