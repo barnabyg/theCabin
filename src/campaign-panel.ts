@@ -2,7 +2,7 @@ import { Campaign, campaignKey, winterDay } from "./campaign";
 import { ordinaryNightFuel, autumnRainDay, fuelCoverage } from "./firewood";
 import type { WorkOrder } from "./haul";
 import { pantryReserves } from "./rations";
-import { road } from "./market";
+import { marketRules, road } from "./market";
 import { renderMerchant } from "./market-panel";
 import { button, element, heading, paragraph } from "./ui";
 import { coordinate, distance } from "./world";
@@ -89,6 +89,13 @@ export function renderCampaign(
       box,
       `Covered woodpiles · ${fuelCoverage(covered)}. In hearths · ${loaded} firewood.`,
     );
+    if (spring.day === winterDay - 1 && (!meals || !drinks)) {
+      const missing = [!meals && "meal", !drinks && "drink"].filter(Boolean).join(" and ");
+      paragraph(
+        box,
+        `Winter starts tomorrow. Store your first ${missing} in a finished pantry while the days are long.`,
+      );
+    }
     if (spring.day >= winterDay) {
       const fuel = campaign.fuelTonight;
       paragraph(
@@ -128,7 +135,7 @@ export function renderCampaign(
     else
       paragraph(
         box,
-        `Town road at ${coordinate(road)} · 30 min each way, double with a load. Trapline at I7.`,
+        `Town road at ${coordinate(road)} · ${marketRules.roadMinutes} min each way, double with a load. Trapline at I7.`,
       );
     const busy = !!haul && !haul.finished && !haul.paused;
     if (market.inTown || (!distance(game.position, road) && !distance(game.selected, road)))

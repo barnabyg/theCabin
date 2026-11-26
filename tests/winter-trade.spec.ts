@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { action, walkTo } from "./controls";
-import { buildCabin, buildPantry, prepareHearth, rest, storeWater } from "./winter-route";
+import {
+  buildCabin,
+  buildPantry,
+  prepareHearth,
+  rest,
+  spendDaylight,
+  storeWater,
+} from "./winter-route";
 
 test("trade furs and haul four purchased meals home to reach thaw without a crop", async ({
   page,
@@ -9,19 +16,22 @@ test("trade furs and haul four purchased meals home to reach thaw without a crop
   await page.getByRole("link", { name: "First winter" }).click();
   await buildPantry(page);
   await walkTo(page, "I7");
-  await action(page, /^Collect 1 fur/);
-  await action(page, /^Collect 1 fur/);
+  await spendDaylight(page, /^Collect 1 fur/, 15);
+  await spendDaylight(page, /^Collect 1 fur/, 15);
+  await expect(page.locator("#load")).toContainText("2 fur");
   for (let trip = 0; trip < 2; trip++) {
     await walkTo(page, "P6");
-    await action(page, /^Walk to town/);
+    await spendDaylight(page, /^Walk to town/, trip === 0 ? 60 : 30);
     if (trip === 0) {
-      await action(page, /^Sell 1 fur/);
-      await action(page, /^Sell 1 fur/);
+      await action(page, /^Sell 1 fur · 3 coins/);
+      await action(page, /^Sell 1 fur · 3 coins/);
       await expect(page.locator("#purse")).toHaveText("10 coins");
     }
-    await action(page, /^Buy 1 food portion/);
-    await action(page, /^Buy 1 food portion/);
-    await action(page, /^Walk home · 60 min/);
+    await action(page, /^Buy 1 food portion · 2 coins/);
+    await action(page, /^Buy 1 food portion · 2 coins/);
+    await expect(page.locator("#purse")).toHaveText(trip === 0 ? "6 coins" : "2 coins");
+    await expect(page.locator("#load")).toContainText("2 food");
+    await spendDaylight(page, /^Walk home/, 60);
     await walkTo(page, "F6");
     await action(page, /^Store harvest/);
     await rest(page);

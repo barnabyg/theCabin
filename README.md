@@ -82,6 +82,10 @@ Before winter, inspect a finished pantry to see how many meals its portions prov
 
 **Reach thaw on trade.** Start a fresh First winter. Build a pantry at F6, collect two furs at I7 and sell them in town. Your purse should hold ten coins. Buy two food portions, carry them home and store them. Rest and make a second trip for two more. With four meals and two coins left, build the cabin and store four drinks. Load five firewood, light the hearth and spend each winter night in the cabin. You should reach **Spring thaw** without planting a crop.
 
+**First winter balance.** The harvest route spends three of the four starting coins on squash seed. Two empty road crossings take 30 minutes each. Sowing costs four minutes, and each watering takes two minutes and one water. Four watered days give six portions for four winter meals. On the trade route, trapping two furs takes 30 minutes. Their sale and the starting purse buy four portions with two coins left. A food load takes 60 minutes to carry home, so buying all four means two return trips.
+
+Both routes have been played through with the same prices, daylight and weather. The existing costs let the harvest route trade daily watering for fewer road trips and let the trade route skip growing time by spending more daylight hauling. The last autumn day now warns about a missing first meal or drink while six hours of daylight remain at dawn. Each winter day has three hours. One missed winter ration or unheated night leaves time to recover. A second consecutive miss of the same kind forces retreat.
+
 ## Verify
 
 From the repository root, run these commands in PowerShell:

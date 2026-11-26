@@ -1,6 +1,20 @@
 import { expect, type Page } from "@playwright/test";
 import { action, selectTile, walkTo } from "./controls";
 
+/** Check the price on the control against the visible daylight clock. */
+export async function spendDaylight(page: Page, name: RegExp, minutes: number) {
+  const clock = page.locator("#clock");
+  const match = /^(\d+)h (\d+)m$/.exec((await clock.textContent()) ?? "");
+  if (!match) throw Error("Expected a daylight clock in hours and minutes");
+  const remaining = Number(match[1]) * 60 + Number(match[2]) - minutes;
+  const control = page.getByRole("button", { name });
+  await expect(control).toContainText(`· ${minutes} min`);
+  await control.click();
+  await expect(clock).toHaveText(
+    `${Math.floor(remaining / 60)}h ${String(remaining % 60).padStart(2, "0")}m`,
+  );
+}
+
 export const rest = (page: Page) => action(page, /^Rest until tomorrow/);
 
 async function deliver(page: Page, material: string, source: string, target: string, job: RegExp) {
@@ -59,22 +73,24 @@ export async function storeWater(page: Page) {
 
 export async function sowSquash(page: Page) {
   await walkTo(page, "P6");
-  await action(page, /^Walk to town/);
-  await expect(page.getByRole("button", { name: /^Buy 1 squash seed/ })).toBeVisible();
-  await action(page, /^Buy 1 squash seed/);
-  await action(page, /^Walk home/);
+  await spendDaylight(page, /^Walk to town/, 30);
+  await action(page, /^Buy 1 squash seed · 3 coins/);
+  await expect(page.locator("#purse")).toHaveText("1 coin");
+  await spendDaylight(page, /^Walk home/, 30);
   await action(page, /^Build menu/);
   await action(page, /^Garden$/);
   await selectTile(page, "G6");
   await action(page, /^Prepare garden/);
-  await action(page, /^Sow squash/);
+  await spendDaylight(page, /^Sow squash/, 4);
+  await expect(page.locator("#seeds")).toHaveText("0 turnip · 0 squash");
 }
 
 export async function waterAndRest(page: Page) {
   await walkTo(page, "G7");
   await action(page, /^Draw stream water/);
   await walkTo(page, "G6");
-  await action(page, /^Water crop/);
+  await spendDaylight(page, /^Water crop/, 2);
+  await expect(page.locator("#load")).toContainText("Empty");
   await rest(page);
 }
 
