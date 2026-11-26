@@ -1,5 +1,5 @@
 import { Campaign, campaignKey, winterDay } from "./campaign";
-import { ordinaryNightFuel, autumnRainDay } from "./firewood";
+import { ordinaryNightFuel, autumnRainDay, fuelCoverage } from "./firewood";
 import type { WorkOrder } from "./haul";
 import { pantryReserves } from "./rations";
 import { road } from "./market";
@@ -73,12 +73,22 @@ export function renderCampaign(
       box,
       `Pantry reserves · ${meals} meal${meals === 1 ? "" : "s"} · ${drinks} drink${drinks === 1 ? "" : "s"} · Each winter night uses 1 portion and 1 water.`,
     );
+    const covered = game.plots.reduce(
+      (pieces, { site }) =>
+        pieces + (site?.kind === "Covered woodpile" && site.complete ? site.stored : 0),
+      0,
+    );
+    const loaded = game.cabins.reduce((pieces, cabin) => pieces + cabin.hearth.fuel, 0);
+    paragraph(
+      box,
+      `Covered woodpiles · ${fuelCoverage(covered)}. In hearths · ${loaded} firewood.`,
+    );
     if (spring.day >= winterDay) {
       const fuel = campaign.fuelTonight;
       paragraph(
         box,
         fuel > ordinaryNightFuel
-          ? `Cold spell · The hearth needs ${fuel} firewood tonight, twice the ordinary burn.`
+          ? `Cold spell · The hearth needs ${fuel} firewood tonight (${fuel - ordinaryNightFuel} extra).`
           : `Winter night · The hearth needs ${fuel} firewood tonight.`,
       );
       if (campaign.unheated)

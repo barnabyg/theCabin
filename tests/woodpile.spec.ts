@@ -64,11 +64,22 @@ test("autumn rain spoils loose fuel while covered firewood survives reopening an
     await action(page, /^Withdraw 1 firewood/);
     await expect(page.locator("#inspect")).toContainText("1 piece · 1 ordinary night");
     await expect(page.locator("#load")).toContainText("1 firewood");
+    await expect(page.locator("#night")).toContainText(
+      "Covered woodpiles · 1 piece · 1 ordinary night. In hearths · 0 firewood.",
+    );
     await walkTo(page, "K4");
     await action(page, /^Add firewood/);
     await action(page, /^Light hearth/);
     await expect(page.locator("#inspect")).toContainText("Hearth · 1 firewood · Lit");
     await expect(page.locator("#load")).toContainText("Empty");
+    await expect(page.locator("#night")).toContainText(
+      "Covered woodpiles · 1 piece · 1 ordinary night. In hearths · 1 firewood.",
+    );
+    await action(page, /^Rest until tomorrow/);
+    await selectTile(page, "H6");
+    await expect(page.locator("#inspect")).toContainText("1 piece · 1 ordinary night");
+    await expect(page.locator("#night")).toContainText("2 firewood tonight (1 extra)");
+    await expect(page.locator("#night")).toContainText("In hearths · 0 firewood.");
   } finally {
     await context.close();
   }

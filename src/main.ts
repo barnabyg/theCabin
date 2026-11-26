@@ -367,7 +367,7 @@ function render() {
   }
   const plan = game.cabins.find((c) => c.contains(p));
   if (plot.site && plot.site.kind !== "Garden")
-    for (const note of buildingNotes(plot.site, game.load)) paragraph(info, note);
+    for (const note of buildingNotes(plot.site, game.load, !!campaign)) paragraph(info, note);
   if (plan) {
     paragraph(info, `${plan.progress} · ${coordinate(plan.origin)}`);
     if (plan.complete)

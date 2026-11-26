@@ -3,6 +3,11 @@ import { COLS, type Homestead, type Job, type Stock } from "./world";
 export const ordinaryNightFuel = 1;
 export const autumnRainDay = 6;
 
+export function fuelCoverage(pieces: number) {
+  const nights = Math.floor(pieces / ordinaryNightFuel);
+  return `${pieces} ${pieces === 1 ? "piece" : "pieces"} · ${nights} ordinary ${nights === 1 ? "night" : "nights"}`;
+}
+
 export function soakExposedFirewood(game: Homestead) {
   for (const [index, plot] of game.plots.entries()) {
     if (!plot.stock.firewood) continue;
