@@ -44,6 +44,29 @@ test("the cabin opens on entry and restores its roof on exit", async ({ page }) 
   expect(await sample()).toEqual(exterior);
 });
 
+test("the near roof hides the settler standing behind the cabin", async ({ page }) => {
+  await openPaintedMap(page, "/?scenario=market");
+  const feet = project([11.5, 0, 2.57]);
+  const sample = () =>
+    page.locator("canvas").evaluate(
+      (node, point) => {
+        if (!(node instanceof HTMLCanvasElement)) throw new Error("Map is hidden");
+        const ctx = node.getContext("2d");
+        if (!ctx) throw new Error("Missing map");
+        return Array.from(
+          ctx.getImageData(point.x * node.width - 2, point.y * node.height - 2, 4, 4).data,
+        );
+      },
+      { x: feet.x / view.width, y: feet.y / view.height },
+    );
+  const roof = await sample();
+  await walkTo(page, "L3");
+  await expect(page.locator("#tile-title")).toContainText("L3");
+  const after = await sample();
+  // Allow rounding from the antialiased edges of individual shakes.
+  expect(Math.max(...after.map((value, i) => Math.abs(value - roof[i])))).toBeLessThan(8);
+});
+
 test("the QHD clearing uses desktop space and keeps its controls in view", async ({ page }) => {
   await page.setViewportSize({ width: 2560, height: 1440 });
   await openPaintedMap(page, "/");

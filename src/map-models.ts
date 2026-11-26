@@ -75,7 +75,9 @@ export function cabinModel(cabin: Cabin, inside: boolean) {
       "plank",
     );
   if (cabin.stage < 2) return mesh;
+  mesh.nextLayer();
   wall(mesh, x, z, w, 0.15, 6, floor);
+  mesh.nextLayer();
   wall(mesh, x, z + 0.12, 0.15, d - 0.12, inside ? 3 : 6, floor);
   wall(mesh, x + w - 0.15, z + 0.12, 0.15, d - 0.12, inside ? 3 : 6, floor);
   const front = z + d - 0.14;
@@ -85,12 +87,8 @@ export function cabinModel(cabin: Cabin, inside: boolean) {
   if (cabin.complete) {
     const chimneyX = x + w - 0.6,
       chimneyZ = z + 0.2;
-    for (let i = 0; i < (inside ? 1 : 3); i++)
-      mesh.box(0x909081, chimneyX, chimneyZ, 0.12 + i * 0.6, 0.38, 0.35, 0.6, "stone");
+    mesh.nextLayer();
     if (!inside) {
-      mesh.box(0xacaa94, chimneyX - 0.04, chimneyZ - 0.04, 1.92, 0.46, 0.43, 0.09);
-      mesh.box(0x4b4d47, chimneyX + 0.04, chimneyZ + 0.04, 2.011, 0.3, 0.27, 0.008);
-      mesh.roof(x - 0.12, z - 0.1, w + 0.24, d + 0.18, 0.98, 0.59, 0x895d43);
       for (let board = 0; board < 5; board++)
         mesh.box(
           0x775436,
@@ -110,20 +108,44 @@ export function cabinModel(cabin: Cabin, inside: boolean) {
       mesh.box(0x8d6947, x + 0.22, front + 0.14, 0.4, 0.49, 0.16, 0.045, "plank");
       mesh.box(0x4e4334, x + w * 0.56, front + 0.175, 0.52, 0.075, 0.036, 0.04);
       mesh.box(0x918672, x + w * 0.37, front + 0.16, 0, w * 0.26, 0.23, 0.085, "stone");
+      mesh.nextLayer();
+      const eaves = 0.98,
+        rise = 0.59,
+        roofWidth = w + 0.24;
+      mesh.roof(x - 0.12, z - 0.1, roofWidth, d + 0.18, eaves, rise, 0x895d43);
+
+      // The exposed chimney starts at the pitch of the east roof slope.
+      mesh.nextLayer();
+      const stack: Vertex[] = [
+        [chimneyX, 1.92, chimneyZ],
+        [chimneyX + 0.38, 1.92, chimneyZ],
+        [chimneyX + 0.38, 1.92, chimneyZ + 0.35],
+        [chimneyX, 1.92, chimneyZ + 0.35],
+      ];
+      const flashing = stack.map(
+        ([cx, , cz]): Vertex => [cx, eaves + (rise * (x + w + 0.12 - cx)) / (roofWidth / 2), cz],
+      );
+      for (const [i, top] of stack.entries()) {
+        const j = (i + 1) % stack.length;
+        mesh.face(0x909081, [flashing[i], flashing[j], stack[j], top], "stone");
+      }
+      mesh.box(0xacaa94, chimneyX - 0.04, chimneyZ - 0.04, 1.92, 0.46, 0.43, 0.09);
+      mesh.box(0x4b4d47, chimneyX + 0.04, chimneyZ + 0.04, 2.011, 0.3, 0.27, 0.008);
     } else {
       // A plank bench at the rear leaves the walking and storage space visible.
       for (const dx of [0.24, 0.94])
         mesh.box(0x70533a, x + dx, z + 0.22, floor, 0.1, 0.25, 0.22, "log");
       mesh.box(0xab845d, x + 0.18, z + 0.19, floor + 0.22, 0.94, 0.31, 0.065, "plank");
+      mesh.box(0x909081, chimneyX, chimneyZ, floor, 0.38, 0.35, 0.6, "stone");
+      mesh.box(0x77766a, chimneyX - 0.1, chimneyZ + 0.23, floor, 0.57, 0.38, 0.22, "stone");
+      mesh.box(0x989486, chimneyX - 0.07, chimneyZ + 0.32, 0.34, 0.1, 0.18, 0.24, "stone");
+      mesh.box(0x989486, chimneyX + 0.35, chimneyZ + 0.32, 0.34, 0.1, 0.18, 0.24, "stone");
+      mesh.box(0xa39c89, chimneyX - 0.09, chimneyZ + 0.29, 0.58, 0.56, 0.22, 0.1, "stone");
+      mesh.box(0x3d3930, chimneyX + 0.03, chimneyZ + 0.35, 0.34, 0.32, 0.04, 0.21);
+      mesh.log(chimneyX + 0.04, chimneyZ + 0.47, 0.34, 0.28, 0.035, true);
+      if (cabin.hearth.lit)
+        mesh.round(0xffaf49, chimneyX + 0.18, chimneyZ + 0.43, 0.34, 0.13, 0.01, 0.27, 5);
     }
-    mesh.box(0x77766a, chimneyX - 0.1, chimneyZ + 0.23, floor, 0.57, 0.38, 0.22, "stone");
-    mesh.box(0x989486, chimneyX - 0.07, chimneyZ + 0.32, 0.34, 0.1, 0.18, 0.24, "stone");
-    mesh.box(0x989486, chimneyX + 0.35, chimneyZ + 0.32, 0.34, 0.1, 0.18, 0.24, "stone");
-    mesh.box(0xa39c89, chimneyX - 0.09, chimneyZ + 0.29, 0.58, 0.56, 0.22, 0.1, "stone");
-    mesh.box(0x3d3930, chimneyX + 0.03, chimneyZ + 0.35, 0.34, 0.32, 0.04, 0.21);
-    mesh.log(chimneyX + 0.04, chimneyZ + 0.47, 0.34, 0.28, 0.035, true);
-    if (cabin.hearth.lit)
-      mesh.round(0xffaf49, chimneyX + 0.18, chimneyZ + 0.43, 0.34, 0.13, 0.01, 0.27, 5);
   }
   return mesh;
 }

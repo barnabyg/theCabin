@@ -71,7 +71,6 @@ export function startLandscape(
     let floor = 0;
     for (const cabin of game.cabins) {
       const { x, y: z } = cabin.origin;
-      markGround(ctx, x, z, footprint.width, footprint.height, "rgba(72,99,96,.38)", "#f5e5b6");
       if (cabin.stage) {
         const inside = cabin.contains(game.position);
         if (inside) floor = 0.13;
@@ -81,6 +80,7 @@ export function startLandscape(
           draw: () => cabinModel(cabin, inside).draw(ctx, art?.materials),
         });
       } else {
+        markGround(ctx, x, z, footprint.width, footprint.height, "rgba(72,99,96,.38)", "#f5e5b6");
         for (const [left, right] of [
           [x, x + footprint.width],
           [x + footprint.width, x],
@@ -121,6 +121,38 @@ export function startLandscape(
         });
       }
     }
+    if (!game.planning) {
+      ctx.setLineDash([6, 4]);
+      markGround(
+        ctx,
+        game.selected.x,
+        game.selected.y,
+        1,
+        1,
+        "rgba(255,237,181,.09)",
+        "#fff0b7",
+        2.5,
+      );
+      ctx.setLineDash([]);
+    }
+    const x = game.position.x + 0.5,
+      z = game.position.y + 0.57;
+    // Keep the settler visible among trees, but let a nearer cabin conceal them.
+    const behindCabin = game.cabins.some(
+      ({ origin, stage }) =>
+        stage >= 2 && z < origin.y && x >= origin.x && x <= origin.x + footprint.width,
+    );
+    objects.push({
+      south: behindCabin ? z : Infinity,
+      tile: game.position,
+      draw: () => {
+        groundDisc(ctx, x, z, floor, 0.235, 0.17, "#ffe8a9");
+        groundDisc(ctx, x, z, floor + 0.005, 0.19, 0.12, "#726c49");
+        return art
+          ? art.settler.draw(ctx, x, z, 0.84, floor + 0.01)
+          : settler(x, z, floor + 0.01).draw(ctx);
+      },
+    });
     hitRegions.length = 0;
     for (const { draw, tile } of objects.sort((a, b) => a.south - b.south))
       hitRegions.push({ outline: draw(), tile });
@@ -148,29 +180,7 @@ export function startLandscape(
           ctx.stroke();
         }
       }
-    } else {
-      ctx.setLineDash([6, 4]);
-      markGround(
-        ctx,
-        game.selected.x,
-        game.selected.y,
-        1,
-        1,
-        "rgba(255,237,181,.09)",
-        "#fff0b7",
-        2.5,
-      );
-      ctx.setLineDash([]);
     }
-    // Draw the locator and settler last so either stays legible beneath a canopy.
-    const x = game.position.x + 0.5,
-      z = game.position.y + 0.57;
-    groundDisc(ctx, x, z, floor, 0.235, 0.17, "#ffe8a9");
-    groundDisc(ctx, x, z, floor + 0.005, 0.19, 0.12, "#726c49");
-    const figure = art
-      ? art.settler.draw(ctx, x, z, 0.84, floor + 0.01)
-      : settler(x, z, floor + 0.01).draw(ctx);
-    hitRegions.push({ outline: figure, tile: game.position });
     hitRegions.reverse();
   }
   new ResizeObserver(paint).observe(canvas);

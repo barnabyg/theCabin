@@ -2,7 +2,13 @@ import { project, type Vertex } from "./map-camera";
 import type { Point } from "./world";
 
 type Material = "log" | "shake" | "stone" | "plank";
-type Face = { vertices: Vertex[]; color: string; depth: number; material?: Material };
+type Face = {
+  vertices: Vertex[];
+  color: string;
+  layer: number;
+  depth: number;
+  material?: Material;
+};
 type RingPoint = [x: number, z: number];
 
 // Map a swatch onto each visible face. Its long axis follows the timber; a
@@ -51,6 +57,13 @@ function litColor(color: number, light: number) {
 // paint their visible surfaces from far to near along the fixed camera axis.
 export class Mesh {
   private faces: Face[] = [];
+  private layer = 0;
+
+  // Long intersecting solids can overlap even when their centre depths sort correctly.
+  // Finish a surface before drawing components known to cover it from this camera.
+  nextLayer() {
+    this.layer++;
+  }
 
   face(color: number, vertices: Vertex[], material?: Material) {
     const [a, b, c] = vertices;
@@ -64,6 +77,7 @@ export class Mesh {
     const sunlight = (-0.47 * nx + 0.78 * ny + 0.41 * nz) / length;
     this.faces.push({
       vertices,
+      layer: this.layer,
       material,
       color: litColor(color, 0.78 + 0.28 * sunlight),
       depth: vertices.reduce((sum, p) => sum + p[1] + p[2], 0) / vertices.length,
@@ -208,7 +222,9 @@ export class Mesh {
 
   draw(ctx: CanvasRenderingContext2D, atlas?: HTMLImageElement) {
     const silhouette = new Path2D();
-    for (const { vertices, color, material } of this.faces.sort((a, b) => a.depth - b.depth)) {
+    for (const { vertices, color, material } of this.faces.sort(
+      (a, b) => a.layer - b.layer || a.depth - b.depth,
+    )) {
       const points = vertices.map(project);
       const [a, b, c] = points;
       if ((b.x - a.x) * (c.y - a.y) <= (b.y - a.y) * (c.x - a.x)) continue;
