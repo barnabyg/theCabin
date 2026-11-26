@@ -12,7 +12,7 @@ You can also start the game from the repository root in PowerShell:
 npm.cmd run play
 ```
 
-Open http://127.0.0.1:43187 in a desktop browser. The command installs locked dependencies and starts the local game. Use Ctrl+C to stop.
+Open the local address printed by the launcher in a desktop browser. The first screen shows **One cold night**, a homestead map and six hours of daylight. Choose **First winter** in the scenario links to start the campaign. The command installs locked dependencies and starts the local game. Use Ctrl+C to stop.
 
 The game uses port 43187 and Playwright uses 43188. Set `CABIN_PORT` or `CABIN_TEST_PORT` before launching to choose a different port. Browser saves belong to the address where you played. To resume a save from the previous default, set `$env:CABIN_PORT = "5173"` and launch the game in the same browser profile.
 
@@ -66,17 +66,27 @@ From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Ope
 
 ## First winter
 
+With Node.js 24.13 or later, run `npm.cmd run play` from the repository root. Choose **First winter**, then **Build menu · Compare cabin sites**. Inspect both footprints before spending daylight. Crosses mark blocked tiles and the menu names each obstruction. To try the wooded site, choose **Mark storage at G6** and **Clear area**. When the site shows **Ready to reserve**, reopen the Build menu. At either clear site, choose **Reserve footprint** and follow the cabin card until the roof and hearth are finished.
+
 From the repository root, run `npm.cmd run play` with Node.js 24.13 or later, open http://127.0.0.1:43187 and choose **First winter**. Walk to P6, buy a turnip seed in town with the opening four coins and return. Prepare a garden at G6 and sow. Save First winter, close the browser, and reopen in the same profile. **Resume First winter** restores the planted bed, day and one remaining coin.
 
 **Buy food with a fur.** In First winter, build a pantry at F6 with two logs from C4. Collect a fur at I7 and take the road at P6. Buy one turnip seed, then try buying food with the remaining coin. The offer should still show eight portions and your pack should still hold the fur. Sell the fur, buy two portions at two coins each and take the 60-minute walk home. Store the food at F6. The pantry should hold two portions and your purse should be empty.
 
 For a winter water shortage, build a pantry at F6 with two logs. Store a turnip harvest there and rest through day seven. After the thirst warning, draw water twice at G7 and choose **Store drinking water** at the pantry. Spend the next night in your heated cabin. The pantry should show one fewer meal and one fewer drink. In a separate run leave the water supply empty for two winter nights to see the retreat from thirst.
 
+Before winter, inspect a finished pantry to see how many meals its portions provide. Inspect a covered woodpile to see how many ordinary nights its dry fuel covers. The campaign panel compares all pantry stores with all covered woodpiles and lists firewood already loaded into hearths separately. With two meals and one covered piece, fuel runs short first. Store three more pieces and food runs short first, assuming an ordinary burn and an empty hearth. On a cold night the forecast gives the extra piece to load before resting.
+
+**Follow the seasons.** In First winter, use **Rest until tomorrow** to watch the meadow change from spring flowers to summer grass, fallen leaves and snow. Each change has a short sound after your first interaction. On day six the calendar announces rain and the forecast explains how to protect loose fuel. On day eight it announces a cold spell and shows how much extra firewood the hearth will need. Toggle **Sound on** beside the daylight clock to mute the cues. The forecast and map still show each change. At spring thaw, meltwater replaces the snow.
+
 **Keep winter fuel dry.** From the repository root run `npm.cmd run play`, open http://127.0.0.1:43187 and choose **First winter**. Reserve a **Covered woodpile** at H6. Fell D4, deliver two logs to H6 and finish the woodpile. Split the other two logs at D4, carry two pieces to H6 and choose **Store firewood**. Leave two pieces at D4. Rest through the rain on day six. On day seven, D4 holds one piece and H6 still holds two ordinary nights of fuel. At H6, withdraw a piece to carry to a finished cabin and add to its hearth.
 
 **Reach thaw on the harvest.** Buy a squash seed, sow at G6 on day one, and water it on each of the first four days. Use the remaining daylight to build a cabin and pantry. Harvest on day five and store at least four portions and four drinks. Split three logs and load at least five pieces into the hearth. Winter starts on day seven with three hours of daylight. Spend the four nights inside the cabin with the hearth lit. The cold spell on day eight burns two pieces. Reaching day eleven shows **Spring thaw** and offers a fresh start. For the cold retreat, stock food and water but leave the hearth empty for two consecutive winter nights.
 
 **Reach thaw on trade.** Start a fresh First winter. Build a pantry at F6, collect two furs at I7 and sell them in town. Your purse should hold ten coins. Buy two food portions, carry them home and store them. Rest and make a second trip for two more. With four meals and two coins left, build the cabin and store four drinks. Load five firewood, light the hearth and spend each winter night in the cabin. You should reach **Spring thaw** without planting a crop.
+
+**First winter balance.** The harvest route spends three of the four starting coins on squash seed. Two empty road crossings take 30 minutes each. Sowing costs four minutes, and each watering takes two minutes and one water. Four watered days give six portions for four winter meals. On the trade route, trapping two furs takes 30 minutes. Their sale and the starting purse buy four portions with two coins left. A food load takes 60 minutes to carry home, so buying all four means two return trips.
+
+Both routes have been played through with the same prices, daylight and weather. The existing costs let the harvest route trade daily watering for fewer road trips and let the trade route skip growing time by spending more daylight hauling. The last autumn day now warns about a missing first meal or drink while six hours of daylight remain at dawn. Each winter day has three hours. One missed winter ration or unheated night leaves time to recover. A second consecutive miss of the same kind forces retreat.
 
 ## Verify
 

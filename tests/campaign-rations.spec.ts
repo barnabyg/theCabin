@@ -76,7 +76,10 @@ test("recover after missing a winter meal and drink by bringing both back to the
   await growTurnips(page);
   await buildPantry(page);
   await prepareHearth(page);
-  await restToWinter(page, 3);
+  for (let day = 3; day < 6; day++) await action(page, /^Rest until tomorrow/);
+  await expect(page.locator("#night")).toContainText("Winter starts tomorrow");
+  await expect(page.locator("#night")).toContainText("first meal and drink");
+  await action(page, /^Rest until tomorrow/);
   await action(page, /^Rest until tomorrow/);
   await expect(page.locator("#night")).toContainText("Hungry");
   await expect(page.locator("#night")).toContainText("Thirsty");

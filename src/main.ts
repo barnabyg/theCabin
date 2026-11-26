@@ -15,10 +15,13 @@ import {
   footprintTiles,
   fixedObstruction,
   withinFootprint,
+  planSize,
   buildingMaterials,
   recipe,
   obstructions,
+  obstructionAt,
 } from "./cabin";
+import { seasonSounds } from "./season-sounds";
 import { startLandscape } from "./landscape";
 import { positionTile } from "./map-camera";
 import {
@@ -49,7 +52,8 @@ const cabinNext = element("cabin-next");
 if (!(cabinControls instanceof HTMLFieldSetElement) || !(cabinNext instanceof HTMLButtonElement))
   throw new Error("Missing cabin construction controls");
 let guidedCabin: Cabin | undefined;
-const landscape = startLandscape(game);
+const landscape = startLandscape(game, () => campaign?.season);
+const sound = campaign && seasonSounds();
 let haul: WorkOrder | undefined = winter?.haul ?? session?.haul;
 let ticker: number | undefined;
 function scenarioEnded() {
@@ -176,6 +180,10 @@ element("build").onclick = () => {
   render();
 };
 function renderMenu() {
+  element("build").textContent =
+    campaign && !game.cabins.length && game.planKind === "Cabin" && !game.planning
+      ? "Build menu · Compare cabin sites"
+      : "Build menu";
   const menu = element("plan-menu");
   menu.hidden = !game.planning;
   menu.replaceChildren();
@@ -191,6 +199,11 @@ function renderMenu() {
     menu,
     `Shortfall · ${Math.max(0, recipe.logs - game.load.logs)} logs, ${Math.max(0, recipe.stone - game.load.stone)} stone`,
   );
+  if (campaign && !game.cabins.length)
+    paragraph(
+      menu,
+      "Clear the wooded site at D4 to gather timber and stone there, or make the longer haul to the open site at K4 and skip clearing.",
+    );
   paragraph(menu, "Choose a site or click its top-left tile on the map. Daylight is paused.");
   for (const [name, site] of [
     ["Open site", openSite],
@@ -219,12 +232,28 @@ function renderMenu() {
       return timber || stock.logs || stock.stone;
     })
   ) {
-    paragraph(
-      menu,
-      game.storage
-        ? `Haul logs and stone to storage at ${coordinate(game.storage)}.`
-        : "To clear this site, return to the clearing, select an open tile and choose Mark storage area.",
-    );
+    if (game.storage)
+      paragraph(menu, `Haul logs and stone to storage at ${coordinate(game.storage)}.`);
+    else if (
+      campaign &&
+      !withinFootprint(game.preview, game.position) &&
+      !fixedObstruction(game, game.position) &&
+      !game.plot(game.position).timber
+    ) {
+      paragraph(
+        menu,
+        "Stack the cleared timber and stone where you stand, or return to the clearing to mark another storage tile.",
+      );
+      button(menu, `Mark storage at ${coordinate(game.position)}`, () => {
+        game.storage = { ...game.position };
+        render();
+      });
+    } else {
+      paragraph(
+        menu,
+        "To clear this site, return to the clearing, select an open tile and choose Mark storage area.",
+      );
+    }
     button(
       menu,
       "Clear area",
@@ -341,7 +370,7 @@ function render() {
   }
   const plan = game.cabins.find((c) => c.contains(p));
   if (plot.site && plot.site.kind !== "Garden")
-    for (const note of buildingNotes(plot.site, game.load)) paragraph(info, note);
+    for (const note of buildingNotes(plot.site, game.load, !!campaign)) paragraph(info, note);
   if (plan) {
     paragraph(info, `${plan.progress} · ${coordinate(plan.origin)}`);
     if (plan.complete)
@@ -431,8 +460,17 @@ function render() {
     });
   else renderNight(game, render, haltHaul, !!haul && !haul.paused && !haul.finished);
   element("message").textContent = game.message;
-  for (const [i, cell] of cells.entries())
+  for (const [i, cell] of cells.entries()) {
     cell.setAttribute("aria-pressed", String(i === p.y * COLS + p.x));
+    const tile = { x: i % COLS, y: Math.floor(i / COLS) };
+    const reason =
+      game.planning && withinFootprint(game.preview, tile, planSize(game.planKind))
+        ? obstructionAt(game, tile)
+        : undefined;
+    if (reason) cell.setAttribute("aria-description", `${reason} blocks this footprint`);
+    else cell.removeAttribute("aria-description");
+  }
+  if (campaign && sound) sound(campaign);
   landscape.paint();
 }
 const directions: Record<string, Point> = {

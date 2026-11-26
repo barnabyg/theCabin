@@ -1,4 +1,4 @@
-import { ordinaryNightFuel } from "./firewood";
+import { fuelCoverage } from "./firewood";
 import { drawWater } from "./garden";
 import { CAPACITY, quantity, stockLabel, type Job, type Stock } from "./world";
 
@@ -32,7 +32,7 @@ export type Outbuilding = (
   complete: boolean;
 };
 
-export function buildingNotes(site: Outbuilding, load: Stock) {
+export function buildingNotes(site: Outbuilding, load: Stock, firstWinter: boolean) {
   const { material, amount } = plans[site.kind];
   const notes = [
     `${site.kind} · ${site.complete ? "Complete" : "Blueprint"}`,
@@ -40,13 +40,13 @@ export function buildingNotes(site: Outbuilding, load: Stock) {
     `Delivered · ${site.delivered} ${material}`,
     `Outstanding · ${amount - site.delivered} ${material}`,
   ];
-  if (site.kind === "Pantry" && site.complete) notes.push(`Stored · ${site.stored} portions`);
-  if (site.kind === "Covered woodpile" && site.complete) {
-    const nights = Math.floor(site.stored / ordinaryNightFuel);
-    notes.push(
-      `Dry firewood · ${site.stored} ${site.stored === 1 ? "piece" : "pieces"} · ${nights} ordinary ${nights === 1 ? "night" : "nights"} of heat`,
-    );
+  if (site.kind === "Pantry" && site.complete) {
+    const plural = site.stored === 1 ? "" : "s";
+    const meals = firstWinter ? ` · ${site.stored} winter meal${plural}` : "";
+    notes.push(`Stored · ${site.stored} portion${plural}${meals}`);
   }
+  if (site.kind === "Covered woodpile" && site.complete)
+    notes.push(`Dry firewood · ${fuelCoverage(site.stored)} of heat`);
   return notes;
 }
 

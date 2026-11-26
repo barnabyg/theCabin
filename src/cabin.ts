@@ -10,12 +10,16 @@ import {
 } from "./world";
 import { Hearth } from "./night";
 export const footprint = { width: 3, height: 2 };
-export function withinFootprint(origin: Point, p: Point) {
+export const singleTile = { width: 1, height: 1 };
+export function planSize(kind: Homestead["planKind"]) {
+  return kind === "Cabin" ? footprint : singleTile;
+}
+export function withinFootprint(origin: Point, p: Point, size = footprint) {
   return (
     p.x >= origin.x &&
-    p.x < origin.x + footprint.width &&
+    p.x < origin.x + size.width &&
     p.y >= origin.y &&
-    p.y < origin.y + footprint.height
+    p.y < origin.y + size.height
   );
 }
 export const recipe = { logs: 4, stone: 2 };
@@ -96,11 +100,16 @@ export function fixedObstruction(game: Homestead, tile: Point) {
 export function obstructions(game: Homestead, origin: Point, size = footprint) {
   const blocked: string[] = [];
   for (const tile of footprintTiles(origin, size)) {
-    const reason =
-      fixedObstruction(game, tile) ??
-      game.plot(tile).timber ??
-      (game.plot(tile).stock.stone ? "Loose stone" : null);
+    const reason = obstructionAt(game, tile);
     if (reason) blocked.push(`${coordinate(tile)} · ${reason}`);
   }
   return blocked;
+}
+
+export function obstructionAt(game: Homestead, tile: Point) {
+  return (
+    fixedObstruction(game, tile) ??
+    game.plot(tile).timber ??
+    (game.plot(tile).stock.stone ? "Loose stone" : null)
+  );
 }

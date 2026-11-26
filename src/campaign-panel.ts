@@ -1,8 +1,8 @@
 import { Campaign, campaignKey, winterDay } from "./campaign";
-import { ordinaryNightFuel, autumnRainDay } from "./firewood";
+import { ordinaryNightFuel, autumnRainDay, fuelCoverage } from "./firewood";
 import type { WorkOrder } from "./haul";
 import { pantryReserves } from "./rations";
-import { road } from "./market";
+import { marketRules, road } from "./market";
 import { renderMerchant } from "./market-panel";
 import { button, element, heading, paragraph } from "./ui";
 import { coordinate, distance } from "./world";
@@ -63,8 +63,9 @@ export function renderCampaign(
   town.hidden = !market.inTown;
   element("map-panel").hidden = market.inTown;
   element("field-notes").hidden = market.inTown || campaign.ended;
+  const weather = campaign.weatherTonight ? ` · ${campaign.weatherTonight} tonight` : "";
   element("calendar").textContent =
-    `${campaign.season} · Day ${spring.day} · Winter begins day ${winterDay}`;
+    `${campaign.season} · Day ${spring.day} · Winter begins day ${winterDay}${weather}`;
   element("seeds").textContent = `${spring.seeds.turnip} turnip · ${spring.seeds.squash} squash`;
   element("purse").textContent = `${market.coins} coin${market.coins === 1 ? "" : "s"}`;
   if (!campaign.ended) {
@@ -73,12 +74,29 @@ export function renderCampaign(
       box,
       `Pantry reserves · ${meals} meal${meals === 1 ? "" : "s"} · ${drinks} drink${drinks === 1 ? "" : "s"} · Each winter night uses 1 portion and 1 water.`,
     );
+    const covered = game.plots.reduce(
+      (pieces, { site }) =>
+        pieces + (site?.kind === "Covered woodpile" && site.complete ? site.stored : 0),
+      0,
+    );
+    const loaded = game.cabins.reduce((pieces, cabin) => pieces + cabin.hearth.fuel, 0);
+    paragraph(
+      box,
+      `Covered woodpiles · ${fuelCoverage(covered)}. In hearths · ${loaded} firewood.`,
+    );
+    if (spring.day === winterDay - 1 && (!meals || !drinks)) {
+      const missing = [!meals && "meal", !drinks && "drink"].filter(Boolean).join(" and ");
+      paragraph(
+        box,
+        `Winter starts tomorrow. Store your first ${missing} in a finished pantry while the days are long.`,
+      );
+    }
     if (spring.day >= winterDay) {
       const fuel = campaign.fuelTonight;
       paragraph(
         box,
-        fuel > ordinaryNightFuel
-          ? `Cold spell · The hearth needs ${fuel} firewood tonight, twice the ordinary burn.`
+        campaign.weatherTonight === "Cold spell"
+          ? `Cold spell · The hearth needs ${fuel} firewood tonight (${fuel - ordinaryNightFuel} extra).`
           : `Winter night · The hearth needs ${fuel} firewood tonight.`,
       );
       if (campaign.unheated)
@@ -102,7 +120,9 @@ export function renderCampaign(
     }
     if (spring.day <= autumnRainDay) {
       const forecast =
-        spring.day === autumnRainDay ? "Rain tonight" : `Rain forecast for day ${autumnRainDay}`;
+        campaign.weatherTonight === "Rain"
+          ? "Rain tonight"
+          : `Rain forecast for day ${autumnRainDay}`;
       paragraph(
         box,
         `${forecast} · One piece of firewood in each outdoor ground stack will spoil. Store split wood in a covered woodpile to keep it dry.`,
@@ -112,7 +132,7 @@ export function renderCampaign(
     else
       paragraph(
         box,
-        `Town road at ${coordinate(road)} · 30 min each way, double with a load. Trapline at I7.`,
+        `Town road at ${coordinate(road)} · ${marketRules.roadMinutes} min each way, double with a load. Trapline at I7.`,
       );
     const busy = !!haul && !haul.finished && !haul.paused;
     if (market.inTown || (!distance(game.position, road) && !distance(game.selected, road)))

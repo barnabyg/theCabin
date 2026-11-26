@@ -1,4 +1,5 @@
-import { footprint } from "./cabin";
+import type { Campaign } from "./campaign";
+import { footprint, footprintTiles, obstructionAt, planSize } from "./cabin";
 import { view, type Vertex } from "./map-camera";
 import { groundPath, markGround, paintTerrain } from "./map-terrain";
 import { cabinModel, pine, plotModel, settler } from "./map-models";
@@ -24,7 +25,10 @@ function groundDisc(
   ctx.fill();
 }
 
-export function startLandscape(game: Homestead) {
+export function startLandscape(
+  game: Homestead,
+  currentSeason: () => Campaign["season"] | undefined,
+) {
   const terrain = document.getElementById("terrain");
   if (!terrain) throw new Error("Missing terrain container");
   const canvas = document.createElement("canvas");
@@ -37,17 +41,25 @@ export function startLandscape(game: Homestead) {
   const hitRegions: { outline: Path2D; tile?: Point }[] = [];
   let art: MapArt | undefined;
   let paintedArt: MapArt | undefined;
+  let paintedSeason: Campaign["season"] | undefined;
 
   function paint() {
     if (!ctx || !ground || !canvas.clientWidth) return;
     const scale = (canvas.clientWidth * window.devicePixelRatio) / view.width;
     const width = Math.max(1, Math.round(view.width * scale)),
       height = Math.max(1, Math.round(view.height * scale));
-    if (background.width !== width || background.height !== height || paintedArt !== art) {
+    const season = currentSeason();
+    if (
+      background.width !== width ||
+      background.height !== height ||
+      paintedArt !== art ||
+      paintedSeason !== season
+    ) {
       background.width = canvas.width = width;
       background.height = canvas.height = height;
       ground.setTransform(width / view.width, 0, 0, height / view.height, 0, 0);
-      paintTerrain(ground, art?.clearing);
+      paintTerrain(ground, art?.clearing, season);
+      paintedSeason = season;
       paintedArt = art;
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -114,7 +126,7 @@ export function startLandscape(game: Homestead) {
       hitRegions.push({ outline: draw(), tile });
 
     if (game.planning) {
-      const size = game.planKind === "Cabin" ? footprint : { width: 1, height: 1 };
+      const size = planSize(game.planKind);
       markGround(
         ctx,
         game.preview.x,
@@ -125,6 +137,17 @@ export function startLandscape(game: Homestead) {
         "#ffe4a0",
         3,
       );
+      for (const tile of footprintTiles(game.preview, size)) {
+        if (!obstructionAt(game, tile)) continue;
+        markGround(ctx, tile.x, tile.y, 1, 1, "rgba(164,66,35,.45)", "#ffe5c0");
+        for (const dx of [0.15, 0.85]) {
+          groundPath(ctx, [
+            [tile.x + dx, 0, tile.y + 0.15],
+            [tile.x + 1 - dx, 0, tile.y + 0.85],
+          ]);
+          ctx.stroke();
+        }
+      }
     } else {
       ctx.setLineDash([6, 4]);
       markGround(

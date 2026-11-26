@@ -1,3 +1,5 @@
+import type { Campaign } from "./campaign";
+import { paintSeason } from "./season-art";
 import { footprint } from "./cabin";
 import { groundCorners, project, view, type Vertex } from "./map-camera";
 import { COLS, openSite, wooded } from "./world";
@@ -41,7 +43,11 @@ function label(ctx: CanvasRenderingContext2D, x: number, z: number, text: string
   ctx.fillText(text, p.x, p.y + 4);
 }
 
-export function paintTerrain(ctx: CanvasRenderingContext2D, clearing?: HTMLImageElement) {
+export function paintTerrain(
+  ctx: CanvasRenderingContext2D,
+  clearing?: HTMLImageElement,
+  season?: Campaign["season"],
+) {
   if (clearing) {
     ctx.drawImage(clearing, 0, 0, view.width, view.height);
   } else {
@@ -51,6 +57,7 @@ export function paintTerrain(ctx: CanvasRenderingContext2D, clearing?: HTMLImage
     ctx.fillStyle = "#688d82";
     ctx.fillRect(0, shore, view.width, view.height - shore);
   }
+  if (season) paintSeason(ctx, season);
   ctx.lineWidth = 1;
   ctx.strokeStyle = "rgba(54,54,32,.37)";
   for (let x = 0; x <= COLS; x++) {
