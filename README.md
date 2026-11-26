@@ -14,6 +14,8 @@ npm.cmd run play
 
 Open the local address printed by the launcher in a desktop browser. The first screen shows **One cold night**, a homestead map and six hours of daylight. Choose **First winter** in the scenario links to start the campaign. The command installs locked dependencies and starts the local game. Use Ctrl+C to stop.
 
+The game uses port 43187 and Playwright uses 43188. Set `CABIN_PORT` or `CABIN_TEST_PORT` before launching to choose a different port. Browser saves belong to the address where you played. To resume a save from the previous default, set `$env:CABIN_PORT = "5173"` and launch the game in the same browser profile.
+
 To see the finished cabin immediately, choose **Market day**. Select K4 and choose **Walk here** to see the cutaway and hearth. Press the up arrow to step outside onto K3 and see the full roof again.
 
 Click the tree at D4 in the wooded site and choose **Walk here**, then **Fell tree**. The stump and four logs remain. Pick up two logs, walk one tile east with the right arrow, and set down the load. You should see two logs on E4 and two still on D4. A loaded step costs two minutes, an empty step one. Select a distant tile to preview the whole trip. Time advances only on committed actions.
@@ -38,7 +40,7 @@ To ferry several loads at once, fell the tree at D4 and choose **Repeat haul**. 
 
 ## First harvest
 
-From the repository root run `npm.cmd run play` with Node.js 24.13 or later, then open http://127.0.0.1:5173 and choose **First harvest**. The spring scenario lasts six working days. Resting spends the remaining daylight. Each morning restores six hours for travel and labour.
+From the repository root run `npm.cmd run play` with Node.js 24.13 or later, then open http://127.0.0.1:43187 and choose **First harvest**. The spring scenario lasts six working days. Resting spends the remaining daylight. Each morning restores six hours for travel and labour.
 
 Reserve the open cabin site at K4, deliver two logs, and choose **Rest until tomorrow**. Pick up the stone at E5 and choose **Save spring day**. Close the browser, reopen the same address in the same browser profile, and choose **Resume First harvest**. You should be at E5 on day two with two stone, and K4 should still show two delivered logs. Finish the cabin or rest through day six to see the frost ending. **Start a fresh spring** discards the saved run.
 
@@ -54,7 +56,7 @@ A repeat haul pauses when you leave the spring tab. Return and choose **Resume h
 
 ## Market day
 
-From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Open http://127.0.0.1:5173 and choose **Market day**. Walk to P6, follow the road to town and try buying turnip seed. Your one coin is short of the three-coin price. Save in town, close and reopen the browser in the same profile, then choose **Resume Market day**. The merchant still has both seeds. Walk home to P6. Each road trip uses 30 minutes empty or 60 with a load.
+From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Open http://127.0.0.1:43187 and choose **Market day**. Walk to P6, follow the road to town and try buying turnip seed. Your one coin is short of the three-coin price. Save in town, close and reopen the browser in the same profile, then choose **Resume Market day**. The merchant still has both seeds. Walk home to P6. Each road trip uses 30 minutes empty or 60 with a load.
 
 **Win with surplus food.** Start a fresh market day, walk to the pantry at F6 and withdraw one of its four portions. Carry it to P6 and walk to town. Sell the portion for two coins, buy one turnip seed for three, and walk home. Sow at G6 and wait until sundown. **Sowing secured** appears with all three marked portions still in the pantry. Taking and selling two portions produces a reserve shortage instead. Waiting without sowing explains the missed deadline.
 
@@ -66,7 +68,7 @@ From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Ope
 
 With Node.js 24.13 or later, run `npm.cmd run play` from the repository root. Choose **First winter**, then **Build menu · Compare cabin sites**. Inspect both footprints before spending daylight. Crosses mark blocked tiles and the menu names each obstruction. To try the wooded site, choose **Mark storage at G6** and **Clear area**. When the site shows **Ready to reserve**, reopen the Build menu. At either clear site, choose **Reserve footprint** and follow the cabin card until the roof and hearth are finished.
 
-From the repository root, run `npm.cmd run play` with Node.js 24.13 or later, open http://127.0.0.1:5173 and choose **First winter**. Walk to P6, buy a turnip seed in town with the opening four coins and return. Prepare a garden at G6 and sow. Save First winter, close the browser, and reopen in the same profile. **Resume First winter** restores the planted bed, day and one remaining coin.
+From the repository root, run `npm.cmd run play` with Node.js 24.13 or later, open http://127.0.0.1:43187 and choose **First winter**. Walk to P6, buy a turnip seed in town with the opening four coins and return. Prepare a garden at G6 and sow. Save First winter, close the browser, and reopen in the same profile. **Resume First winter** restores the planted bed, day and one remaining coin.
 
 **Buy food with a fur.** In First winter, build a pantry at F6 with two logs from C4. Collect a fur at I7 and take the road at P6. Buy one turnip seed, then try buying food with the remaining coin. The offer should still show eight portions and your pack should still hold the fur. Sell the fur, buy two portions at two coins each and take the 60-minute walk home. Store the food at F6. The pantry should hold two portions and your purse should be empty.
 
@@ -76,7 +78,7 @@ Before winter, inspect a finished pantry to see how many meals its portions prov
 
 **Follow the seasons.** In First winter, use **Rest until tomorrow** to watch the meadow change from spring flowers to summer grass, fallen leaves and snow. Each change has a short sound after your first interaction. On day six the calendar announces rain and the forecast explains how to protect loose fuel. On day eight it announces a cold spell and shows how much extra firewood the hearth will need. Toggle **Sound on** beside the daylight clock to mute the cues. The forecast and map still show each change. At spring thaw, meltwater replaces the snow.
 
-**Keep winter fuel dry.** From the repository root run `npm.cmd run play`, open http://127.0.0.1:5173 and choose **First winter**. Reserve a **Covered woodpile** at H6. Fell D4, deliver two logs to H6 and finish the woodpile. Split the other two logs at D4, carry two pieces to H6 and choose **Store firewood**. Leave two pieces at D4. Rest through the rain on day six. On day seven, D4 holds one piece and H6 still holds two ordinary nights of fuel. At H6, withdraw a piece to carry to a finished cabin and add to its hearth.
+**Keep winter fuel dry.** From the repository root run `npm.cmd run play`, open http://127.0.0.1:43187 and choose **First winter**. Reserve a **Covered woodpile** at H6. Fell D4, deliver two logs to H6 and finish the woodpile. Split the other two logs at D4, carry two pieces to H6 and choose **Store firewood**. Leave two pieces at D4. Rest through the rain on day six. On day seven, D4 holds one piece and H6 still holds two ordinary nights of fuel. At H6, withdraw a piece to carry to a finished cabin and add to its hearth.
 
 **Reach thaw on the harvest.** Buy a squash seed, sow at G6 on day one, and water it on each of the first four days. Use the remaining daylight to build a cabin and pantry. Harvest on day five and store at least four portions and four drinks. Split three logs and load at least five pieces into the hearth. Winter starts on day seven with three hours of daylight. Spend the four nights inside the cabin with the hearth lit. The cold spell on day eight burns two pieces. Reaching day eleven shows **Spring thaw** and offers a fresh start. For the cold retreat, stock food and water but leave the hearth empty for two consecutive winter nights.
 

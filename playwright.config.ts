@@ -1,5 +1,5 @@
 import { defineConfig } from "@playwright/test";
-const port = Number(process.env.CABIN_TEST_PORT ?? 5197);
+const port = Number(process.env.CABIN_TEST_PORT ?? 43188);
 const baseURL = `http://127.0.0.1:${port}`;
 export default defineConfig({
   testDir: "./tests",
