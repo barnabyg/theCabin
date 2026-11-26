@@ -69,18 +69,27 @@ export function startLandscape(
     if (game.storage)
       markGround(ctx, game.storage.x, game.storage.y, 1, 1, "rgba(93,180,187,.38)", "#94e1dc", 3);
     let floor = 0;
+    let settlerDepth = Infinity;
     for (const cabin of game.cabins) {
       const { x, y: z } = cabin.origin;
-      markGround(ctx, x, z, footprint.width, footprint.height, "rgba(72,99,96,.38)", "#f5e5b6");
       if (cabin.stage) {
         const inside = cabin.contains(game.position);
         if (inside) floor = 0.13;
         groundDisc(ctx, x + 1.6, z + 1.14, 0, 1.54, 0.96, "rgba(54,70,50,.23)");
+        const south = z + footprint.height - 0.12;
+        if (
+          cabin.walled &&
+          game.position.y < z &&
+          game.position.x >= x &&
+          game.position.x < x + footprint.width
+        )
+          settlerDepth = Math.min(settlerDepth, south);
         objects.push({
-          south: z + footprint.height - 0.12,
+          south,
           draw: () => cabinModel(cabin, inside).draw(ctx, art?.materials),
         });
       } else {
+        markGround(ctx, x, z, footprint.width, footprint.height, "rgba(72,99,96,.38)", "#f5e5b6");
         for (const [left, right] of [
           [x, x + footprint.width],
           [x + footprint.width, x],
@@ -109,11 +118,16 @@ export function startLandscape(
       }
       if (plot.site && plot.site.kind !== "Garden" && !plot.site.complete)
         markGround(ctx, x - 0.4, z - 0.38, 0.8, 0.76, "rgba(72,99,96,.38)", "#f5e5b6");
-      if (plot.site || plot.timber === "Stump" || Object.values(plot.stock).some(Boolean)) {
+      if (
+        plot.rawStone ||
+        plot.site ||
+        plot.timber === "Stump" ||
+        Object.values(plot.stock).some(Boolean)
+      ) {
         const cabin = game.cabins.find(
           (c) => c.stage && c.contains({ x: Math.floor(x), y: Math.floor(z) }),
         );
-        if (cabin?.complete && !cabin.contains(game.position)) continue;
+        if (cabin?.roofed && !cabin.contains(game.position)) continue;
         const south = cabin ? cabin.origin.y + footprint.height - 0.1 : z + 0.32;
         objects.push({
           south,
@@ -121,6 +135,34 @@ export function startLandscape(
         });
       }
     }
+    if (!game.planning) {
+      ctx.setLineDash([6, 4]);
+      markGround(
+        ctx,
+        game.selected.x,
+        game.selected.y,
+        1,
+        1,
+        "rgba(255,237,181,.09)",
+        "#fff0b7",
+        2.5,
+      );
+      ctx.setLineDash([]);
+    }
+    const x = game.position.x + 0.5,
+      z = game.position.y + 0.57;
+    // A stable sort draws the settler immediately before a nearer cabin, after intervening pines.
+    objects.unshift({
+      south: settlerDepth,
+      tile: game.position,
+      draw: () => {
+        groundDisc(ctx, x, z, floor, 0.235, 0.17, "#ffe8a9");
+        groundDisc(ctx, x, z, floor + 0.005, 0.19, 0.12, "#726c49");
+        return art
+          ? art.settler.draw(ctx, x, z, 0.84, floor + 0.01)
+          : settler(x, z, floor + 0.01).draw(ctx);
+      },
+    });
     hitRegions.length = 0;
     for (const { draw, tile } of objects.sort((a, b) => a.south - b.south))
       hitRegions.push({ outline: draw(), tile });
@@ -148,29 +190,7 @@ export function startLandscape(
           ctx.stroke();
         }
       }
-    } else {
-      ctx.setLineDash([6, 4]);
-      markGround(
-        ctx,
-        game.selected.x,
-        game.selected.y,
-        1,
-        1,
-        "rgba(255,237,181,.09)",
-        "#fff0b7",
-        2.5,
-      );
-      ctx.setLineDash([]);
     }
-    // Draw the locator and settler last so either stays legible beneath a canopy.
-    const x = game.position.x + 0.5,
-      z = game.position.y + 0.57;
-    groundDisc(ctx, x, z, floor, 0.235, 0.17, "#ffe8a9");
-    groundDisc(ctx, x, z, floor + 0.005, 0.19, 0.12, "#726c49");
-    const figure = art
-      ? art.settler.draw(ctx, x, z, 0.84, floor + 0.01)
-      : settler(x, z, floor + 0.01).draw(ctx);
-    hitRegions.push({ outline: figure, tile: game.position });
     hitRegions.reverse();
   }
   new ResizeObserver(paint).observe(canvas);

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { action, selectTile, walkTo } from "./controls";
-import { buildPantry } from "./winter-route";
+import { buildCabin, buildPantry } from "./winter-route";
 
 async function restToWinter(page: Page, fromDay: number) {
   for (let day = fromDay; day < 7; day++) await action(page, /^Rest until tomorrow/);
@@ -44,23 +44,7 @@ async function stockWater(page: Page) {
 }
 
 async function prepareHearth(page: Page) {
-  await action(page, /^Build menu/);
-  await action(page, /^Cabin$/);
-  await action(page, /^Open site/);
-  await action(page, /^Reserve footprint/);
-  await walkTo(page, "D4");
-  await action(page, /^Fell tree/);
-  for (const [source, material] of [
-    ["D4", "logs"],
-    ["D4", "logs"],
-    ["E5", "stone"],
-  ]) {
-    await walkTo(page, source);
-    await action(page, new RegExp(`^Pick up ${material}`));
-    await walkTo(page, "K4");
-    await action(page, /^Deliver materials/);
-  }
-  for (const job of [/^Lay floor/, /^Raise walls/, /^Fit roof and hearth/]) await action(page, job);
+  await buildCabin(page);
   await walkTo(page, "C4");
   await action(page, /^Pick up logs/);
   await walkTo(page, "K4");

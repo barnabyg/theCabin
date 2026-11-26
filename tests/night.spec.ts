@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { action, reserveOpen, selectTile, walkTo } from "./controls";
+import { finishDeliveredCabin, action, reserveOpen, selectTile, walkTo } from "./controls";
 
 async function furnish(page: Page, site: "K4" | "D4") {
   await page.goto("/");
@@ -9,6 +9,7 @@ async function furnish(page: Page, site: "K4" | "D4") {
   if (site === "D4") {
     await action(page, /^Clear stump/);
     await walkTo(page, "E5");
+    await action(page, /^Work rock with pickaxe/);
     await action(page, /^Pick up stone/);
     await action(page, /^Build menu/);
     await action(page, /^Wooded site/);
@@ -30,11 +31,12 @@ async function furnish(page: Page, site: "K4" | "D4") {
   }
   if (site === "K4") {
     await walkTo(page, "E5");
+    await action(page, /^Work rock with pickaxe/);
     await action(page, /^Pick up stone/);
     await walkTo(page, site);
     await action(page, /^Deliver materials/);
   }
-  for (const job of [/^Lay floor/, /^Raise walls/, /^Fit roof and hearth/]) await action(page, job);
+  await finishDeliveredCabin(page);
   await expect(page.locator("#inspect")).toContainText("Stone hearth ready");
 }
 async function restart(page: Page) {

@@ -9,29 +9,30 @@ test("build from a reservation by following the cabin's next action", async ({ p
   await expect(next).toBeFocused();
   await expect(guide).toContainText("Cabin at K4");
   await selectTile(page, "B7");
-  for (const [stage, material] of [
-    ["Lay floor", "logs"],
-    ["Raise walls", "logs"],
-    ["Fit roof and hearth", "stone"],
-  ]) {
-    await expect(guide.getByRole("heading")).toHaveText(stage);
-    await expect(next).toContainText(
-      stage === "Lay floor" ? "Walk to the tree" : `Walk to the ${material}`,
-    );
+  const steps = [
+    "Walk to the tree",
+    "Fell tree",
+    "Pick up logs",
+    "Walk to the cabin",
+    "Deliver materials",
+    "Walk to the rock",
+    "Work rock with pickaxe",
+    "Pick up stone",
+    "Walk to the cabin",
+    "Deliver materials",
+    "Set footings and sills",
+    "Walk to the logs",
+    "Pick up logs",
+    "Walk to the cabin",
+    "Deliver materials",
+    "Raise wall posts",
+    "Frame and shingle roof",
+    "Daub joints and fit door",
+    "Build hearth and chimney",
+  ];
+  for (const step of steps) {
+    await expect(next).toContainText(step);
     await next.click();
-    if (stage === "Lay floor") {
-      await expect(next).toContainText("Fell tree");
-      await next.click();
-    }
-    for (const label of [
-      `Pick up ${material}`,
-      "Walk to the cabin at K4",
-      "Deliver materials",
-      stage,
-    ]) {
-      await expect(next).toContainText(label);
-      await next.click();
-    }
   }
   await expect(guide.getByRole("heading")).toHaveText("Cabin complete");
   await expect(next).toBeHidden();
@@ -74,20 +75,25 @@ test("interrupt a repeat haul, preserve its load, then finish the cabin in stage
   await expect(page.locator("#haul")).toContainText("Haul complete", { timeout: 25000 });
   await expect(pause).toBeHidden();
   await expect(page.locator("#inspect")).toContainText("Delivered · 4 logs, 0 stone");
-  await expect(page.locator("#cabin-next")).toContainText("Lay floor");
+  await expect(page.getByRole("button", { name: /^Set footings/ })).toBeDisabled();
   await expect(page.locator("#load")).toContainText("Empty");
-  await action(page, /^Lay floor/);
-  await expect(page.locator("#inspect")).toContainText("Floor laid");
   await walkTo(page, "E5");
+  await action(page, /^Work rock with pickaxe/);
   await action(page, /^Pick up stone/);
   await walkTo(page, "K4");
-  await expect(page.locator("#inspect")).toContainText("Floor laid");
+  await expect(page.locator("#inspect")).toContainText("Blueprint");
   await action(page, /^Deliver materials/);
   await expect(page.locator("#inspect")).toContainText("Outstanding · 0 logs, 0 stone");
   await expect(page.getByRole("button", { name: /Deliver materials/ })).toHaveCount(0);
-  await action(page, /^Raise walls/);
-  await expect(page.locator("#inspect")).toContainText("Walls raised");
-  await action(page, /^Fit roof and hearth/);
+  await action(page, /^Set footings/);
+  await expect(page.locator("#inspect")).toContainText("Sills set");
+  await action(page, /^Raise wall posts/);
+  await expect(page.locator("#inspect")).toContainText("Wall posts raised");
+  await action(page, /^Frame and shingle roof/);
+  await expect(page.locator("#inspect")).toContainText("Roof shingled");
+  await action(page, /^Daub joints/);
+  await expect(page.locator("#inspect")).toContainText("Walls sealed");
+  await action(page, /^Build hearth/);
   await expect(page.locator("#inspect")).toContainText("Stone hearth ready");
   await expect(page.getByRole("button", { name: /Split 1 log/ })).toHaveCount(0);
 });

@@ -1,5 +1,5 @@
 import { expect, type Page } from "@playwright/test";
-import { action, selectTile, walkTo } from "./controls";
+import { finishDeliveredCabin, action, selectTile, walkTo } from "./controls";
 
 /** Check the price on the control against the visible daylight clock. */
 export async function spendDaylight(page: Page, name: RegExp, minutes: number) {
@@ -19,6 +19,7 @@ export const rest = (page: Page) => action(page, /^Rest until tomorrow/);
 
 async function deliver(page: Page, material: string, source: string, target: string, job: RegExp) {
   await walkTo(page, source);
+  if (material === "stone") await action(page, /^Work rock/);
   await action(page, new RegExp(`^Pick up ${material}`));
   await walkTo(page, target);
   await action(page, job);
@@ -45,9 +46,7 @@ export async function buildCabin(page: Page) {
   for (let load = 0; load < 2; load++)
     await deliver(page, "logs", "D4", "K4", /^Deliver materials/);
   await deliver(page, "stone", "E5", "K4", /^Deliver materials/);
-  await action(page, /^Lay floor/);
-  await action(page, /^Raise walls/);
-  await action(page, /^Fit roof and hearth/);
+  await finishDeliveredCabin(page);
 }
 
 export async function prepareHearth(page: Page, pieces = 5) {

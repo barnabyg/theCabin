@@ -6,6 +6,7 @@ import {
   distance,
   quantity,
   pickup,
+  pickaxeJob,
   timberJob,
   type Homestead,
   type Job,
@@ -122,7 +123,8 @@ export class ClearArea extends Order {
       const plot = game.plot(tile);
       const timber = timberJob(plot);
       const material = buildingMaterials.find((m) => plot.stock[m]);
-      const job = timber ?? (material && pickup(game.load, plot.stock, material));
+      const job =
+        timber ?? (material && pickup(game.load, plot.stock, material)) ?? pickaxeJob(plot);
       if (job) return stepToward(game, tile) ?? job;
     }
   }

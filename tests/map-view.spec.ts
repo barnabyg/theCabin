@@ -27,20 +27,76 @@ test("the cabin opens on entry and restores its roof on exit", async ({ page }) 
   await openPaintedMap(page, "/?scenario=market");
   const bounds = await page.locator("canvas").boundingBox();
   if (!bounds) throw new Error("Map is hidden");
-  // Sample the centre of L4, away from the settler and the selected tile.
-  const p = project([11.5, 0, 3.68]);
-  const clip = {
-    x: Math.round(bounds.x + (p.x * bounds.width) / view.width) - 5,
-    y: Math.round(bounds.y + (p.y * bounds.height) / view.height) - 5,
-    width: 10,
-    height: 10,
-  };
-  const exterior = await page.screenshot({ clip });
+  // Check the roof over L4 and the upper chimney independently.
+  const clips = [project([11.5, 0, 3.68]), project([12.47, 1.95, 3.53])].map((p) => ({
+    x: Math.round(bounds.x + (p.x * bounds.width) / view.width) - 2,
+    y: Math.round(bounds.y + (p.y * bounds.height) / view.height) - 2,
+    width: 4,
+    height: 4,
+  }));
+  const sample = () => Promise.all(clips.map((clip) => page.screenshot({ clip })));
+  const exterior = await sample();
   await walkTo(page, "K4");
-  expect(await page.screenshot({ clip })).not.toEqual(exterior);
+  const interior = await sample();
+  for (const [i, patch] of interior.entries()) expect(patch).not.toEqual(exterior[i]);
   await page.keyboard.press("ArrowUp");
   await expect(page.locator("#tile-title")).toContainText("K3");
-  expect(await page.screenshot({ clip })).toEqual(exterior);
+  expect(await sample()).toEqual(exterior);
+});
+
+test("the near roof hides the settler standing behind the cabin", async ({ page }) => {
+  await openPaintedMap(page, "/?scenario=market");
+  const feet = project([11.5, 0, 2.57]);
+  const sample = () =>
+    page.locator("canvas").evaluate(
+      (node, point) => {
+        if (!(node instanceof HTMLCanvasElement)) throw new Error("Map is hidden");
+        const ctx = node.getContext("2d");
+        if (!ctx) throw new Error("Missing map");
+        return Array.from(
+          ctx.getImageData(point.x * node.width - 2, point.y * node.height - 2, 4, 4).data,
+        );
+      },
+      { x: feet.x / view.width, y: feet.y / view.height },
+    );
+  const roof = await sample();
+  await walkTo(page, "L3");
+  await expect(page.locator("#tile-title")).toContainText("L3");
+  const after = await sample();
+  // Allow rounding from the antialiased edges of individual shakes.
+  expect(Math.max(...after.map((value, i) => Math.abs(value - roof[i])))).toBeLessThan(8);
+});
+
+test("a distant cabin leaves the settler visible under the M1 pine", async ({ page }) => {
+  async function sample(url: string) {
+    await openPaintedMap(page, url);
+    await walkTo(page, "M1");
+    const board = await page.locator("canvas").boundingBox();
+    if (!board) throw new Error("Map is hidden");
+    const centre = project([12.5, 0.35, 0.57]);
+    return page.screenshot({
+      clip: {
+        x: Math.round(board.x + (centre.x * board.width) / view.width) - 3,
+        y: Math.round(board.y + (centre.y * board.height) / view.height) - 3,
+        width: 6,
+        height: 6,
+      },
+    });
+  }
+  const alone = await sample("/");
+  expect(await sample("/?scenario=market")).toEqual(alone);
+});
+
+test("the QHD clearing uses desktop space and keeps its controls in view", async ({ page }) => {
+  await page.setViewportSize({ width: 2560, height: 1440 });
+  await openPaintedMap(page, "/");
+  const board = await page.locator(".board").boundingBox();
+  const notes = await page.locator("#field-notes").boundingBox();
+  if (!board || !notes) throw new Error("The map and Field Notes must be visible");
+  expect(board.width).toBeGreaterThan(1800);
+  expect(board.width / board.height).toBeCloseTo(16 / 9, 2);
+  expect(notes.x).toBeGreaterThan(board.x + board.width);
+  await expect(page.locator(".controls")).toBeInViewport({ ratio: 1 });
 });
 
 test("the projected clearing keeps edge tiles, planning and the river aligned after resize", async ({
@@ -56,8 +112,8 @@ test("the projected clearing keeps edge tiles, planning and the river aligned af
       position: { x: (p.x * bounds.width) / view.width, y: (p.y * bounds.height) / view.height },
     });
   }
-  for (const width of [1440, 680]) {
-    await page.setViewportSize({ width, height: 980 });
+  for (const width of [2560, 1440, 680]) {
+    await page.setViewportSize({ width, height: width === 2560 ? 1440 : 980 });
     for (const [x, z, name] of [
       [0.1, 0.1, "A1"],
       [15.9, 0.1, "P1"],

@@ -16,7 +16,7 @@ test("keep the wooded footprint while clearing the tree, stump and stone", async
   await action(page, /^Wooded site/);
   const menu = page.locator("#plan-menu");
   await expect(menu).toContainText("D4 · Tree");
-  await expect(menu).toContainText("E5 · Loose stone");
+  await expect(menu).toContainText("E5 · Raw rock");
   await expect(page.getByRole("button", { name: /Reserve footprint/ })).toBeDisabled();
   await page.keyboard.press("ArrowRight");
   await expect(page.locator("#clock")).toHaveText("6h 00m");
@@ -28,6 +28,10 @@ test("keep the wooded footprint while clearing the tree, stump and stone", async
   await action(page, /^Return to clearing/);
   await action(page, /^Clear stump/);
   await walkTo(page, "E5");
+  await expect(page.getByRole("button", { name: /^Pick up stone/ })).toHaveCount(0);
+  await action(page, /^Work rock with pickaxe · 2 stone · 6 min/);
+  await expect(page.locator("#inspect")).toContainText("On the ground · 2 stone");
+  await expect(page.getByRole("button", { name: /^Work rock/ })).toHaveCount(0);
   await action(page, /^Pick up stone/);
   await action(page, /^Build menu/);
   await expect(menu).toContainText("Footprint clear");

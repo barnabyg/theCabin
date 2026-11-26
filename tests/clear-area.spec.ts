@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { action, selectTile } from "./controls";
+import { finishDeliveredCabin, action, selectTile } from "./controls";
 
 test("clear the chosen cabin footprint, store each load and build from the stockpile", async ({
   page,
@@ -28,7 +28,7 @@ test("clear the chosen cabin footprint, store each load and build from the stock
   await page.clock.runFor(15000);
   await expect(page.locator("#haul")).toContainText("Ready to reserve · Cabin site D4");
   await expect(page.locator("#inspect")).toContainText("On the ground · 4 logs, 2 stone");
-  await expect(page.locator("#clock")).toHaveText("4h 55m");
+  await expect(page.locator("#clock")).toHaveText("4h 49m");
   await selectTile(page, "C4");
   await expect(page.locator("#inspect")).toContainText("Tree");
   await action(page, /^Build menu/);
@@ -40,9 +40,7 @@ test("clear the chosen cabin footprint, store each load and build from the stock
     await action(page, new RegExp(`^Repeat haul · ${material} to D4`));
     await page.clock.runFor(15000);
   }
-  await action(page, /^Lay floor/);
-  await action(page, /^Raise walls/);
-  await action(page, /^Fit roof and hearth/);
+  await finishDeliveredCabin(page);
   await expect(page.locator("#inspect")).toContainText("Stone hearth ready");
 });
 

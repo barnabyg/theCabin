@@ -11,6 +11,7 @@ import { ClearArea, Haul, type WorkOrder } from "./haul";
 import { nextCabinStep } from "./cabin-guide";
 import {
   type Cabin,
+  cabinStageCount,
   footprint,
   footprintTiles,
   fixedObstruction,
@@ -228,8 +229,8 @@ function renderMenu() {
   if (
     !tiles.some((tile) => fixedObstruction(game, tile)) &&
     tiles.some((tile) => {
-      const { timber, stock } = game.plot(tile);
-      return timber || stock.logs || stock.stone;
+      const { timber, rawStone, stock } = game.plot(tile);
+      return timber || rawStone || stock.logs || stock.stone;
     })
   ) {
     if (game.storage)
@@ -238,7 +239,8 @@ function renderMenu() {
       campaign &&
       !withinFootprint(game.preview, game.position) &&
       !fixedObstruction(game, game.position) &&
-      !game.plot(game.position).timber
+      !game.plot(game.position).timber &&
+      !game.plot(game.position).rawStone
     ) {
       paragraph(
         menu,
@@ -309,7 +311,7 @@ function renderCabinGuide() {
   const { note, job } = nextCabinStep(game, cabin);
   const shortDay = job && job.minutes > game.daylight;
   element("cabin-stage").textContent =
-    `Cabin at ${coordinate(cabin.origin)} · ${cabin.complete ? "Complete" : `Stage ${cabin.stage + 1} of 3`}`;
+    `Cabin at ${coordinate(cabin.origin)} · ${cabin.complete ? "Complete" : `Stage ${cabin.stage + 1} of ${cabinStageCount}`}`;
   element("cabin-heading").textContent = cabin.nextStage?.label ?? "Cabin complete";
   element("cabin-instruction").textContent = shortDay
     ? `${note} This step needs ${job.minutes} minutes of daylight. You have ${game.daylight} left.`
@@ -385,7 +387,12 @@ function render() {
       `Outstanding · ${plan.remaining("logs")} logs, ${plan.remaining("stone")} stone`,
     );
   }
-  paragraph(info, plot.timber ?? "Grassland");
+  paragraph(
+    info,
+    plot.rawStone
+      ? `Raw rock · Yields ${plot.rawStone} stone with a pickaxe`
+      : (plot.timber ?? "Grassland"),
+  );
   if (quantity(plot.stock)) paragraph(info, `On the ground · ${stockLabel(plot.stock)}`);
   const steps = distance(game.position, p);
   paragraph(
@@ -400,6 +407,7 @@ function render() {
     !market &&
     !game.planning &&
     !plot.timber &&
+    !plot.rawStone &&
     !fixedObstruction(game, p) &&
     (!haul || haul.finished || (haul.paused && !(haul instanceof ClearArea)))
   ) {

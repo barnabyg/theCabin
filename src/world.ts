@@ -17,6 +17,7 @@ export interface Point {
   y: number;
 }
 export interface Plot {
+  rawStone?: number;
   site?: Garden | Outbuilding;
   timber: "Tree" | "Stump" | null;
   stock: Stock;
@@ -65,6 +66,18 @@ export function timberJob(tile: Plot): Job | undefined {
         tile.timber = null;
       },
     };
+}
+export function pickaxeJob(plot: Plot): Job | undefined {
+  const yieldStone = plot.rawStone;
+  if (!yieldStone) return;
+  return {
+    label: `Work rock with pickaxe · ${yieldStone} stone`,
+    minutes: 3 * yieldStone,
+    run: () => {
+      plot.stock.stone += yieldStone;
+      delete plot.rawStone;
+    },
+  };
 }
 export function pickup(load: Stock, pile: Stock, material: Material): Job {
   const amount = Math.min(CAPACITY - quantity(load), pile[material]);
@@ -141,8 +154,8 @@ export class Homestead {
       [15, 6],
     ])
       this.plot({ x, y }).timber = "Tree";
-    this.plot({ x: 4, y: 4 }).stock.stone = 2;
-    this.plot({ x: 5, y: 2 }).stock.stone = 4;
+    this.plot({ x: 4, y: 4 }).rawStone = 2;
+    this.plot({ x: 5, y: 2 }).rawStone = 4;
   }
   plot(p: Point) {
     return this.plots[p.y * COLS + p.x];
@@ -192,6 +205,8 @@ export class Homestead {
     const jobs: Job[] = [];
     const timber = timberJob(tile);
     if (timber) jobs.push(timber);
+    const quarry = pickaxeJob(tile);
+    if (quarry) jobs.push(quarry);
     for (const material of materials)
       if (tile.stock[material]) jobs.push(pickup(this.load, tile.stock, material));
     if (quantity(this.load)) jobs.push(this.setDownJob());

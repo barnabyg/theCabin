@@ -1,5 +1,5 @@
 import { chromium, expect, test, type Page } from "@playwright/test";
-import { action, reserveOpen, selectTile, walkTo } from "./controls";
+import { finishDeliveredCabin, action, reserveOpen, selectTile, walkTo } from "./controls";
 
 async function plan(page: Page, kind: "Well" | "Garden" | "Pantry", tile: string) {
   await action(page, /^Build menu/);
@@ -20,6 +20,8 @@ async function deliver(
   delivery: RegExp,
 ) {
   await walkTo(page, source);
+  if (resource === "stone" && (await page.getByRole("button", { name: /^Work rock/ }).count()))
+    await action(page, /^Work rock/);
   await action(page, new RegExp(`^Pick up ${resource}`));
   await walkTo(page, target);
   await action(page, delivery);
@@ -39,8 +41,7 @@ test("win First harvest from bare ground after reopening a partial well", async 
     await action(page, /^Fell tree/);
     for (let i = 0; i < 2; i++) await deliver(page, "logs", "D4", "K4", /^Deliver materials/);
     await deliver(page, "stone", "E5", "K4", /^Deliver materials/);
-    for (const job of [/^Lay floor/, /^Raise walls/, /^Fit roof and hearth/])
-      await action(page, job);
+    await finishDeliveredCabin(page);
     await plan(page, "Well", "H6");
     await deliver(page, "stone", "F3", "H6", /^Deliver to well/);
     await action(page, /^Save spring day/);
