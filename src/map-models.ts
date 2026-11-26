@@ -93,6 +93,7 @@ export function cabinModel(cabin: Cabin, inside: boolean) {
   postWall(mesh, x, z + 0.12, 0.15, d - 0.12, inside ? 0.29 : 0.805, cabin.sealed);
   postWall(mesh, x + w - 0.15, z + 0.12, 0.15, d - 0.12, inside ? 0.29 : 0.805, cabin.sealed);
   const front = z + d - 0.14;
+  if (cabin.sealed) mesh.box(0x918672, x + w * 0.37, front + 0.16, 0, w * 0.26, 0.23, 0.085, "stone");
   // Leave a doorway in the south wall and lower it to the sill in cutaway.
   if (inside) postWall(mesh, x, front, w * 0.39, 0.16, 0.085, cabin.sealed);
   else {
@@ -154,7 +155,6 @@ function cabinDoorAndWindow(mesh: Mesh, x: number, front: number, w: number, flo
   mesh.box(0x72583e, x + 0.31, front + 0.23, 0.58, 0.31, 0.025, 0.035);
   mesh.box(0x8d6947, x + 0.22, front + 0.14, 0.4, 0.49, 0.16, 0.045, "plank");
   mesh.box(0x4e4334, x + w * 0.56, front + 0.175, 0.52, 0.075, 0.036, 0.04);
-  mesh.box(0x918672, x + w * 0.37, front + 0.16, 0, w * 0.26, 0.23, 0.085, "stone");
 }
 
 function cabinRoof(
