@@ -1,4 +1,4 @@
-import { obstructions } from "./cabin";
+import { obstructions, singleTile } from "./cabin";
 import { plans } from "./outbuilding";
 import { button, paragraph } from "./ui";
 import { coordinate, distance, stockLabel, type Homestead } from "./world";
@@ -19,7 +19,7 @@ export function springBuildMenu(
     });
   if (game.planKind === "Cabin") return false;
   const p = game.preview;
-  const blocked = obstructions(game, p, { width: 1, height: 1 });
+  const blocked = obstructions(game, p, singleTile);
   if (game.planKind !== "Garden") {
     const kind = game.planKind;
     const plan = plans[kind];

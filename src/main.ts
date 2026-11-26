@@ -15,6 +15,7 @@ import {
   footprintTiles,
   fixedObstruction,
   withinFootprint,
+  planSize,
   buildingMaterials,
   recipe,
   obstructions,
@@ -463,7 +464,7 @@ function render() {
     cell.setAttribute("aria-pressed", String(i === p.y * COLS + p.x));
     const tile = { x: i % COLS, y: Math.floor(i / COLS) };
     const reason =
-      game.planning && game.planKind === "Cabin" && withinFootprint(game.preview, tile)
+      game.planning && withinFootprint(game.preview, tile, planSize(game.planKind))
         ? obstructionAt(game, tile)
         : undefined;
     if (reason) cell.setAttribute("aria-description", `${reason} blocks this footprint`);

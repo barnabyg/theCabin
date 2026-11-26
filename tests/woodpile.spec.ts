@@ -15,6 +15,9 @@ test("autumn rain spoils loose fuel while covered firewood survives reopening an
     await action(page, /^Covered woodpile$/);
     await selectTile(page, "D4");
     await expect(page.getByRole("button", { name: /^Reserve covered woodpile/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "D4", exact: true })).toHaveAccessibleDescription(
+      "Tree blocks this footprint",
+    );
     await selectTile(page, "H6");
     await action(page, /^Reserve covered woodpile/);
     await walkTo(page, "D4");

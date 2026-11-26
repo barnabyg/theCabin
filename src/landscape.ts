@@ -1,5 +1,5 @@
 import type { Campaign } from "./campaign";
-import { footprint, footprintTiles, obstructionAt } from "./cabin";
+import { footprint, footprintTiles, obstructionAt, planSize } from "./cabin";
 import { view, type Vertex } from "./map-camera";
 import { groundPath, markGround, paintTerrain } from "./map-terrain";
 import { cabinModel, pine, plotModel, settler } from "./map-models";
@@ -126,7 +126,7 @@ export function startLandscape(
       hitRegions.push({ outline: draw(), tile });
 
     if (game.planning) {
-      const size = game.planKind === "Cabin" ? footprint : { width: 1, height: 1 };
+      const size = planSize(game.planKind);
       markGround(
         ctx,
         game.preview.x,

@@ -10,12 +10,16 @@ import {
 } from "./world";
 import { Hearth } from "./night";
 export const footprint = { width: 3, height: 2 };
-export function withinFootprint(origin: Point, p: Point) {
+export const singleTile = { width: 1, height: 1 };
+export function planSize(kind: Homestead["planKind"]) {
+  return kind === "Cabin" ? footprint : singleTile;
+}
+export function withinFootprint(origin: Point, p: Point, size = footprint) {
   return (
     p.x >= origin.x &&
-    p.x < origin.x + footprint.width &&
+    p.x < origin.x + size.width &&
     p.y >= origin.y &&
-    p.y < origin.y + footprint.height
+    p.y < origin.y + size.height
   );
 }
 export const recipe = { logs: 4, stone: 2 };
