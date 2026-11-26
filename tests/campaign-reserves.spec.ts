@@ -19,7 +19,6 @@ test("compare two pantry meals with a shorter and then a longer covered fuel res
   await action(page, /^Build menu/);
   await action(page, /^Covered woodpile$/);
   await selectTile(page, "H6");
-  await action(page, /^Reserve covered woodpile/);
   await walkTo(page, "C4");
   await action(page, /^Pick up logs/);
   await walkTo(page, "H6");

@@ -17,7 +17,7 @@ export function springBuildMenu(
       game.preview = { ...game.position };
       render();
     });
-  if (game.planKind === "Cabin") return false;
+  if (game.planKind === "Cabin") return;
   const p = game.preview;
   const blocked = obstructions(game, p, singleTile);
   if (game.planKind !== "Garden") {
@@ -30,7 +30,7 @@ export function springBuildMenu(
       `Delivered · 0 ${plan.material} · Outstanding · ${plan.amount} ${plan.material}`,
     );
     paragraph(menu, blocked.join(" / ") || "Footprint clear");
-    button(
+    return button(
       menu,
       `Reserve ${kind.toLowerCase()}`,
       () => {
@@ -42,13 +42,12 @@ export function springBuildMenu(
       },
       !!blocked.length,
     );
-    return true;
   }
   paragraph(menu, `Garden · ${coordinate(p)} · 1 tile · Prepare soil with the spade`);
   paragraph(menu, blocked.join(" / ") || "Footprint clear");
   const cost = 6 + distance(game.position, p) * game.pace;
   paragraph(menu, `Walk and prepare · ${cost} min`);
-  button(
+  return button(
     menu,
     "Prepare garden",
     () => {
@@ -66,5 +65,4 @@ export function springBuildMenu(
     },
     !!blocked.length || cost > game.daylight,
   );
-  return true;
 }

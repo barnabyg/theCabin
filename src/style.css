@@ -227,6 +227,9 @@ canvas {
   gap: 4px;
   background: #f6f4e9;
 }
+.controls[hidden] {
+  display: none;
+}
 kbd {
   padding: 2px 4px;
   border: 1px solid #cbcdb8;

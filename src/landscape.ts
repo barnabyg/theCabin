@@ -1,8 +1,15 @@
 import type { Campaign } from "./campaign";
-import { footprint, footprintTiles, obstructionAt, planSize } from "./cabin";
+import {
+  Cabin,
+  cabinStageCount,
+  footprint,
+  footprintTiles,
+  obstructionAt,
+  planSize,
+} from "./cabin";
 import { project, view } from "./map-camera";
 import { groundPath, markGround, paintMapCoordinates, paintTerrain } from "./map-terrain";
-import { cabinModel, pine, plotModel, settler } from "./map-models";
+import { cabinModel, pine, plotModel, settler, siteModel } from "./map-models";
 import { loadMapArt, type MapArt } from "./map-art";
 import { COLS, type Homestead, type Point } from "./world";
 
@@ -28,6 +35,12 @@ function groundDisc(
   return path;
 }
 
+function finishedCabinModel(origin: Point) {
+  const cabin = new Cabin(origin);
+  cabin.stage = cabinStageCount;
+  return cabinModel(cabin, false);
+}
+
 export function startLandscape(
   game: Homestead,
   currentSeason: () => Campaign["season"] | undefined,
@@ -41,6 +54,12 @@ export function startLandscape(
   const background = document.createElement("canvas");
   const ground = background.getContext("2d");
   if (!ctx || !ground) throw new Error("Canvas drawing is unavailable");
+  const ghost = document.createElement("canvas");
+  ghost.width = view.width;
+  ghost.height = view.height;
+  let preview: { allowed: boolean; showModel: boolean } | undefined;
+  const scene = document.createElement("canvas");
+  const sceneContext = scene.getContext("2d");
   const hitRegions: { outline: Path2D; tile?: Point }[] = [];
   let art: MapArt | undefined;
   let paintedArt: MapArt | undefined;
@@ -171,7 +190,39 @@ export function startLandscape(
     for (const { draw, tile } of objects.sort((a, b) => a.south - b.south))
       hitRegions.push({ outline: draw(), tile });
 
-    if (game.planning) {
+    paintMapCoordinates(ctx);
+    hitRegions.reverse();
+    if (game.planning && sceneContext) {
+      if (scene.width !== width || scene.height !== height) {
+        scene.width = width;
+        scene.height = height;
+      }
+      sceneContext.drawImage(canvas, 0, 0);
+      drawPreview();
+    }
+  }
+  function redraw() {
+    if (!ctx || !game.planning || !scene.width) return;
+    ctx.drawImage(scene, 0, 0, view.width, view.height);
+    drawPreview();
+  }
+  function setPreview(allowed: boolean | undefined, showModel: boolean) {
+    preview = allowed === undefined ? undefined : { allowed, showModel };
+    const brush = ghost.getContext("2d");
+    if (!preview || !showModel || !brush) return;
+    const kind = game.planKind;
+    const { x, y } = game.preview;
+    const mesh =
+      kind === "Cabin"
+        ? finishedCabinModel(game.preview)
+        : siteModel({ kind, complete: true, delivered: 0, stored: 0 }, x + 0.5, y + 0.5);
+    brush.clearRect(0, 0, ghost.width, ghost.height);
+    const outline = mesh.draw(brush);
+    brush.fillStyle = preview.allowed ? "rgba(98,255,166,.60)" : "rgba(255,96,77,.65)";
+    brush.fill(outline);
+  }
+  function drawPreview() {
+    if (ctx && preview) {
       const size = planSize(game.planKind);
       markGround(
         ctx,
@@ -179,8 +230,8 @@ export function startLandscape(
         game.preview.y,
         size.width,
         size.height,
-        "rgba(255,226,143,.24)",
-        "#ffe4a0",
+        preview.allowed ? "rgba(97,223,146,.22)" : "rgba(212,70,52,.24)",
+        preview.allowed ? "#a8ffcb" : "#ff9687",
         3,
       );
       for (const tile of footprintTiles(game.preview, size)) {
@@ -194,9 +245,15 @@ export function startLandscape(
           ctx.stroke();
         }
       }
+      if (preview.showModel) {
+        ctx.save();
+        ctx.globalAlpha = 0.68;
+        ctx.shadowColor = preview.allowed ? "#afffd1" : "#ff998c";
+        ctx.shadowBlur = 3;
+        ctx.drawImage(ghost, 0, 0);
+        ctx.restore();
+      }
     }
-    paintMapCoordinates(ctx);
-    hitRegions.reverse();
   }
   new ResizeObserver(paint).observe(canvas);
   void loadMapArt()
@@ -213,5 +270,5 @@ export function startLandscape(
     const y = ((event.clientY - bounds.top) * canvas.height) / bounds.height;
     return hitRegions.find((region) => ctx?.isPointInPath(region.outline, x, y))?.tile;
   }
-  return { paint, pickObject };
+  return { paint, pickObject, setPreview, redraw };
 }

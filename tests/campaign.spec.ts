@@ -20,7 +20,6 @@ test("buy a first sowing from bare ground and reopen the planted campaign", asyn
     await action(page, /^Build menu/);
     await action(page, /^Garden$/);
     await selectTile(page, "G6");
-    await action(page, /^Prepare garden/);
     await action(page, /^Sow turnip/);
     await action(page, /^Save First winter/);
     await browser.close();

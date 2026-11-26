@@ -5,7 +5,6 @@ async function sow(page: Page, tile: string, variety: "turnip" | "squash") {
   await action(page, /^Build menu/);
   await action(page, /^Garden$/);
   await selectTile(page, tile);
-  await action(page, /^Prepare garden/);
   await expect(page.locator("#inspect")).toContainText("Squash · 2 seeds · 4 watered days");
   await action(page, new RegExp(`^Sow ${variety}`));
 }

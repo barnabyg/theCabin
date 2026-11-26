@@ -139,21 +139,6 @@ function pointerTile(event: MouseEvent) {
   if (object) return cells[object.y * COLS + object.x];
   return event.target instanceof HTMLButtonElement ? event.target : undefined;
 }
-tiles.addEventListener("click", (event) => {
-  if (game.night || scenarioEnded() || trader?.inTown || (market && !game.daylight)) return;
-  const tile = event.detail ? pointerTile(event) : event.target;
-  if (!(tile instanceof HTMLButtonElement)) return;
-  const index = cells.indexOf(tile);
-  const point = { x: index % COLS, y: Math.floor(index / COLS) };
-  if (tile !== event.target) tile.focus({ preventScroll: true });
-  if (game.planning) game.preview = point;
-  else {
-    game.selected = point;
-    const cabin = game.cabins.find((c) => c.contains(point) && !c.complete);
-    if (cabin) guidedCabin = cabin;
-  }
-  render();
-});
 let hovered: HTMLButtonElement | undefined;
 function highlight(tile?: HTMLButtonElement) {
   if (hovered === tile) return;
@@ -162,8 +147,59 @@ function highlight(tile?: HTMLButtonElement) {
   tile?.classList.add("hovered");
   tiles.title = tile?.getAttribute("aria-label") ?? "";
 }
-tiles.addEventListener("pointermove", (event) => highlight(pointerTile(event)));
-tiles.addEventListener("pointerleave", () => highlight());
+function pointForTile(tile: EventTarget | null | undefined) {
+  if (!(tile instanceof HTMLButtonElement)) return;
+  const index = cells.indexOf(tile);
+  if (index >= 0) return { x: index % COLS, y: Math.floor(index / COLS) };
+}
+let placeButton: HTMLButtonElement | undefined;
+let showingModel = false;
+function previewTile(point: Point) {
+  if (showingModel && !distance(point, game.preview)) return;
+  game.preview = point;
+  refreshPlan(true);
+  landscape.redraw();
+}
+tiles.addEventListener("click", (event) => {
+  if (game.night || scenarioEnded() || trader?.inTown || (market && !game.daylight)) return;
+  const tile = event.detail ? pointerTile(event) : event.target;
+  const point = pointForTile(tile);
+  if (!point || !(tile instanceof HTMLButtonElement)) return;
+  if (tile !== event.target) tile.focus({ preventScroll: true });
+  if (game.planning) {
+    previewTile(point);
+    placeButton?.click();
+    return;
+  }
+  game.selected = point;
+  const cabin = game.cabins.find((c) => c.contains(point) && !c.complete);
+  if (cabin) guidedCabin = cabin;
+  render();
+});
+function hidePointerModel() {
+  if (game.planning && showingModel) {
+    showingModel = false;
+    landscape.setPreview(placeButton && !placeButton.disabled, false);
+    landscape.redraw();
+  }
+}
+tiles.addEventListener("pointermove", (event) => {
+  const tile = pointerTile(event);
+  if (game.planning) {
+    highlight();
+    const point = pointForTile(tile);
+    if (point) previewTile(point);
+    else hidePointerModel();
+  } else highlight(tile);
+});
+tiles.addEventListener("focusin", (event) => {
+  const point = pointForTile(event.target);
+  if (game.planning && point) previewTile(point);
+});
+tiles.addEventListener("pointerleave", () => {
+  highlight();
+  hidePointerModel();
+});
 function siteName(p: Point) {
   for (const [site, name] of [
     [wooded, "Wooded site"],
@@ -189,7 +225,10 @@ function renderMenu() {
   menu.hidden = !game.planning;
   menu.replaceChildren();
   if (!game.planning) return;
-  if (spring && springBuildMenu(menu, game, render, !!campaign)) return;
+  if (spring) {
+    const place = springBuildMenu(menu, game, render, !!campaign);
+    if (place) return place;
+  }
   const h = document.createElement("h2");
   h.textContent = "Cabin & stone hearth";
   menu.append(h);
@@ -205,7 +244,7 @@ function renderMenu() {
       menu,
       "Clear the wooded site at D4 to gather timber and stone there, or make the longer haul to the open site at K4 and skip clearing.",
     );
-  paragraph(menu, "Choose a site or click its top-left tile on the map. Daylight is paused.");
+  paragraph(menu, "Point at the top-left tile of your cabin, or choose a site below.");
   for (const [name, site] of [
     ["Open site", openSite],
     ["Wooded site", wooded],
@@ -268,7 +307,7 @@ function renderMenu() {
       !game.storage,
     );
   }
-  button(
+  const reserve = button(
     menu,
     "Reserve footprint",
     () => {
@@ -283,6 +322,21 @@ function renderMenu() {
     game.planning = false;
     render();
   });
+  return reserve;
+}
+function refreshPlan(showModel: boolean) {
+  placeButton = renderMenu();
+  showingModel = !!placeButton && showModel;
+  landscape.setPreview(placeButton && !placeButton.disabled, showingModel);
+  for (const [i, cell] of cells.entries()) {
+    const tile = { x: i % COLS, y: Math.floor(i / COLS) };
+    const reason =
+      game.planning && withinFootprint(game.preview, tile, planSize(game.planKind))
+        ? obstructionAt(game, tile)
+        : undefined;
+    if (reason) cell.setAttribute("aria-description", `${reason} blocks this footprint`);
+    else cell.removeAttribute("aria-description");
+  }
 }
 function haltHaul() {
   stopTimer();
@@ -353,7 +407,9 @@ function render() {
   element("build").hidden = !!market || !!game.night || scenarioEnded();
   element("field-notes").hidden = !!game.night || scenarioEnded();
   element("storage-key").hidden = !game.storage;
-  renderMenu();
+  element("walk-controls").hidden = game.planning;
+  element("placement-controls").hidden = !game.planning;
+  refreshPlan(game.planning);
   renderHaul();
   renderCabinGuide();
   const p = game.selected,
@@ -468,16 +524,8 @@ function render() {
     });
   else renderNight(game, render, haltHaul, !!haul && !haul.paused && !haul.finished);
   element("message").textContent = game.message;
-  for (const [i, cell] of cells.entries()) {
+  for (const [i, cell] of cells.entries())
     cell.setAttribute("aria-pressed", String(i === p.y * COLS + p.x));
-    const tile = { x: i % COLS, y: Math.floor(i / COLS) };
-    const reason =
-      game.planning && withinFootprint(game.preview, tile, planSize(game.planKind))
-        ? obstructionAt(game, tile)
-        : undefined;
-    if (reason) cell.setAttribute("aria-description", `${reason} blocks this footprint`);
-    else cell.removeAttribute("aria-description");
-  }
   if (campaign && sound) sound(campaign);
   landscape.paint();
 }
@@ -492,6 +540,12 @@ const directions: Record<string, Point> = {
   d: { x: 1, y: 0 },
 };
 window.addEventListener("keydown", (event) => {
+  if (game.planning && event.key === "Escape") {
+    game.planning = false;
+    render();
+    element("build").focus();
+    return;
+  }
   if (trader?.inTown || (market && !game.daylight)) return;
   if (game.night || scenarioEnded() || game.planning || (haul && !haul.paused && !haul.finished))
     return;

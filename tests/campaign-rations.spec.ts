@@ -15,7 +15,6 @@ async function growTurnips(page: Page) {
   await action(page, /^Build menu/);
   await action(page, /^Garden$/);
   await selectTile(page, "G6");
-  await action(page, /^Prepare garden/);
   await action(page, /^Sow turnip/);
   for (let day = 1; day <= 2; day++) {
     await walkTo(page, "G7");
