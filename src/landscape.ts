@@ -1,4 +1,4 @@
-import { footprint } from "./cabin";
+import { footprint, footprintTiles, obstructionAt } from "./cabin";
 import { view, type Vertex } from "./map-camera";
 import { groundPath, markGround, paintTerrain } from "./map-terrain";
 import { cabinModel, pine, plotModel, settler } from "./map-models";
@@ -125,6 +125,17 @@ export function startLandscape(game: Homestead) {
         "#ffe4a0",
         3,
       );
+      for (const tile of footprintTiles(game.preview, size)) {
+        if (!obstructionAt(game, tile)) continue;
+        markGround(ctx, tile.x, tile.y, 1, 1, "rgba(164,66,35,.45)", "#ffe5c0");
+        for (const dx of [0.15, 0.85]) {
+          groundPath(ctx, [
+            [tile.x + dx, 0, tile.y + 0.15],
+            [tile.x + 1 - dx, 0, tile.y + 0.85],
+          ]);
+          ctx.stroke();
+        }
+      }
     } else {
       ctx.setLineDash([6, 4]);
       markGround(

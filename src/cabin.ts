@@ -96,11 +96,16 @@ export function fixedObstruction(game: Homestead, tile: Point) {
 export function obstructions(game: Homestead, origin: Point, size = footprint) {
   const blocked: string[] = [];
   for (const tile of footprintTiles(origin, size)) {
-    const reason =
-      fixedObstruction(game, tile) ??
-      game.plot(tile).timber ??
-      (game.plot(tile).stock.stone ? "Loose stone" : null);
+    const reason = obstructionAt(game, tile);
     if (reason) blocked.push(`${coordinate(tile)} · ${reason}`);
   }
   return blocked;
+}
+
+export function obstructionAt(game: Homestead, tile: Point) {
+  return (
+    fixedObstruction(game, tile) ??
+    game.plot(tile).timber ??
+    (game.plot(tile).stock.stone ? "Loose stone" : null)
+  );
 }

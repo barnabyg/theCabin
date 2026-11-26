@@ -64,6 +64,8 @@ From the repository root run `npm.cmd run play` with Node.js 24.13 or later. Ope
 
 ## First winter
 
+With Node.js 24.13 or later, run `npm.cmd run play` from the repository root. Choose **First winter**, then **Build menu · Compare cabin sites**. Inspect both footprints before spending daylight. Crosses mark blocked tiles and the menu names each obstruction. To try the wooded site, choose **Mark storage at G6** and **Clear area**. When the site shows **Ready to reserve**, reopen the Build menu. At either clear site, choose **Reserve footprint** and follow the cabin card until the roof and hearth are finished.
+
 From the repository root, run `npm.cmd run play` with Node.js 24.13 or later, open http://127.0.0.1:5173 and choose **First winter**. Walk to P6, buy a turnip seed in town with the opening four coins and return. Prepare a garden at G6 and sow. Save First winter, close the browser, and reopen in the same profile. **Resume First winter** restores the planted bed, day and one remaining coin.
 
 **Buy food with a fur.** In First winter, build a pantry at F6 with two logs from C4. Collect a fur at I7 and take the road at P6. Buy one turnip seed, then try buying food with the remaining coin. The offer should still show eight portions and your pack should still hold the fur. Sell the fur, buy two portions at two coins each and take the 60-minute walk home. Store the food at F6. The pantry should hold two portions and your purse should be empty.
