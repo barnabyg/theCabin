@@ -80,7 +80,7 @@ export class Mesh {
       layer: this.layer,
       material,
       color: litColor(color, 0.78 + 0.28 * sunlight),
-      depth: vertices.reduce((sum, p) => sum + p[1] + p[2], 0) / vertices.length,
+      depth: vertices.reduce((sum, p) => sum + p[2], 0) / vertices.length,
     });
   }
 

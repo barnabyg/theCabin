@@ -1,6 +1,6 @@
 # The Cabin
 
-A single-player homesteading game set near a fictional river town in the Illinois Country around 1750. The clearing is shown in 3D from a fixed, north-facing camera. Click a ground tile to inspect it, or focus its coordinate button and press Enter. The arrow keys and WASD move the settler. The roof opens into a cutaway while the settler is inside a finished cabin.
+A single-player homesteading game set near a fictional river town in the Illinois Country around 1750. The clearing is shown in 3D from a fixed, north-facing camera aligned with the distant tree line beyond the meadow. Click a ground tile to inspect it, or focus its coordinate button and press Enter. The arrow keys and WASD move the settler. The roof opens into a cutaway while the settler is inside a finished cabin.
 
 ## Play
 

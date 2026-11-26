@@ -1,7 +1,7 @@
 import type { Campaign } from "./campaign";
 import { footprint, footprintTiles, obstructionAt, planSize } from "./cabin";
-import { view, type Vertex } from "./map-camera";
-import { groundPath, markGround, paintTerrain } from "./map-terrain";
+import { project, view } from "./map-camera";
+import { groundPath, markGround, paintMapCoordinates, paintTerrain } from "./map-terrain";
 import { cabinModel, pine, plotModel, settler } from "./map-models";
 import { loadMapArt, type MapArt } from "./map-art";
 import { COLS, type Homestead, type Point } from "./world";
@@ -15,14 +15,17 @@ function groundDisc(
   depth: number,
   color: string,
 ) {
-  const points: Vertex[] = Array.from({ length: 24 }, (_, i) => {
+  const path = new Path2D();
+  for (let i = 0; i < 24; i++) {
     const angle = (i * Math.PI) / 12;
-    return [x + radius * Math.cos(angle), height, z + depth * Math.sin(angle)];
-  });
-  groundPath(ctx, points);
-  ctx.closePath();
+    const p = project([x + radius * Math.cos(angle), height, z + depth * Math.sin(angle)]);
+    if (i === 0) path.moveTo(p.x, p.y);
+    else path.lineTo(p.x, p.y);
+  }
+  path.closePath();
   ctx.fillStyle = color;
-  ctx.fill();
+  ctx.fill(path);
+  return path;
 }
 
 export function startLandscape(
@@ -156,11 +159,12 @@ export function startLandscape(
       south: settlerDepth,
       tile: game.position,
       draw: () => {
-        groundDisc(ctx, x, z, floor, 0.235, 0.17, "#ffe8a9");
+        // The locator selects the settler. Plots behind the upright figure remain targetable.
+        const locator = groundDisc(ctx, x, z, floor, 0.235, 0.17, "#ffe8a9");
         groundDisc(ctx, x, z, floor + 0.005, 0.19, 0.12, "#726c49");
-        return art
-          ? art.settler.draw(ctx, x, z, 0.84, floor + 0.01)
-          : settler(x, z, floor + 0.01).draw(ctx);
+        if (art) art.settler.draw(ctx, x, z, 0.84, floor + 0.01);
+        else settler(x, z, floor + 0.01).draw(ctx);
+        return locator;
       },
     });
     hitRegions.length = 0;
@@ -191,6 +195,7 @@ export function startLandscape(
         }
       }
     }
+    paintMapCoordinates(ctx);
     hitRegions.reverse();
   }
   new ResizeObserver(paint).observe(canvas);

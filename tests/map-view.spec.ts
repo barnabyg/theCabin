@@ -23,6 +23,29 @@ async function openPaintedMap(page: Page, url: string) {
     .toBeGreaterThan(32);
 }
 
+test("the clearing recedes to the painted tree line and ends on the riverbank", async ({
+  page,
+}) => {
+  await openPaintedMap(page, "/?scenario=market");
+  const board = await page.locator(".board").boundingBox();
+  if (!board) throw new Error("Map is hidden");
+  // Read the outside ground edges from the real tile hit regions. Extend their
+  // lines to find the horizon independently of the renderer's camera constants.
+  const outside = async (row: number) => {
+    const left = await page.getByRole("button", { name: `A${row}`, exact: true }).boundingBox();
+    const right = await page.getByRole("button", { name: `P${row}`, exact: true }).boundingBox();
+    if (!left || !right) throw new Error("Ground tiles are hidden");
+    return { width: right.x + right.width - left.x, y: left.y + left.height - board.y };
+  };
+  const far = await outside(1),
+    near = await outside(7);
+  const horizon = far.y - (far.width * (near.y - far.y)) / (near.width - far.width);
+  expect(horizon / board.height).toBeGreaterThan(0.12);
+  expect(horizon / board.height).toBeLessThan(0.18);
+  expect(near.y / board.height).toBeGreaterThan(0.69);
+  expect(near.y / board.height).toBeLessThan(0.73);
+});
+
 test("the cabin opens on entry and restores its roof on exit", async ({ page }) => {
   await openPaintedMap(page, "/?scenario=market");
   const bounds = await page.locator("canvas").boundingBox();
@@ -67,13 +90,15 @@ test("the near roof hides the settler standing behind the cabin", async ({ page 
   expect(Math.max(...after.map((value, i) => Math.abs(value - roof[i])))).toBeLessThan(8);
 });
 
-test("a distant cabin leaves the settler visible under the M1 pine", async ({ page }) => {
+test("a distant cabin leaves the settler visible under the P1 pine with a clear sightline", async ({
+  page,
+}) => {
   async function sample(url: string) {
     await openPaintedMap(page, url);
-    await walkTo(page, "M1");
+    await walkTo(page, "P1");
     const board = await page.locator("canvas").boundingBox();
     if (!board) throw new Error("Map is hidden");
-    const centre = project([12.5, 0.35, 0.57]);
+    const centre = project([15.5, 0.35, 0.57]);
     return page.screenshot({
       clip: {
         x: Math.round(board.x + (centre.x * board.width) / view.width) - 3,
@@ -115,7 +140,7 @@ test("the projected clearing keeps edge tiles, planning and the river aligned af
   for (const width of [2560, 1440, 680]) {
     await page.setViewportSize({ width, height: width === 2560 ? 1440 : 980 });
     for (const [x, z, name] of [
-      [0.1, 0.1, "A1"],
+      [0.4, 0.25, "A1"],
       [15.9, 0.1, "P1"],
       [0.1, 6.9, "A7"],
       [15.9, 6.9, "P7"],
@@ -146,7 +171,7 @@ test("a click on an overhanging pine selects its tree until it is felled", async
   const board = page.locator(".board");
   const bounds = await board.boundingBox();
   if (!bounds) throw new Error("Map is hidden");
-  const crown = project([3.5, 1.02, 3.72]);
+  const crown = project([3.66, 0.45, 3.72]);
   const position = {
     x: (crown.x * bounds.width) / view.width,
     y: (crown.y * bounds.height) / view.height,
@@ -155,6 +180,7 @@ test("a click on an overhanging pine selects its tree until it is felled", async
   await expect(page.locator("#tile-title")).toContainText("D4");
   await page.getByRole("button", { name: /Walk here/ }).click();
   await page.getByRole("button", { name: /Fell tree/ }).click();
+  await walkTo(page, "G6"); // Clear the settler from the former canopy.
   await board.click({ position });
   await expect(page.locator("#tile-title")).toContainText("D3");
 });
