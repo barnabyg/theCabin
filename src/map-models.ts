@@ -74,6 +74,8 @@ export function cabinModel(cabin: Cabin, inside: boolean) {
     for (const dz of [0, d - 0.24])
       mesh.box(0x9d9888, x + dx, z + dz, 0, 0.24, 0.24, 0.07, "stone");
   for (const dz of [0, d - 0.13]) mesh.box(0x77563a, x, z + dz, 0.07, w, 0.13, 0.05, "log");
+  for (const dx of [0, w - 0.15])
+    mesh.box(0x77563a, x + dx, z + 0.13, 0.07, 0.15, d - 0.26, 0.05, "log");
   mesh.nextLayer();
   for (let i = 0; i < 12; i++)
     mesh.box(
