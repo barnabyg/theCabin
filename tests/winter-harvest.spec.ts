@@ -31,8 +31,18 @@ test("recover during a cold spell and reach thaw on the harvest after reopening"
     await rest(page);
     await expect(page.locator("#inspect")).toContainText("3 firewood · Lit");
     await rest(page);
+    const frozen = await page.locator("#terrain").screenshot();
+    const winterSound = await page.locator("audio").getAttribute("src");
     await rest(page);
     await expect(page.getByRole("heading", { name: "Spring thaw" })).toBeVisible();
+    expect((await page.locator("#terrain").screenshot()).equals(frozen)).toBe(false);
+    const audio = page.locator("audio");
+    await expect(audio).not.toHaveAttribute("src", winterSound ?? "");
+    await expect
+      .poll(() =>
+        audio.evaluate((player) => player instanceof HTMLAudioElement && player.currentTime > 0),
+      )
+      .toBe(true);
     await action(page, /^Start a fresh First winter/);
     await expect(page.locator("#calendar")).toContainText("Spring · Day 1");
     await expect(page.locator("#purse")).toHaveText("4 coins");

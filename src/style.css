@@ -100,6 +100,15 @@ h1 {
   display: block;
   margin-top: 4px;
 }
+#season-sounds {
+  margin-top: 6px;
+  padding: 3px 9px;
+  border: 1px solid #a8b49e;
+  border-radius: 4px;
+  color: #314c3c;
+  background: #fcfaf0;
+  cursor: pointer;
+}
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(254px, 26%);

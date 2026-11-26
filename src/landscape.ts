@@ -1,3 +1,4 @@
+import type { Campaign } from "./campaign";
 import { footprint, footprintTiles, obstructionAt } from "./cabin";
 import { view, type Vertex } from "./map-camera";
 import { groundPath, markGround, paintTerrain } from "./map-terrain";
@@ -24,7 +25,10 @@ function groundDisc(
   ctx.fill();
 }
 
-export function startLandscape(game: Homestead) {
+export function startLandscape(
+  game: Homestead,
+  currentSeason: () => Campaign["season"] | undefined,
+) {
   const terrain = document.getElementById("terrain");
   if (!terrain) throw new Error("Missing terrain container");
   const canvas = document.createElement("canvas");
@@ -37,17 +41,25 @@ export function startLandscape(game: Homestead) {
   const hitRegions: { outline: Path2D; tile?: Point }[] = [];
   let art: MapArt | undefined;
   let paintedArt: MapArt | undefined;
+  let paintedSeason: Campaign["season"] | undefined;
 
   function paint() {
     if (!ctx || !ground || !canvas.clientWidth) return;
     const scale = (canvas.clientWidth * window.devicePixelRatio) / view.width;
     const width = Math.max(1, Math.round(view.width * scale)),
       height = Math.max(1, Math.round(view.height * scale));
-    if (background.width !== width || background.height !== height || paintedArt !== art) {
+    const season = currentSeason();
+    if (
+      background.width !== width ||
+      background.height !== height ||
+      paintedArt !== art ||
+      paintedSeason !== season
+    ) {
       background.width = canvas.width = width;
       background.height = canvas.height = height;
       ground.setTransform(width / view.width, 0, 0, height / view.height, 0, 0);
-      paintTerrain(ground, art?.clearing);
+      paintTerrain(ground, art?.clearing, season);
+      paintedSeason = season;
       paintedArt = art;
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0);

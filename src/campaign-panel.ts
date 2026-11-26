@@ -63,8 +63,14 @@ export function renderCampaign(
   town.hidden = !market.inTown;
   element("map-panel").hidden = market.inTown;
   element("field-notes").hidden = market.inTown || campaign.ended;
+  const weather =
+    spring.day === autumnRainDay
+      ? " · Rain tonight"
+      : campaign.fuelTonight > ordinaryNightFuel
+        ? " · Cold spell tonight"
+        : "";
   element("calendar").textContent =
-    `${campaign.season} · Day ${spring.day} · Winter begins day ${winterDay}`;
+    `${campaign.season} · Day ${spring.day} · Winter begins day ${winterDay}${weather}`;
   element("seeds").textContent = `${spring.seeds.turnip} turnip · ${spring.seeds.squash} squash`;
   element("purse").textContent = `${market.coins} coin${market.coins === 1 ? "" : "s"}`;
   if (!campaign.ended) {

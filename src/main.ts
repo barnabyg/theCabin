@@ -20,6 +20,7 @@ import {
   obstructions,
   obstructionAt,
 } from "./cabin";
+import { seasonSounds } from "./season-sounds";
 import { startLandscape } from "./landscape";
 import { positionTile } from "./map-camera";
 import {
@@ -50,7 +51,8 @@ const cabinNext = element("cabin-next");
 if (!(cabinControls instanceof HTMLFieldSetElement) || !(cabinNext instanceof HTMLButtonElement))
   throw new Error("Missing cabin construction controls");
 let guidedCabin: Cabin | undefined;
-const landscape = startLandscape(game);
+const landscape = startLandscape(game, () => campaign?.season);
+const sound = campaign && seasonSounds();
 let haul: WorkOrder | undefined = winter?.haul ?? session?.haul;
 let ticker: number | undefined;
 function scenarioEnded() {
@@ -467,6 +469,7 @@ function render() {
     if (reason) cell.setAttribute("aria-description", `${reason} blocks this footprint`);
     else cell.removeAttribute("aria-description");
   }
+  if (campaign && sound) sound(campaign);
   landscape.paint();
 }
 const directions: Record<string, Point> = {
